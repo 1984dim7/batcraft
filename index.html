@@ -997,9 +997,10 @@ $('backBtn').onclick = toCraft;
 $('retryBtn').onclick = () => { resetScore(); setTimeout(startPitch, 600); };
 $('resetBtn').onclick = () => { radii.fill(LOG_R); buildCraft(); };
 
-// デバッグ用フック
+// 検証ハーネス（docs/smoke-test.md が依存）— 削除禁止
 window.__bat = {
   radii, batStats, toGame, toCraft, startSwing,
+  info: () => renderer.info.memory,
   setAim: (x, y) => aim = {x, y},
   rebuild: () => { if (craftBat) rebuildBatMesh(craftBat); updateCraftStats(); },
   state: () => ({mode, score: {...score}, pitching: !!pitch, flying: !!fly,
