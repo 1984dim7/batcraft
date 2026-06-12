@@ -148,15 +148,6 @@
         <option value="obsidian">黒曜石 (Obsidian) - 漆黒の魔器</option>
       </select>
     </div>
-    <div style="margin:8px 0;font-size:12px;">
-      <label for="paintSelect" style="display:block;margin-bottom:3px;color:#aab6cc;">ネオン塗装 (Accent Paint)：</label>
-      <select id="paintSelect" style="font-size:12px;padding:5px 8px;border-radius:6px;background:#1d2230;color:#fff;border:1px solid rgba(255,255,255,.2);width:100%;box-sizing:border-box;cursor:pointer;">
-        <option value="none">無塗装 (ナチュラル)</option>
-        <option value="#00ffff">シアン・ネオン (Cyan)</option>
-        <option value="#ff00ff">マゼンタ・ネオン (Magenta)</option>
-        <option value="#ffd23a">ゴールド・ネオン (Gold)</option>
-      </select>
-    </div>
     <button id="resetBtn" class="sub">丸太からやり直す</button><br>
     <button id="doneBtn">完成！打席に立つ</button>
   </div>
@@ -461,24 +452,11 @@ function batGeometry() {
   pts.push(new THREE.Vector2(0.0001, BAT_LEN));
   const geo = new THREE.LatheGeometry(pts, 40);
   
-  const paintHex = $('paintSelect') ? $('paintSelect').value : 'none';
-  const hasPaint = (paintHex && paintHex !== 'none');
-  const paintColor = hasPaint ? new THREE.Color(paintHex) : null;
-
   const pos = geo.attributes.position, col = new Float32Array(pos.count*3), c = new THREE.Color();
   for (let v = 0; v < pos.count; v++) {
     const i = clamp(Math.round(pos.getY(v)/BAT_LEN*SEG), 0, SEG);
     const bark = clamp((radii[i] - (LOG_R-0.004))/0.004, 0, 1);
     c.copy(woodCol).lerp(barkCol, bark).multiplyScalar(.93 + .07*Math.sin(i*1.7));
-    
-    // Accent ring paint at 22%-28% of the length
-    if (hasPaint) {
-      const ratio = pos.getY(v) / BAT_LEN;
-      if (ratio >= 0.22 && ratio <= 0.28) {
-        c.copy(paintColor);
-      }
-    }
-    
     col.set([c.r, c.g, c.b], v*3);
   }
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
@@ -1462,12 +1440,7 @@ function startSwing() {
   }
   swing = {s:0, sPrev:0, a, hit:false, phi:0, phiPrev:0, phiV:0, w:0};
   
-  // スイングトレイルの色変更（ペイント選択に合わせる）
-  const paintHex = $('paintSelect') ? $('paintSelect').value : 'none';
-  const trailColor = (paintHex && paintHex !== 'none') ? new THREE.Color(paintHex) : new THREE.Color(0xffffff);
-  trail.forEach(t => {
-    t.material.color.copy(trailColor);
-  });
+  trail.forEach(t => { t.material.color.set(0xffffff); });
   
   snd.swing();
 }
@@ -2332,8 +2305,9 @@ function toCraft() {
   
   if ($('debugPresets')) $('debugPresets').style.display = 'block';
   
-  camera.position.set(0, .30, 1.05*Math.max(1, 1.7/camera.aspect));
-  camera.lookAt(0, -.02, 0);
+  const craftZ = camera.aspect < 0.75 ? 0.95 : 1.7;
+  camera.position.set(0, .20, 1.05*Math.max(0.9, craftZ/camera.aspect));
+  camera.lookAt(0, .05, 0);
   buildCraft();
 }
 function updatePitchHistoryUI() {
@@ -2536,8 +2510,9 @@ function toGame() {
     `あなたのバット: ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
     `スイング ${BS.swingT.toFixed(2)}秒 — ${BS.swingT > .45 ? '重い！早めに振ろう' : BS.swingT < .26 ? '鋭く振れる！' : 'バランス型'}`;
   
-  const back = Math.max(1, 1.6/camera.aspect);
-  camHome = {pos:new THREE.Vector3(1.45, 2.1, 4.3*back), look:new THREE.Vector3(-.25, 1.25, -9)};
+  const isMobile = camera.aspect < 0.75;
+  const back = Math.max(1, (isMobile ? 1.0 : 1.6)/camera.aspect);
+  camHome = {pos:new THREE.Vector3(1.45, 2.1, 4.3*back), look:new THREE.Vector3(-.25, 1.25, isMobile ? -5 : -9)};
   camera.position.copy(camHome.pos);
   camera.lookAt(camHome.look);
   resetScore();
