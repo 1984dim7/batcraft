@@ -51,6 +51,14 @@
       <p style="color:#9fb4d9">左端がグリップ、右端が芯（バレル）だ。</p>
     </div>
     <div id="meter"><div id="meterFill"></div></div>
+    <div style="margin:8px 0;font-size:12px;">
+      <label for="materialSelect" style="display:block;margin-bottom:3px;color:#aab6cc;">木材の素材：</label>
+      <select id="materialSelect" style="font-size:12px;padding:5px 8px;border-radius:6px;background:#1d2230;color:#fff;border:1px solid rgba(255,255,255,.2);width:100%;box-sizing:border-box;cursor:pointer;">
+        <option value="aodamo">アオダモ (Aodamo) - しなり特化</option>
+        <option value="maple">メープル (Maple) - パワー特化</option>
+        <option value="ash">ホワイトアッシュ (White Ash) - 操作性特化</option>
+      </select>
+    </div>
     <button id="resetBtn" class="sub">丸太からやり直す</button><br>
     <button id="doneBtn">完成！打席に立つ ⚾</button>
   </div>
@@ -153,6 +161,25 @@ function woodTexture(base, streak, n) {
 const woodMat = new THREE.MeshStandardMaterial({map:woodTexture('#cfa05f','#7a5226',90), roughness:.62, vertexColors:true});
 const darkWood = new THREE.MeshStandardMaterial({map:woodTexture('#6e4f30','#3b2a16',120), roughness:.85});
 
+function updateWoodMaterial() {
+  const mat = $('materialSelect') ? $('materialSelect').value : 'aodamo';
+  let base, streak;
+  if (mat === 'maple') {
+    base = '#f4eae1';
+    streak = '#a08a78';
+  } else if (mat === 'ash') {
+    base = '#bda68e';
+    streak = '#6b5847';
+  } else {
+    base = '#cfa05f';
+    streak = '#7a5226';
+  }
+  
+  if (woodMat.map) woodMat.map.dispose();
+  woodMat.map = woodTexture(base, streak, 90);
+  woodMat.needsUpdate = true;
+}
+
 // ================= バット形状 =================
 const SEG = 56, BAT_LEN = 0.85, LOG_R = 0.062, MIN_R = 0.011;
 const RHO = 700, MB = 0.145, BALL_R = 0.037;     // 木材密度, ボール質量/半径
@@ -179,6 +206,43 @@ function radiusAt(x) { // x: グリップからの距離(m)
   const f = clamp(x/BAT_LEN*SEG, 0, SEG), i = Math.floor(f);
   return Math.max(radii[i] + (radii[Math.min(i+1,SEG)] - radii[i])*(f-i), MIN_R);
 }
+function getBatShapeScore() {
+  // 1. Check handle radius (i from 0 to 15)
+  let avgHandle = 0;
+  for (let i = 0; i <= 15; i++) avgHandle += radii[i];
+  avgHandle /= 16;
+  const handlePenalty = Math.max(0, avgHandle - 0.020) * 15.0; // penalty for too thick handle
+
+  // 2. Taper check: transition (i from 15 to 35) should generally increase
+  let taperPenalty = 0;
+  for (let i = 15; i < 35; i++) {
+    if (radii[i] > radii[i+1] + 0.001) {
+      taperPenalty += (radii[i] - radii[i+1]);
+    }
+  }
+  taperPenalty *= 10;
+
+  // 3. Barrel check: barrel (i from 40 to 56) should be thick
+  let avgBarrel = 0;
+  for (let i = 40; i <= 56; i++) avgBarrel += radii[i];
+  avgBarrel /= 17;
+  const barrelPenalty = Math.max(0, 0.022 - avgBarrel) * 15.0; // penalty for too thin barrel
+
+  // 4. Exploit check: both ends thin
+  let maxR = 0;
+  for (let i = 0; i <= SEG; i++) {
+    if (radii[i] > maxR) maxR = radii[i];
+  }
+  const tipRatio = radii[SEG] / Math.max(maxR, 1e-4);
+  let tipPenalty = 0;
+  if (tipRatio < 0.80) {
+    tipPenalty = (0.80 - tipRatio) * 3.0; // severe penalty if tip is too thin
+  }
+
+  const score = 1.0 - handlePenalty - taperPenalty - barrelPenalty - tipPenalty;
+  return clamp(score, 0.1, 1.0);
+}
+
 // 質量・重心・慣性モーメント・性能
 function batStats() {
   const dx = BAT_LEN/SEG;
@@ -191,11 +255,37 @@ function batStats() {
   }
   const com = Mx/M;
   const cop = I/(M*com);                                // 芯（打撃の中心）
-  const swingT = clamp(0.16 + 0.16*I, 0.19, 0.75);      // 重い→振りが遅い
-  const meff = I/(cop*cop + 1e-4);                      // 芯での有効質量
-  // しなり: 曲げ剛性は半径の4乗に比例（細いグリップ＋重い先端ほどしなる）
-  const flex = clamp(Math.pow(0.016/handleR, 3) * (1 + I*2), 0.2, 3.5);
-  return {M, com, I, cop, barrel, swingT, meff, flex, handleR};
+
+  // Get material properties
+  const matType = $('materialSelect') ? $('materialSelect').value : 'aodamo';
+  let powerMult = 1.0;
+  let flexMult = 1.0;
+  let swingTMult = 1.0;
+  
+  if (matType === 'maple') {
+    powerMult = 1.12;
+    flexMult = 0.8;
+    swingTMult = 1.05;
+  } else if (matType === 'ash') {
+    powerMult = 0.9;
+    flexMult = 1.0;
+    swingTMult = 0.85;
+  } else { // aodamo
+    powerMult = 1.0;
+    flexMult = 1.15;
+    swingTMult = 1.0;
+  }
+
+  const swingT = clamp((0.16 + 0.16*I) * swingTMult, 0.19, 0.75);      // 重い→振りが遅い
+  let meff = I/(cop*cop + 1e-4) * powerMult;                           // 芯での有効質量
+  let flex = clamp(Math.pow(0.016/handleR, 3) * (1 + I*2) * flexMult, 0.2, 3.5);
+
+  // Apply shapeScore penalty
+  const shapeScore = getBatShapeScore();
+  meff *= shapeScore;
+  flex *= shapeScore;
+
+  return {M, com, I, cop, barrel, swingT, meff, flex, handleR, shapeScore};
 }
 function updateCraftStats() {
   const s = batStats();
@@ -299,6 +389,7 @@ function showMsg(text, color='#fff', ms=1100) {
 let craftBat, kanna, shavings = [], brushW = 4, carving = false, cursorX = 0, overLog = false;
 function buildCraft() {
   disposeGroup(craftGroup); shavings = [];
+  updateWoodMaterial();
   // 横向きの丸太（X軸沿い・回転）
   craftBat = new THREE.Mesh(batGeometry(), woodMat);
   craftBat.rotation.z = -Math.PI/2;           // Y→X 横倒し
@@ -1329,6 +1420,10 @@ $('doneBtn').onclick = toGame;
 $('backBtn').onclick = toCraft;
 $('retryBtn').onclick = () => { resetScore(); gameTimeout(startPitch, 600); };
 $('resetBtn').onclick = () => { radii.fill(LOG_R); buildCraft(); };
+$('materialSelect').onchange = () => {
+  updateWoodMaterial();
+  updateCraftStats();
+};
 
 // 検証ハーネス（docs/smoke-test.md が依存）— 削除禁止
 window.__bat = {
