@@ -556,6 +556,14 @@ function addOutfieldStructures() {
   gameGroup.add(fenceWedge(112, 9, 5.5, 0x465062));
   gameGroup.add(fenceWedge(113, 9, 11, 0x2c3542));
 
+  // 客席の床（半透明/中空状態を解消するソリッドなコンクリート床）
+  const standsFloorGeo = new THREE.CylinderGeometry(112, 103, 11, 64, 1, true, Math.PI * 0.70, Math.PI * 0.60);
+  const standsFloorMat = new THREE.MeshStandardMaterial({ color: 0x1d2430, side: THREE.DoubleSide, roughness: 0.95 });
+  const standsFloor = new THREE.Mesh(standsFloorGeo, standsFloorMat);
+  standsFloor.position.y = 9.0;
+  standsFloor.receiveShadow = true;
+  gameGroup.add(standsFloor);
+
   // Register cylinder shell colliders
   // Outfield Fence (yMin=0, yMax=3.79, radius=98)
   fieldColliders.push({ type: 'cylinder_shell', radius: 98, yMin: 0, yMax: 3.79, thetaStart: Math.PI * 0.70, thetaLength: Math.PI * 0.60, landing: false });
