@@ -1785,12 +1785,15 @@ function nextPitch() {
   else gameTimeout(startPitch, 400);   // ＋ワインドアップ2秒で次の球まで間が空く
 }
 
-// ================= ランキング（ブラウザ保存） =================
+// ================= ランキング（共有 + ブラウザ保存） =================
+// Google Apps Script WebアプリのURLを設定すると全プレイヤー共有ランキングになる
+// （未設定の間はブラウザ保存のみ）。デプロイ手順は docs/ranking-setup.md 参照
+const RANK_API = '';
+const MAT_LABEL = {wood:'木製', carbon:'カーボン', metal:'アルミ', gold:'金', diamond:'ダイヤ', obsidian:'黒曜石'};
 function loadRank() {
   try { return JSON.parse(localStorage.getItem('batcraft_rank') || '[]'); } catch(e) { return []; }
 }
-function renderRank(highlight) {
-  const list = loadRank().sort((a, b) => b.total - a.total).slice(0, 10);
+function renderRankList(list, highlight) {
   const container = $('rankList');
   container.innerHTML = '';
   if (list.length === 0) {
@@ -1809,17 +1812,31 @@ function renderRank(highlight) {
     }
     const nameSpan = document.createElement('span');
     nameSpan.textContent = String(r.name);
-    const sep = document.createTextNode(' — ');
+    li.appendChild(nameSpan);
+    const matLabel = MAT_LABEL[r.mat];
+    if (matLabel) {
+      const matSpan = document.createElement('span');
+      matSpan.textContent = `（${matLabel}）`;
+      matSpan.style.color = hl ? '' : '#8a96ad';
+      matSpan.style.fontSize = '11px';
+      li.appendChild(matSpan);
+    }
     const b = document.createElement('b');
     b.textContent = r.total;
-    const unit = document.createTextNode(' m');
-    
-    li.appendChild(nameSpan);
-    li.appendChild(sep);
+    li.appendChild(document.createTextNode(' — '));
     li.appendChild(b);
-    li.appendChild(unit);
+    li.appendChild(document.createTextNode(' m'));
     container.appendChild(li);
   });
+}
+function renderRank(highlight) {
+  // ローカル記録を即表示し、共有APIがあれば取得後に置き換える
+  renderRankList(loadRank().sort((a, b) => b.total - a.total).slice(0, 10), highlight);
+  if (RANK_API) {
+    fetch(RANK_API).then(r => r.json())
+      .then(list => renderRankList(list.slice(0, 10), highlight))
+      .catch(() => {});
+  }
 }
 function showEnd() {
   $('hitData').style.display = 'none';
@@ -1834,9 +1851,15 @@ function showEnd() {
 }
 $('regBtn').onclick = () => {
   const name = ($('playerName').value.trim() || '名無しの強打者').slice(0, 10);
-  const rec = {name, total: score.total, date: Date.now()};
+  const mat = $('materialSelect') ? $('materialSelect').value : 'wood';
+  const rec = {name, total: score.total, mat, date: Date.now()};
   const list = loadRank(); list.push(rec);
   localStorage.setItem('batcraft_rank', JSON.stringify(list.sort((a, b) => b.total - a.total).slice(0, 30)));
+  if (RANK_API) {
+    // Content-Typeを付けない(text/plain扱い)ことでGASへのプリフライトを回避
+    fetch(RANK_API, {method:'POST', body: JSON.stringify(rec)})
+      .then(() => renderRank(rec)).catch(() => {});
+  }
   renderRank(rec); snd.ui();
   $('regBtn').disabled = true; $('regBtn').textContent = '登録しました ✓';
 };
