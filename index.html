@@ -1788,7 +1788,7 @@ function nextPitch() {
 // ================= ランキング（共有 + ブラウザ保存） =================
 // Google Apps Script WebアプリのURLを設定すると全プレイヤー共有ランキングになる
 // （未設定の間はブラウザ保存のみ）。デプロイ手順は docs/ranking-setup.md 参照
-const RANK_API = '';
+const RANK_API = 'https://script.google.com/macros/s/AKfycbyIoOWPkxQFUNZrwf0ngd_Ziq76S04OhegrzRW-Ek0TebZsG-u0nSxy6hLceBjT3lKN/exec';
 const MAT_LABEL = {wood:'木製', carbon:'カーボン', metal:'アルミ', gold:'金', diamond:'ダイヤ', obsidian:'黒曜石'};
 function loadRank() {
   try { return JSON.parse(localStorage.getItem('batcraft_rank') || '[]'); } catch(e) { return []; }
