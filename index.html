@@ -633,6 +633,7 @@ function buildField() {
 }
 
 // ================= スイングと物理 =================
+const MEET = { sE: 0.38, dirX: 0.94, leadT: 0.40 };
 let BS;                       // 打席に入った時点のバット性能（固定）
 let aim = {x:.5, y:.5};       // マウス正規化座標
 let swing = null, pitch = null, fly = null, windup = null;
@@ -664,11 +665,11 @@ function setBatPose(s, a, phi) {
 function startSwing() {
   if (mode !== 'game' || swing) return;
   const a = aimHands();
-  // スイングアシスト: 接触予定時刻のボール位置へ構えを部分的に吸い付ける（空振り救済）
+  // スイングアシスト: 接触予定時刻 of ボール位置へ構えを部分的に吸い付ける（空振り救済）
   if (pitch) {
-    const k = clamp((pitch.t + 0.40*BS.swingT)/pitch.T, 0, 1.06);
+    const k = clamp((pitch.t + MEET.leadT*BS.swingT)/pitch.T, 0, 1.06);
     const b = pitchPos(k);
-    a.x += clamp(b.x - 0.94*BS.cop - a.x, -0.16, 0.16)*0.65;
+    a.x += clamp(b.x - MEET.dirX*BS.cop - a.x, -0.16, 0.16)*0.65;
     a.y += clamp(b.y - a.y, -0.20, 0.20)*0.7;
   }
   swing = {s:0, sPrev:0, a, hit:false, phi:0, phiPrev:0, phiV:0, w:0};
@@ -701,27 +702,29 @@ function pitchPos(k) {
   return p;
 }
 
-// 衝突: バット面の法線で反射方向を計算
-function tryContact(h) {
-  if (!swing || swing.hit || !pitch || swing.s < .08 || swing.s > .95) return;
-  const sE = easeS(Math.min(swing.s, 1));
-  const A = handsPos(sE, swing.a), d = batDir(sE, swing.phi);
-  const rel = ball.position.clone().sub(A);
+function detectContact(sw, bPos, bPrev, BS, h) {
+  if (sw.hit || sw.s < 0.08 || sw.s > 0.95) return null;
+  const sE = easeS(Math.min(sw.s, 1));
+  const A = handsPos(sE, sw.a), d = batDir(sE, sw.phi);
+  const rel = bPos.clone().sub(A);
   const x = clamp(rel.dot(d), 0.03, BAT_LEN);          // バット軸上の接触位置
   const C = A.clone().addScaledVector(d, x);
-  const dist = ball.position.distanceTo(C);
-  if (dist >= radiusAt(x) + BALL_R + 0.048) return;  // +48mm は当てやすさ補正
-  const n = dist > 1e-4 ? ball.position.clone().sub(C).divideScalar(dist) : new THREE.Vector3(0,1,0);
+  const dist = bPos.distanceTo(C);
+  if (dist >= radiusAt(x) + BALL_R + 0.048) return null;  // +48mm は当てやすさ補正
+  const n = dist > 1e-4 ? bPos.clone().sub(C).divideScalar(dist) : new THREE.Vector3(0,1,0);
   // ボール速度（数値微分）
-  const vBall = ball.position.clone().sub(pitch.prev).divideScalar(Math.max(h,1e-4));
+  const vBall = bPos.clone().sub(bPrev).divideScalar(Math.max(h,1e-4));
   // バット接触点の速度（しなりのムチ効果込みの数値微分）+ 体重移動補正
-  const vBat = batPointRaw(swing.s, swing.phi, swing.a, x)
-    .sub(batPointRaw(swing.sPrev, swing.phiPrev, swing.a, x))
+  const vBat = batPointRaw(sw.s, sw.phi, sw.a, x)
+    .sub(batPointRaw(sw.sPrev, sw.phiPrev, sw.a, x))
     .divideScalar(Math.max(h, 1e-4)).multiplyScalar(BAT_BOOST);
   // 互いに離れていく向きなら衝突しない（接近中のみヒット）
-  if (vBall.clone().sub(vBat).dot(n) >= -0.5) return;
-  // --- ヒット！---
-  swing.hit = true;
+  if (vBall.clone().sub(vBat).dot(n) >= -0.5) return null;
+  return { sE, x, C, dist, n, vBall, vBat, d };
+}
+
+function exitVelocity(contact, pitchKmh, BS) {
+  const { x, n, vBall, vBat } = contact;
   // 芯からのズレで反発係数が落ちる（有効質量は接触位置で変わる）
   const q = Math.exp(-Math.pow((x - BS.cop)/0.14, 2));
   const meff = BS.I/(x*x + 1e-4);
@@ -735,7 +738,7 @@ function tryContact(h) {
       .normalize().multiplyScalar(vOut.length());
     vOut.lerp(ideal, 0.8*q);
   }
-  vOut.multiplyScalar(1 + (pitch.kmh - 70)/250);   // 速い球を打ち返すほど飛ぶ
+  vOut.multiplyScalar(1 + (pitchKmh - 70)/250);   // 速い球を打ち返すほど飛ぶ
   // ミートの質 × バット速度 × バット性能の総合点で飛距離が指数関数的に伸びる
   const E = q * clamp(vBat.length()/22, 0, 1.3) * clamp(BS.meff/3, 0.5, 1.2);
   const mult = Math.min(Math.exp(Math.max(0, E - 0.82)*3.2), 12);
@@ -746,13 +749,33 @@ function tryContact(h) {
     const dir = vOut.clone().normalize();
     dir.y = Math.max(dir.y, 0.55); dir.normalize();   // 大飛球は高く打ち上がる
     vOut.copy(dir).multiplyScalar(spd);
+  } else {
+    vOut.setLength(spd);
+  }
+  return { vOut, q, eA, superHit, mult };
+}
+
+// 衝突: バット面の法線で反射方向を計算
+function tryContact(h) {
+  if (!swing || !pitch) return;
+  const contact = detectContact(swing, ball.position, pitch.prev, BS, h);
+  if (!contact) return;
+
+  // --- ヒット！---
+  swing.hit = true;
+  const res = exitVelocity(contact, pitch.kmh, BS);
+  const { vOut, q, eA, superHit, mult } = res;
+
+  if (superHit) {
     showMsg('⚡ ジャストミート!!', '#7df0ff', 1800);
     snd.jackpot();
-  } else { vOut.setLength(spd); snd.hit(q); }
-  window.__lastHit = {s:+swing.s.toFixed(3), sE:+sE.toFixed(3), tilt:+d.y.toFixed(3),
+  } else {
+    snd.hit(q);
+  }
+  window.__lastHit = {s:+swing.s.toFixed(3), sE:+contact.sE.toFixed(3), tilt:+contact.d.y.toFixed(3),
     ballY:+ball.position.y.toFixed(3), handsY:+swing.a.y.toFixed(3), ballZ:+ball.position.z.toFixed(3),
-    x:+x.toFixed(3), n:n.toArray().map(v=>+v.toFixed(2)), q:+q.toFixed(2),
-    eA:+eA.toFixed(2), vBat:vBat.toArray().map(v=>+v.toFixed(1)), vOut:vOut.toArray().map(v=>+v.toFixed(1))};
+    x:+contact.x.toFixed(3), n:contact.n.toArray().map(v=>+v.toFixed(2)), q:+q.toFixed(2),
+    eA:+eA.toFixed(2), vBat:contact.vBat.toArray().map(v=>+v.toFixed(1)), vOut:vOut.toArray().map(v=>+v.toFixed(1))};
   pitch = null;
   // 良い当たりほど空気抵抗も切り裂く（指数的な飛距離の伸びを支える）
   fly = {v:vOut, t:0, landed:false, follow:true, super:superHit, dragK:0.0042/mult,
@@ -935,7 +958,7 @@ function updateGame(dt) {
   if (aimRing) {
     const a = aimHands();
     // ミート想定点: 接触が起きる s≈0.38 でのバットの芯の位置
-    aimRing.position.copy(batPointAt(0.38, a, BS.cop));
+    aimRing.position.copy(batPointAt(MEET.sE, a, BS.cop));
     aimRing.visible = !swing;
   }
 }
