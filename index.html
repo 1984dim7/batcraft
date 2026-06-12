@@ -38,13 +38,109 @@
   #hitData .col { display:inline-block; margin:0 16px; }
   #meter { width:100%; height:8px; background:#2a2f3c; border-radius:4px; margin-top:8px; }
   #meterFill { height:100%; width:100%; background:linear-gradient(90deg,#f5a623,#e9314f); border-radius:4px; }
+  
+  /* Pitch History grid & dots (Wii Fit inspired) */
+  .pitch-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+  }
+  .pitch-dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #1a2233;
+    border: 2px solid #3d4c66;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #889ec2;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .pitch-dot.current {
+    border-color: #ffd23a;
+    box-shadow: 0 0 10px #ffd23a;
+    background: #1a2233;
+    color: #fff;
+    animation: pitchPulse 1.0s infinite alternate;
+  }
+  .pitch-dot.hr {
+    background: #ffd23a;
+    border-color: #e6a100;
+    color: #000;
+    box-shadow: 0 0 12px rgba(255, 210, 58, 0.6);
+  }
+  .pitch-dot.hit {
+    background: #389e0d;
+    border-color: #237804;
+    color: #fff;
+    box-shadow: 0 0 10px rgba(56, 158, 13, 0.5);
+  }
+  .pitch-dot.foul {
+    background: #fa8c16;
+    border-color: #ad4e00;
+    color: #fff;
+  }
+  .pitch-dot.miss {
+    background: #cf1322;
+    border-color: #820008;
+    color: #fff;
+  }
+  .pitch-dot.unplayed {
+    opacity: 0.55;
+  }
+  @keyframes pitchPulse {
+    0% { transform: scale(1.0); }
+    100% { transform: scale(1.18); }
+  }
+  /* Game Mode Selector Styles */
+  #modeSelectModal {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(10,12,18,0.85);
+    backdrop-filter: blur(12px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #fff;
+    pointer-events: auto;
+  }
+  #modeClassicCard, #modeChallengeCard {
+    background: rgba(255,255,255,0.03);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: left;
+    width: 230px;
+    box-sizing: border-box;
+  }
+  #modeClassicCard:hover {
+    background: rgba(79, 195, 247, 0.08);
+    border-color: #4fc3f7;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(79, 195, 247, 0.15);
+  }
+  #modeChallengeCard:hover {
+    background: rgba(255, 94, 122, 0.08);
+    border-color: #ff5e7a;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 94, 122, 0.15);
+  }
 </style>
 </head>
 <body>
 <div id="ui">
   <div class="panel" id="craftPanel">
-    <h1>🪵 バット工房 — 旋盤</h1>
-    <button class="hbtn" onclick="this.closest('.panel').classList.toggle('open')">❓ 操作説明</button>
+    <h1><svg class="ui-icon" viewBox="0 0 24 24" width="20" height="20" style="vertical-align:middle; fill:currentColor; margin-right:4px;"><path d="M12 2C6.48 2 2 4.47 2 7.5S6.48 13 12 13s10-2.47 10-5.5S17.52 2 12 2zm0 9c-4.42 0-8-1.79-8-3.5S7.58 4 12 4s8 1.79 8 3.5-3.58 3.5-8 3.5zM2 9.5v5c0 3.03 4.48 5.5 10 5.5s10-2.47 10-5.5v-5c0 2.25-3.48 4.2-8 4.75V17c0 .55-.45 1-1 1s-1-.45-1-1v-2.75c-4.52-.55-8-2.5-8-4.75z"/></svg>バット工房 — 旋盤</h1>
+    <button class="hbtn" onclick="this.closest('.panel').classList.toggle('open')">操作説明 ?</button>
     <div class="help">
       <p>回転する丸太に<b>鉋（カンナ）</b>を当てて削ろう</p>
       <p><b>左ボタン長押し</b>で削る ／ <b>Shift</b>で戻す ／ <b>ホイール</b>で刃の幅</p>
@@ -52,18 +148,30 @@
     </div>
     <div id="meter"><div id="meterFill"></div></div>
     <div style="margin:8px 0;font-size:12px;">
-      <label for="materialSelect" style="display:block;margin-bottom:3px;color:#aab6cc;">木材の素材：</label>
+      <label for="materialSelect" style="display:block;margin-bottom:3px;color:#aab6cc;">バットの素材：</label>
       <select id="materialSelect" style="font-size:12px;padding:5px 8px;border-radius:6px;background:#1d2230;color:#fff;border:1px solid rgba(255,255,255,.2);width:100%;box-sizing:border-box;cursor:pointer;">
-        <option value="aodamo">アオダモ (Aodamo) - しなり特化</option>
-        <option value="maple">メープル (Maple) - パワー特化</option>
-        <option value="ash">ホワイトアッシュ (White Ash) - 操作性特化</option>
+        <option value="wood">木製バット (Wood) - バランス型</option>
+        <option value="carbon">カーボン (Carbon) - 超軽量・高速</option>
+        <option value="metal">アルミ金属 (Aluminum) - 芯超広・強反発</option>
+        <option value="gold">金バット (Gold) - 重量級パワー</option>
+        <option value="diamond">ダイヤモンド (Diamond) - 究極の硬度</option>
+        <option value="obsidian">黒曜石 (Obsidian) - 漆黒の魔器</option>
+      </select>
+    </div>
+    <div style="margin:8px 0;font-size:12px;">
+      <label for="paintSelect" style="display:block;margin-bottom:3px;color:#aab6cc;">ネオン塗装 (Accent Paint)：</label>
+      <select id="paintSelect" style="font-size:12px;padding:5px 8px;border-radius:6px;background:#1d2230;color:#fff;border:1px solid rgba(255,255,255,.2);width:100%;box-sizing:border-box;cursor:pointer;">
+        <option value="none">無塗装 (ナチュラル)</option>
+        <option value="#00ffff">シアン・ネオン (Cyan)</option>
+        <option value="#ff00ff">マゼンタ・ネオン (Magenta)</option>
+        <option value="#ffd23a">ゴールド・ネオン (Gold)</option>
       </select>
     </div>
     <button id="resetBtn" class="sub">丸太からやり直す</button><br>
-    <button id="doneBtn">完成！打席に立つ ⚾</button>
+    <button id="doneBtn">完成！打席に立つ</button>
   </div>
   <div class="panel" id="craftStats">
-    <h1>📐 バット計測</h1>
+    <h1><svg class="ui-icon" viewBox="0 0 24 24" width="20" height="20" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><polygon points="5 5 5 19 19 19"/><polygon points="8 11 8 16 13 16"/></svg>バット計測</h1>
     <table>
       <tr><td>質量</td><td id="stMass">–</td></tr>
       <tr><td>重心 (グリップから)</td><td id="stCom">–</td></tr>
@@ -74,13 +182,17 @@
   </div>
 
   <div class="panel" id="gamePanel" style="display:none">
-    <h1>⚾ 打撃チャレンジ</h1>
-    <button class="hbtn" onclick="this.closest('.panel').classList.toggle('open')">❓ 操作説明</button>
+    <h1><svg class="ui-icon" viewBox="0 0 24 24" width="20" height="20" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; margin-right:4px;"><circle cx="12" cy="12" r="9"/><path d="M7 6c2 3 2 9 0 12"/><path d="M17 6c-2 3-2 9 0 12"/></svg>打撃チャレンジ</h1>
+    <button class="hbtn" onclick="this.closest('.panel').classList.toggle('open')">操作説明 ?</button>
     <div class="help">
       <p><b>マウス移動</b>でミートポイント微調整（白い輪＋黄色い点）</p>
       <p><b>クリック / スペース</b>でスイング ／ <b>長押しドラッグ</b>で視点</p>
       <p>青い円が縮みきった瞬間に投球！球速は1球ごとに上がる</p>
       <p id="batInfo" style="color:#9fb4d9"></p>
+    </div>
+    <div id="pitchHistory" style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.12); padding-top:10px;">
+      <p style="font-size:11.5px; color:#aab6cc; margin:0 0 6px; font-weight:bold; letter-spacing:0.5px;">投球履歴 (10球)</p>
+      <div class="pitch-grid"></div>
     </div>
     <button id="backBtn" class="sub">工房に戻る</button>
     <button id="retryBtn" class="sub">もう一度10球</button>
@@ -94,7 +206,7 @@
   <div id="pitchSpeed"></div>
   <div class="panel" id="endPanel" style="display:none; position:absolute; top:50%; left:50%;
        transform:translate(-50%,-50%); text-align:center; min-width:300px">
-    <h1>🏆 試合終了！</h1>
+    <h1><svg class="ui-icon" viewBox="0 0 24 24" width="22" height="22" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34"/><path d="M12 2a6 6 0 0 1 6 6v1c0 2.2-1.8 4-4 4h-4c-2.2 0-4-1.8-4-4V8a6 6 0 0 1 6-6z"/></svg>試合終了！</h1>
     <p style="font-size:15px">10球の総飛距離 <b id="totalDist" style="font-size:24px">0</b> m</p>
     <p><input id="playerName" maxlength="10" placeholder="なまえ" style="font-size:14px;padding:7px 10px;
        border-radius:8px;border:1px solid #555;background:#1d2230;color:#fff;text-align:center"></p>
@@ -108,6 +220,108 @@
     <div class="col"><div class="big" id="hdAngle">–</div><div class="lbl">打球角度</div></div>
     <div class="col"><div class="big" id="hdDir">–</div><div class="lbl">方向</div></div>
     <div class="col"><div class="big" id="hdDist">–</div><div class="lbl">飛距離 m</div></div>
+  </div>
+  <!-- Debug Mode toggle & panel -->
+  <div id="debugToggleContainer" style="position:absolute; bottom:14px; left:14px; pointer-events:auto; font-size:11px; z-index:100;">
+    <label style="cursor:pointer; background:rgba(15,18,28,0.78); border:1px solid rgba(255,255,255,0.18); border-radius:8px; padding:6px 12px; display:flex; align-items:center; gap:6px; backdrop-filter:blur(6px); box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+      <input type="checkbox" id="debugModeCheckbox" style="cursor:pointer; width:14px; height:14px;">
+      <span style="font-weight:bold; color:#aab6cc; letter-spacing:0.3px; display:flex; align-items:center;"><svg class="ui-icon" viewBox="0 0 24 24" width="13" height="13" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>デバッグモード選択</span>
+    </label>
+  </div>
+
+  <div id="debugPanel" style="display:none; position:absolute; bottom:14px; right:14px; width:270px; background:rgba(10,12,18,0.88); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:12px; padding:12px 14px; pointer-events:auto; font-size:11px; font-family:monospace; line-height:1.45; color:#cfe3ff; box-shadow:0 6px 24px rgba(0,0,0,0.6); z-index:90;">
+    <div style="font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:4px; margin-bottom:8px; color:#ffd23a; display:flex; justify-content:space-between; font-size:12px; align-items:center;">
+      <span style="display:flex; align-items:center;"><svg class="ui-icon" viewBox="0 0 24 24" width="13" height="13" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>デバッグモード</span>
+      <span id="debugModeStatus" style="color:#7dffa0;">ACTIVE</span>
+    </div>
+    
+    <!-- Presets (only shown in craft mode) -->
+    <div id="debugPresets" style="margin-bottom:10px;">
+      <div style="color:#8a96ad; margin-bottom:4px; font-weight:bold;">バット形状プリセット:</div>
+      <div style="display:flex; flex-wrap:wrap; gap:4px;">
+        <button class="sub" onclick="applyPreset('power')" style="font-size:10px; padding:4px 8px; margin:0; font-weight:bold; background:#243654; color:#6cb5ff;">パワー型</button>
+        <button class="sub" onclick="applyPreset('balanced')" style="font-size:10px; padding:4px 8px; margin:0; font-weight:bold; background:#243654; color:#6cb5ff;">バランス型</button>
+        <button class="sub" onclick="applyPreset('extreme')" style="font-size:10px; padding:4px 8px; margin:0; font-weight:bold; background:#4a2424; color:#ff7d7d;">極端型</button>
+      </div>
+    </div>
+    
+    <!-- Sliders -->
+    <div style="margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:2px; font-weight:bold;">
+        <span>バットステータス倍率:</span>
+        <b id="debugBatMultVal" style="color:#ffd23a;">1.0x</b>
+      </div>
+      <input type="range" id="debugBatMultSlider" min="1.0" max="5.0" step="0.1" value="1.0" style="width:100%; cursor:pointer;">
+    </div>
+    
+    <div style="margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:2px; font-weight:bold;">
+        <span>球速倍率:</span>
+        <b id="debugPitchMultVal" style="color:#ffd23a;">1.0x</b>
+      </div>
+      <input type="range" id="debugPitchSlider" min="0.1" max="10.0" step="0.1" value="1.0" style="width:100%; cursor:pointer;">
+    </div>
+    
+    <!-- Parameter Display -->
+    <div style="border-top:1px solid rgba(255,255,255,0.12); padding-top:8px; font-size:10px; color:#aab6cc;">
+      <div style="font-weight:bold; margin-bottom:4px; color:#fff;">物理パラメータ:</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px 8px;">
+        <div>Mass: <span id="dbgMass" style="color:#ffd479;">-</span></div>
+        <div>CoM: <span id="dbgCom" style="color:#ffd479;">-</span></div>
+        <div>Inertia: <span id="dbgI" style="color:#ffd479;">-</span></div>
+        <div>CoP: <span id="dbgCop" style="color:#ffd479;">-</span></div>
+        <div>Barrel: <span id="dbgBarrel" style="color:#ffd479;">-</span></div>
+        <div>Grip: <span id="dbgGrip" style="color:#ffd479;">-</span></div>
+        <div>SwingT: <span id="dbgSwingT" style="color:#ffd479;">-</span></div>
+        <div>Meff: <span id="dbgMeff" style="color:#ffd479;">-</span></div>
+        <div>Flex: <span id="dbgFlex" style="color:#ffd479;">-</span></div>
+        <div>ShapeScr: <span id="dbgShapeScore" style="color:#ffd479;">-</span></div>
+      </div>
+      <div id="dbgGameInfo" style="margin-top:6px; border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px; display:none;">
+        <div style="font-weight:bold; margin-bottom:4px; color:#fff;">ゲームステータス:</div>
+        <div>球速: <span id="dbgBallSpeed" style="color:#ffd479;">-</span></div>
+        <div>投球時間(T): <span id="dbgT" style="color:#ffd479;">-</span></div>
+        <div>現在飛行速度: <span id="dbgFlyV" style="color:#ffd479;">-</span></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Game Mode Selector Modal -->
+  <div id="modeSelectModal">
+    <div style="background:rgba(20,25,40,0.85); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.15); border-radius:18px; padding:32px 40px; max-width:600px; text-align:center; box-shadow:0 12px 36px rgba(0,0,0,0.6); position:relative;">
+      <h2 style="font-size:24px; margin:0 0 10px; font-weight:bold; letter-spacing:1px; color:#ffd23a; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <svg viewBox="0 0 24 24" width="26" height="26" style="fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>ゲームモード選択
+      </h2>
+      <p style="font-size:14px; color:#aab6cc; margin:0 0 28px; line-height:1.6;">
+        打撃チャレンジのルールを選択してください。自作バットの性能が試されます！
+      </p>
+      
+      <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-bottom:24px;">
+        <!-- Classic Mode Card -->
+        <div id="modeClassicCard">
+          <div style="font-size:18px; font-weight:bold; margin-bottom:8px; color:#4fc3f7; display:flex; align-items:center; gap:6px;">
+            <svg viewBox="0 0 24 24" width="18" height="18" style="fill:none; stroke:#4fc3f7; stroke-width:2.5;"><circle cx="12" cy="12" r="9"/><path d="M7 6c1.5 2.5 1.5 7.5 0 10"/><path d="M17 6c-1.5 2.5-1.5 7.5 0 10"/></svg>通常モード
+          </div>
+          <p style="font-size:12px; color:#aab6cc; margin:0; line-height:1.5;">
+            ストレート投球のみのシンプルなモード。バットの純粋な飛距離性能とミート精度を競います。
+          </p>
+          <div style="margin-top:16px; font-size:11px; color:#4fc3f7; font-weight:bold;">★ ランキング登録可能</div>
+        </div>
+        
+        <!-- Challenge Mode Card -->
+        <div id="modeChallengeCard">
+          <div style="font-size:18px; font-weight:bold; margin-bottom:8px; color:#ff5e7a; display:flex; align-items:center; gap:6px;">
+            <svg viewBox="0 0 24 24" width="18" height="18" style="fill:none; stroke:#ff5e7a; stroke-width:2.5;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>チャレンジ
+          </div>
+          <p style="font-size:12px; color:#aab6cc; margin:0; line-height:1.5;">
+            変化球や10球目の「魔球」が登場！しなり戻りブースト、スコアボード破壊、ターゲットリングなどのギミック満載！
+          </p>
+          <div style="margin-top:16px; font-size:11px; color:#ff5e7a; font-weight:bold;">★ ギミック＆ボーナス満載</div>
+        </div>
+      </div>
+      
+      <button id="modeCancelBtn" class="sub" style="margin-top:10px; background:#3a4152;">もどる</button>
+    </div>
   </div>
 </div>
 
@@ -161,22 +375,123 @@ function woodTexture(base, streak, n) {
 const woodMat = new THREE.MeshStandardMaterial({map:woodTexture('#cfa05f','#7a5226',90), roughness:.62, vertexColors:true});
 const darkWood = new THREE.MeshStandardMaterial({map:woodTexture('#6e4f30','#3b2a16',120), roughness:.85});
 
-function updateWoodMaterial() {
-  const mat = $('materialSelect') ? $('materialSelect').value : 'aodamo';
-  let base, streak;
-  if (mat === 'maple') {
-    base = '#f4eae1';
-    streak = '#a08a78';
-  } else if (mat === 'ash') {
-    base = '#bda68e';
-    streak = '#6b5847';
-  } else {
-    base = '#cfa05f';
-    streak = '#7a5226';
+function carbonTexture() {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#1a1c22'; g.fillRect(0,0,128,128);
+  g.fillStyle = '#2b2d36';
+  for (let y = 0; y < 128; y += 4) {
+    for (let x = 0; x < 128; x += 4) {
+      if ((x + y) % 8 === 0) {
+        g.fillRect(x, y, 3, 3);
+      }
+    }
   }
+  const t = new THREE.CanvasTexture(c);
+  t.encoding = THREE.sRGBEncoding;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+
+function metalTexture() {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 128, 0);
+  grad.addColorStop(0, '#758396');
+  grad.addColorStop(0.3, '#d8dee9');
+  grad.addColorStop(0.5, '#eceff4');
+  grad.addColorStop(0.7, '#d8dee9');
+  grad.addColorStop(1, '#758396');
+  g.fillStyle = grad; g.fillRect(0,0,128,128);
+  
+  g.strokeStyle = '#e5e9f0';
+  g.globalAlpha = 0.15;
+  for (let i = 0; i < 20; i++) {
+    const y = Math.random() * 128;
+    g.beginPath();
+    g.moveTo(0, y); g.lineTo(128, y);
+    g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.encoding = THREE.sRGBEncoding;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+
+function bambooTexture() {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+  const g = c.getContext('2d');
+  g.fillStyle = '#decfa0'; g.fillRect(0,0,128,128);
+  
+  g.fillStyle = '#c0aa75';
+  for (let x = 0; x < 128; x += 16) {
+    g.fillRect(x, 0, 2, 128);
+  }
+  g.fillStyle = '#a0854d';
+  for (let i = 0; i < 40; i++) {
+    const x = Math.random() * 128, w = 1 + Math.random() * 2;
+    g.globalAlpha = 0.08 + Math.random() * 0.12;
+    g.fillRect(x, 0, w, 128);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.encoding = THREE.sRGBEncoding;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+
+function updateWoodMaterial() {
+  const mat = $('materialSelect') ? $('materialSelect').value : 'wood';
   
   if (woodMat.map) woodMat.map.dispose();
-  woodMat.map = woodTexture(base, streak, 90);
+  woodMat.map = null;
+  woodMat.emissive = new THREE.Color(0x000000);
+  woodMat.emissiveIntensity = 0;
+  woodMat.transparent = false;
+  woodMat.opacity = 1.0;
+  
+  if (mat === 'carbon') {
+    woodMat.map = carbonTexture();
+    woodMat.roughness = 0.22;
+    woodMat.metalness = 0.82;
+    woodMat.color.setHex(0xffffff);
+  } else if (mat === 'metal') {
+    woodMat.map = metalTexture();
+    woodMat.roughness = 0.18;
+    woodMat.metalness = 0.95;
+    woodMat.color.setHex(0xffffff);
+  } else if (mat === 'gold') {
+    // 金バット: 鏡面仕上げの黄金光沢
+    woodMat.map = null;
+    woodMat.color.setHex(0xffd700);
+    woodMat.roughness = 0.10;
+    woodMat.metalness = 1.0;
+    woodMat.emissive = new THREE.Color(0xaa8800);
+    woodMat.emissiveIntensity = 0.15;
+  } else if (mat === 'diamond') {
+    // ダイヤモンド: 美しい半透明の宝石光沢
+    woodMat.map = null;
+    woodMat.color.setHex(0xc0f0ff);
+    woodMat.roughness = 0.05;
+    woodMat.metalness = 0.15;
+    woodMat.transparent = true;
+    woodMat.opacity = 0.72;
+    woodMat.emissive = new THREE.Color(0x40c0ff);
+    woodMat.emissiveIntensity = 0.35;
+  } else if (mat === 'obsidian') {
+    // 黒曜石: 漆黒のガラス光沢＋紫の自己発光
+    woodMat.map = null;
+    woodMat.color.setHex(0x0a0810);
+    woodMat.roughness = 0.04;
+    woodMat.metalness = 0.25;
+    woodMat.emissive = new THREE.Color(0x2c0a45);
+    woodMat.emissiveIntensity = 0.40;
+  } else {
+    // 木製 (wood) - アオダモ/メープル/アッシュ統合
+    woodMat.map = woodTexture('#cfa05f', '#7a5226', 90);
+    woodMat.roughness = 0.62;
+    woodMat.metalness = 0.1;
+    woodMat.color.setHex(0xffffff);
+  }
   woodMat.needsUpdate = true;
 }
 
@@ -191,12 +506,25 @@ function batGeometry() {
   for (let i = 0; i <= SEG; i++) pts.push(new THREE.Vector2(Math.max(radii[i], MIN_R), i/SEG*BAT_LEN));
   pts.push(new THREE.Vector2(0.0001, BAT_LEN));
   const geo = new THREE.LatheGeometry(pts, 40);
-  // 樹皮が残っている所は暗く（頂点カラー）
+  
+  const paintHex = $('paintSelect') ? $('paintSelect').value : 'none';
+  const hasPaint = (paintHex && paintHex !== 'none');
+  const paintColor = hasPaint ? new THREE.Color(paintHex) : null;
+
   const pos = geo.attributes.position, col = new Float32Array(pos.count*3), c = new THREE.Color();
   for (let v = 0; v < pos.count; v++) {
     const i = clamp(Math.round(pos.getY(v)/BAT_LEN*SEG), 0, SEG);
     const bark = clamp((radii[i] - (LOG_R-0.004))/0.004, 0, 1);
     c.copy(woodCol).lerp(barkCol, bark).multiplyScalar(.93 + .07*Math.sin(i*1.7));
+    
+    // Accent ring paint at 22%-28% of the length
+    if (hasPaint) {
+      const ratio = pos.getY(v) / BAT_LEN;
+      if (ratio >= 0.22 && ratio <= 0.28) {
+        c.copy(paintColor);
+      }
+    }
+    
     col.set([c.r, c.g, c.b], v*3);
   }
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
@@ -257,22 +585,34 @@ function batStats() {
   const cop = I/(M*com);                                // 芯（打撃の中心）
 
   // Get material properties
-  const matType = $('materialSelect') ? $('materialSelect').value : 'aodamo';
+  const matType = $('materialSelect') ? $('materialSelect').value : 'wood';
   let powerMult = 1.0;
   let flexMult = 1.0;
   let swingTMult = 1.0;
   
-  if (matType === 'maple') {
-    powerMult = 1.12;
-    flexMult = 0.8;
+  if (matType === 'carbon') {
+    powerMult = 0.95;
+    flexMult = 0.55;
+    swingTMult = 0.72;
+  } else if (matType === 'metal') {
+    powerMult = 1.25;
+    flexMult = 0.3;
+    swingTMult = 0.95;
+  } else if (matType === 'gold') {
+    powerMult = 1.40;
+    flexMult = 0.15;
+    swingTMult = 1.25;
+  } else if (matType === 'diamond') {
+    powerMult = 1.60;
+    flexMult = 0.05;
+    swingTMult = 1.10;
+  } else if (matType === 'obsidian') {
+    powerMult = 1.30;
+    flexMult = 0.10;
     swingTMult = 1.05;
-  } else if (matType === 'ash') {
-    powerMult = 0.9;
-    flexMult = 1.0;
-    swingTMult = 0.85;
-  } else { // aodamo
+  } else { // wood
     powerMult = 1.0;
-    flexMult = 1.15;
+    flexMult = 1.0;
     swingTMult = 1.0;
   }
 
@@ -373,7 +713,105 @@ const snd = {
   land: () => tone(95, .12, 'sine', .22, 60),
   foul: () => tone(220, .12, 'square', .12, 180),
   carve: () => noiseSnd(.09, 700, 2200, .07),
-  ui: () => tone(660, .06, 'sine', .12)
+  ui: () => tone(660, .06, 'sine', .12),
+  explosion: () => { tone(65, .45, 'sawtooth', .48, 25); noiseSnd(.55, 60, 600, .45); },
+  whip: () => {
+    noiseSnd(.12, 1200, 3200, .28);
+    tone(600, .10, 'sine', .22, 200);
+  },
+  metalHit: q => {
+    const ac = audio(), t = ac.currentTime;
+    [1800, 2400, 3100, 4200].forEach((freq, idx) => {
+      setTimeout(() => {
+        try {
+          const o = ac.createOscillator(), gn = ac.createGain();
+          o.type = 'sine'; o.frequency.setValueAtTime(freq, t);
+          gn.gain.setValueAtTime(0.08 / (idx + 1), t);
+          gn.gain.exponentialRampToValueAtTime(.0001, t + 0.35);
+          o.connect(gn).connect(ac.destination);
+          o.start(t); o.stop(t + 0.4);
+        } catch(e) {}
+      }, 0);
+    });
+    tone(280 + 100 * q, .15, 'triangle', .25);
+    noiseSnd(.06, 2000, 6000, .3);
+  },
+  glassShatter: () => {
+    noiseSnd(.4, 800, 5000, .35);
+    const ac = audio(), t = ac.currentTime;
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => {
+        try {
+          const freq = 2000 + Math.random() * 4000;
+          const o = ac.createOscillator(), gn = ac.createGain();
+          o.type = 'sine'; o.frequency.setValueAtTime(freq, t + i * 0.03);
+          gn.gain.setValueAtTime(0.05, t + i * 0.03);
+          gn.gain.exponentialRampToValueAtTime(.0001, t + i * 0.03 + 0.15);
+          o.connect(gn).connect(ac.destination);
+          o.start(t + i * 0.03); o.stop(t + i * 0.03 + 0.18);
+        } catch(e) {}
+      }, i * 30);
+    }
+  },
+  ringChime: () => {
+    [880, 1100, 1320, 1760].forEach((f, i) => {
+      setTimeout(() => tone(f, .3, 'sine', .12), i * 65);
+    });
+  },
+  // 滞空歓声シンセ
+  _cheerNodes: null,
+  cheer: () => {
+    try {
+      const ac = audio(), t = ac.currentTime;
+      // ホワイトノイズ生成 (2秒ループ)
+      const bufLen = ac.sampleRate * 2;
+      const buf = ac.createBuffer(1, bufLen, ac.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+      const src = ac.createBufferSource(); src.buffer = buf; src.loop = true;
+      // バンドパスで人声帯域に絞る
+      const bp = ac.createBiquadFilter(); bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(480, t); bp.Q.setValueAtTime(1.2, t);
+      // 揺らし (LFO→周波数)
+      const lfo = ac.createOscillator(); lfo.type = 'sine'; lfo.frequency.setValueAtTime(2.8, t);
+      const lfoGain = ac.createGain(); lfoGain.gain.setValueAtTime(120, t);
+      lfo.connect(lfoGain).connect(bp.frequency);
+      lfo.start(t);
+      // 第二層: やや高い帯域で厚み
+      const bp2 = ac.createBiquadFilter(); bp2.type = 'bandpass';
+      bp2.frequency.setValueAtTime(680, t); bp2.Q.setValueAtTime(0.8, t);
+      const lfo2 = ac.createOscillator(); lfo2.type = 'sine'; lfo2.frequency.setValueAtTime(3.5, t);
+      const lfoGain2 = ac.createGain(); lfoGain2.gain.setValueAtTime(90, t);
+      lfo2.connect(lfoGain2).connect(bp2.frequency);
+      lfo2.start(t);
+      // マスターゲイン
+      const gain = ac.createGain(); gain.gain.setValueAtTime(0.0, t);
+      const gain2 = ac.createGain(); gain2.gain.setValueAtTime(0.0, t);
+      src.connect(bp).connect(gain).connect(ac.destination);
+      src.connect(bp2).connect(gain2).connect(ac.destination);
+      src.start(t);
+      snd._cheerNodes = { src, lfo, lfo2, gain, gain2, bp, bp2, ac };
+    } catch(e) {}
+  },
+  updateCheer: (vol) => {
+    if (!snd._cheerNodes) return;
+    const { gain, gain2, ac } = snd._cheerNodes;
+    const t = ac.currentTime;
+    const v = Math.min(vol, 0.38);
+    gain.gain.setTargetAtTime(v, t, 0.08);
+    gain2.gain.setTargetAtTime(v * 0.6, t, 0.08);
+  },
+  stopCheer: () => {
+    if (!snd._cheerNodes) return;
+    const { src, lfo, lfo2, gain, gain2, ac } = snd._cheerNodes;
+    const t = ac.currentTime;
+    gain.gain.setTargetAtTime(0.0, t, 0.15);
+    gain2.gain.setTargetAtTime(0.0, t, 0.15);
+    setTimeout(() => {
+      try { src.stop(); lfo.stop(); lfo2.stop(); } catch(e) {}
+    }, 600);
+    snd._cheerNodes = null;
+  }
 };
 
 // ================= シーン構成 =================
@@ -498,7 +936,7 @@ function addGroundAndSkyland() {
   gameGroup.add(grass);
   // 場外〜宇宙弾の着地用に大地をずっと先まで
   const earth = new THREE.Mesh(new THREE.RingGeometry(258, 7000, 48),
-    new THREE.MeshBasicMaterial({color:0x0e1626}));
+    new THREE.MeshBasicMaterial({color:0x1a3518}));
   earth.rotation.x = -Math.PI/2; earth.position.y = -.05;
   gameGroup.add(earth);
   // ファウル領域を薄暗く（フェアゾーン ±45° 以外に半透明の影）
@@ -553,34 +991,34 @@ function addOutfieldStructures() {
   };
   gameGroup.add(fenceWedge(98, 3.6, 1.8, 0x1d4a28));
   gameGroup.add(fenceWedge(98, .18, 3.7, 0xf2c230));
-  gameGroup.add(fenceWedge(112, 9, 5.5, 0x465062));
-  gameGroup.add(fenceWedge(113, 9, 11, 0x2c3542));
+  gameGroup.add(fenceWedge(112, 13.5, 7.75, 0x465062));
+  gameGroup.add(fenceWedge(113, 13.5, 15.25, 0x2c3542));
 
   // 客席の床（半透明/中空状態を解消するソリッドなコンクリート床）
-  const standsFloorGeo = new THREE.CylinderGeometry(112, 103, 11, 64, 1, true, Math.PI * 0.70, Math.PI * 0.60);
+  const standsFloorGeo = new THREE.CylinderGeometry(112, 103, 16.5, 64, 1, true, Math.PI * 0.70, Math.PI * 0.60);
   const standsFloorMat = new THREE.MeshStandardMaterial({ color: 0x1d2430, side: THREE.DoubleSide, roughness: 0.95 });
   const standsFloor = new THREE.Mesh(standsFloorGeo, standsFloorMat);
-  standsFloor.position.y = 9.0;
+  standsFloor.position.y = 13.5;
   standsFloor.receiveShadow = true;
   gameGroup.add(standsFloor);
 
   // Register cylinder shell colliders
   // Outfield Fence (yMin=0, yMax=3.79, radius=98)
   fieldColliders.push({ type: 'cylinder_shell', radius: 98, yMin: 0, yMax: 3.79, thetaStart: Math.PI * 0.70, thetaLength: Math.PI * 0.60, landing: false });
-  // Stands Wall 1 (radius=112, yMin=1.0, yMax=10.0)
-  fieldColliders.push({ type: 'cylinder_shell', radius: 112, yMin: 1.0, yMax: 10.0, thetaStart: Math.PI * 0.70, thetaLength: Math.PI * 0.60, landing: true });
-  // Stands Wall 2 (radius=113, yMin=6.5, yMax=15.5)
-  fieldColliders.push({ type: 'cylinder_shell', radius: 113, yMin: 6.5, yMax: 15.5, thetaStart: Math.PI * 0.70, thetaLength: Math.PI * 0.60, landing: true });
-  // Stands Slope (rMin=103, rMax=112, yMin=3.5, yMax=14.5)
-  fieldColliders.push({ type: 'stands_slope', rMin: 103, rMax: 112, yMin: 3.5, yMax: 14.5, thetaStart: Math.PI * 0.72, thetaLength: Math.PI * 0.56, landing: true });
+  // Stands Wall 1 (radius=112, yMin=1.0, yMax=15.0)
+  fieldColliders.push({ type: 'cylinder_shell', radius: 112, yMin: 1.0, yMax: 15.0, thetaStart: Math.PI * 0.70, thetaLength: Math.PI * 0.60, landing: true });
+  // Stands Wall 2 (radius=113, yMin=9.75, yMax=23.25)
+  fieldColliders.push({ type: 'cylinder_shell', radius: 113, yMin: 9.75, yMax: 23.25, thetaStart: Math.PI * 0.70, thetaLength: Math.PI * 0.60, landing: true });
+  // Stands Slope (rMin=103, rMax=112, yMin=5.25, yMax=21.75)
+  fieldColliders.push({ type: 'stands_slope', rMin: 103, rMax: 112, yMin: 5.25, yMax: 21.75, thetaStart: Math.PI * 0.72, thetaLength: Math.PI * 0.56, landing: true });
 
   // 観客（スタンドのカラフルな点々）
   {
-    const n = 1200, pos = new Float32Array(n*3), col = new Float32Array(n*3), c = new THREE.Color();
+    const n = 1800, pos = new Float32Array(n*3), col = new Float32Array(n*3), c = new THREE.Color();
     for (let i = 0; i < n; i++) {
       const th = Math.PI*(0.72 + Math.random()*0.56);
       const tier = Math.random();
-      const r = 103 + tier*9, y = 3.5 + tier*11 + Math.random()*.8;
+      const r = 103 + tier*9, y = 5.25 + tier*16.5 + Math.random()*1.2;
       pos.set([r*Math.sin(th), y, r*Math.cos(th)], i*3);
       c.setHSL(Math.random(), .65, .55 + Math.random()*.25);
       col.set([c.r, c.g, c.b], i*3);
@@ -610,35 +1048,184 @@ function addOutfieldStructures() {
   }
   // スコアボード
   {
-    const cv = document.createElement('canvas'); cv.width = 512; cv.height = 224;
-    const g2 = cv.getContext('2d');
-    g2.fillStyle = '#0a1118'; g2.fillRect(0, 0, 512, 224);
-    g2.strokeStyle = '#2e3c4e'; g2.lineWidth = 10; g2.strokeRect(5, 5, 502, 214);
-    g2.fillStyle = '#ffd23a'; g2.font = 'bold 52px sans-serif'; g2.textAlign = 'center';
-    g2.fillText('BAT CRAFT', 256, 88);
-    g2.fillStyle = '#7de08a'; g2.font = 'bold 40px sans-serif';
-    g2.fillText('★ NIGHT GAME ★', 256, 160);
-    const tex = new THREE.CanvasTexture(cv); tex.encoding = THREE.sRGBEncoding;
+    scoreboardCanvas = document.createElement('canvas'); scoreboardCanvas.width = 512; scoreboardCanvas.height = 224;
+    scoreboardCtx = scoreboardCanvas.getContext('2d');
+    drawScoreboardText('BAT CRAFT', '★ NIGHT GAME ★');
+    scoreboardTex = new THREE.CanvasTexture(scoreboardCanvas); scoreboardTex.encoding = THREE.sRGBEncoding;
     const sb = new THREE.Mesh(new THREE.BoxGeometry(18, 8, .8),
-      [poleMat, poleMat, poleMat, poleMat, new THREE.MeshBasicMaterial({map:tex}), poleMat]);
+      [poleMat, poleMat, poleMat, poleMat, new THREE.MeshStandardMaterial({map:scoreboardTex, roughness:0.2, metalness:0.3}), poleMat]);
     sb.position.set(0, 12.5, -109);
     gameGroup.add(sb);
     // Scoreboard Collider (x: [-9, 9], y: [8.5, 16.5], z: [-109.4, -108.6])
-    fieldColliders.push({ type: 'box', min: new THREE.Vector3(-9, 8.5, -109.4), max: new THREE.Vector3(9, 16.5, -108.6), landing: true });
+    fieldColliders.push({ type: 'box', min: new THREE.Vector3(-9, 8.5, -109.4), max: new THREE.Vector3(9, 16.5, -108.6), landing: true, isScoreboard: true });
+    scoreboardBroken = false;
+  }
+
+  // Night searchlights
+  searchlights = [];
+  const slCount = 4;
+  for (let i = 0; i < slCount; i++) {
+    const th = Math.PI * (0.65 + 0.7 * (i / (slCount - 1)));
+    const r = 160 + Math.random() * 80;
+    const x = r * Math.sin(th);
+    const z = r * Math.cos(th);
+    
+    const beamGeo = new THREE.ConeGeometry(8, 120, 16, 1, true);
+    beamGeo.translate(0, 60, 0);
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: 0x88bbff,
+      transparent: true,
+      opacity: 0.15,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const beam = new THREE.Mesh(beamGeo, beamMat);
+    beam.position.set(x, -5, z);
+    
+    beam.rotation.x = 0.2 + Math.random() * 0.3;
+    beam.rotation.z = Math.random() * Math.PI * 2;
+    const rotSpeed = 0.4 + Math.random() * 0.6;
+    
+    gameGroup.add(beam);
+    searchlights.push({ mesh: beam, rotSpeed });
   }
 }
 
+const buildingTexCache = {};
+function getBuildingMaterial(color, emissiveColorHex) {
+  const cacheKey = color.getHexString() + '_' + emissiveColorHex;
+  if (buildingTexCache[cacheKey]) return buildingTexCache[cacheKey];
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#0a0d14';
+  ctx.fillRect(0, 0, 64, 128);
+  
+  // Grid of windows
+  ctx.fillStyle = emissiveColorHex;
+  const cols = 4;
+  const rows = 12;
+  const w = 64 / cols;
+  const h = 128 / rows;
+  for (let r = 0; r < rows; r++) {
+    if (Math.random() < 0.15) continue;
+    for (let c = 0; c < cols; c++) {
+      if (Math.random() < 0.25) continue;
+      ctx.fillRect(c * w + w * 0.2, r * h + h * 0.2, w * 0.6, h * 0.6);
+    }
+  }
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  
+  const mat = new THREE.MeshStandardMaterial({
+    color: color,
+    roughness: 0.35,
+    metalness: 0.6,
+    emissiveMap: tex,
+    emissive: new THREE.Color(emissiveColorHex).multiplyScalar(0.4),
+    map: tex
+  });
+  
+  buildingTexCache[cacheKey] = mat;
+  return mat;
+}
+
 function addBuildings() {
-  // 場外のビル街
-  for (let i = 0; i < 26; i++) {
-    const th = Math.PI*(0.72 + Math.random()*0.56);
-    const r = 135 + Math.random()*70;
-    const hgt = 10 + Math.random()*45, w = 8 + Math.random()*14;
-    const b = new THREE.Mesh(new THREE.BoxGeometry(w, hgt, w),
-      new THREE.MeshStandardMaterial({color:new THREE.Color().setHSL(.6, .18, .10 + Math.random()*.10)}));
-    b.position.set(r*Math.sin(th), hgt/2, r*Math.cos(th));
-    b.rotation.y = Math.random()*Math.PI;
+  const colors = [
+    new THREE.Color(0x111625),
+    new THREE.Color(0x181c2b),
+    new THREE.Color(0x0f182c),
+    new THREE.Color(0x1f1d2e)
+  ];
+  const emissiveColors = ['#ffbb33', '#33aaff', '#ff33aa', '#33ffaa', '#ff5555'];
+  
+  const startTh = Math.PI * 0.62;
+  const endTh = Math.PI * 1.38;
+  
+  for (let i = 0; i < 160; i++) {
+    const th = startTh + Math.random() * (endTh - startTh);
+    // Expand radius: from 130m out to 750m
+    const r = 130 + Math.pow(Math.random(), 1.3) * 620;
+    const hgt = 12 + Math.random() * 55;
+    const w = 9 + Math.random() * 16;
+    
+    const col = colors[Math.floor(Math.random() * colors.length)];
+    const emissiveCol = emissiveColors[Math.floor(Math.random() * emissiveColors.length)];
+    
+    let geom, mat, b;
+    const type = Math.random();
+    
+    if (type < 0.45) {
+      // Type 1: Skyscraper with glowing window texture
+      geom = new THREE.BoxGeometry(w, hgt, w);
+      mat = getBuildingMaterial(col, emissiveCol);
+      b = new THREE.Mesh(geom, mat);
+    } else if (type < 0.75) {
+      // Type 2: Tapered glass tower
+      geom = new THREE.CylinderGeometry(w * 0.45, w * 0.75, hgt, 4, 1);
+      geom.rotateY(Math.PI / 4); // rotate to make it look like a diamond/square tower
+      mat = new THREE.MeshStandardMaterial({
+        color: col,
+        roughness: 0.15,
+        metalness: 0.85,
+        emissive: new THREE.Color(emissiveCol).multiplyScalar(0.2)
+      });
+      b = new THREE.Mesh(geom, mat);
+      
+      // Add glowing vertical stripes on the edges
+      const stripeGeo = new THREE.BoxGeometry(0.2, hgt, 0.2);
+      const stripeMat = new THREE.MeshBasicMaterial({ color: emissiveCol });
+      for (const sx of [-1, 1]) {
+        for (const sz of [-1, 1]) {
+          const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+          stripe.position.set(sx * w * 0.48, 0, sz * w * 0.48);
+          b.add(stripe);
+        }
+      }
+    } else {
+      // Type 3: Cylindrical tower with antenna spire
+      geom = new THREE.CylinderGeometry(w * 0.5, w * 0.5, hgt, 8);
+      mat = new THREE.MeshStandardMaterial({
+        color: col,
+        roughness: 0.2,
+        metalness: 0.7,
+        emissive: new THREE.Color(emissiveCol).multiplyScalar(0.15)
+      });
+      b = new THREE.Mesh(geom, mat);
+      
+      // Antenna
+      const antLen = 6 + Math.random() * 8;
+      const antGeo = new THREE.CylinderGeometry(0.08, 0.08, antLen, 4);
+      const antMat = new THREE.MeshBasicMaterial({ color: 0xcccccc });
+      const ant = new THREE.Mesh(antGeo, antMat);
+      ant.position.y = hgt/2 + antLen/2;
+      b.add(ant);
+      
+      // Beacon light
+      const beaconGeo = new THREE.SphereGeometry(0.25, 8, 8);
+      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff3333 });
+      const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+      beacon.position.y = antLen / 2;
+      ant.add(beacon);
+    }
+    
+    b.position.set(r * Math.sin(th), hgt / 2, r * Math.cos(th));
+    b.rotation.y = Math.random() * Math.PI;
+    
+    // Performance optimization: only cast/receive shadow if close
+    if (r < 220) {
+      b.castShadow = true;
+      b.receiveShadow = true;
+    }
+    
     gameGroup.add(b);
+    
+    // Register collider
     fieldColliders.push({
       type: 'rotated_box',
       center: b.position.clone(),
@@ -779,13 +1366,128 @@ function buildField() {
   addSkyStarsAndMoon();
   addPlayersAndGuides();
   addGameBallsAndBat();
+  
+  // 空中ネオンリング（Challenge Mode限定）
+  targetHoops = [];
+  if (gameMode === 'challenge') {
+    const hoopPositions = [
+      { pos: new THREE.Vector3(-30, 16, -65), color: 0x00ffff },
+      { pos: new THREE.Vector3(0, 24, -80), color: 0xff00ff },
+      { pos: new THREE.Vector3(30, 14, -60), color: 0xffd23a }
+    ];
+    
+    hoopPositions.forEach(cfg => {
+      const geo = new THREE.RingGeometry(5.2, 6.0, 32);
+      const mat = new THREE.MeshBasicMaterial({
+        color: cfg.color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(cfg.pos);
+      gameGroup.add(mesh);
+      
+      targetHoops.push({
+        mesh,
+        pos: cfg.pos.clone(),
+        innerR: 5.2,
+        outerR: 6.0,
+        color: cfg.color,
+        active: true
+      });
+    });
+  }
 }
 
 // ================= スイングと物理 =================
 const MEET = { sE: 0.38, dirX: 0.94, leadT: 0.40 };
 let BS;                       // 打席に入った時点のバット性能（固定）
+let gameMode = 'normal'; // 'normal' or 'challenge'
+let targetHoops = [];
+let scoreboardCanvas = null, scoreboardCtx = null, scoreboardTex = null;
+let scoreboardBroken = false;
+let currentPitchType = 'straight';
+
+function drawScoreboardText(line1, line2, isBroken = false) {
+  const g2 = scoreboardCtx;
+  if (!g2) return;
+  g2.fillStyle = isBroken ? '#150505' : '#0a1118'; g2.fillRect(0, 0, 512, 224);
+  g2.strokeStyle = isBroken ? '#e61d1d' : '#2e3c4e'; g2.lineWidth = 10; g2.strokeRect(5, 5, 502, 214);
+  
+  if (isBroken) {
+    g2.fillStyle = '#ff3333'; g2.font = 'bold 58px monospace'; g2.textAlign = 'center';
+    g2.fillText('SYSTEM ERROR', 256, 88);
+    g2.fillStyle = '#ff6666'; g2.font = 'bold 36px monospace';
+    g2.fillText('OUT OF RANGE: +300m', 256, 160);
+  } else {
+    g2.fillStyle = '#ffd23a'; g2.font = 'bold 52px sans-serif'; g2.textAlign = 'center';
+    g2.fillText(line1, 256, 88);
+    g2.fillStyle = '#7de08a'; g2.font = 'bold 40px sans-serif';
+    g2.fillText(line2, 256, 160);
+  }
+}
+
+function breakScoreboard() {
+  if (scoreboardBroken) return;
+  scoreboardBroken = true;
+  drawScoreboardText('', '', true);
+  
+  const g2 = scoreboardCtx;
+  g2.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+  g2.lineWidth = 2.5;
+  
+  const cx = 256;
+  const cy = 112;
+  
+  // 放射状のヒビ
+  for (let i = 0; i < 16; i++) {
+    const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.2;
+    g2.beginPath();
+    g2.moveTo(cx, cy);
+    let px = cx;
+    let py = cy;
+    const segments = 4 + Math.floor(Math.random() * 4);
+    const rMax = 120 + Math.random() * 100;
+    for (let s = 1; s <= segments; s++) {
+      const r = (s / segments) * rMax;
+      const nx = cx + Math.cos(angle + (Math.random() - 0.5) * 0.15) * r;
+      const ny = cy + Math.sin(angle + (Math.random() - 0.5) * 0.15) * r;
+      g2.lineTo(nx, ny);
+      px = nx;
+      py = ny;
+    }
+    g2.stroke();
+  }
+  
+  // 同心円状のヒビ
+  for (let r = 20; r < 200; r += 25 + Math.random() * 20) {
+    g2.beginPath();
+    for (let theta = 0; theta < Math.PI * 2; theta += 0.1) {
+      const currR = r + (Math.random() - 0.5) * 5;
+      const x = cx + Math.cos(theta) * currR;
+      const y = cy + Math.sin(theta) * currR;
+      if (theta === 0) g2.moveTo(x, y);
+      else g2.lineTo(x, y);
+    }
+    g2.closePath();
+    g2.stroke();
+  }
+  
+  scoreboardTex.needsUpdate = true;
+  
+  snd.glassShatter();
+  score.total += 300;
+  showMsg('✦ SCOREBOARD CRASH BONUS: +300m ✦', '#ff3333', 2500);
+}
 let aim = {x:.5, y:.5};       // マウス正規化座標
-let swing = null, pitch = null, fly = null, windup = null, impact = null;
+let swing = null, pitch = null, fly = null, windup = null, impact = null, explosion = null;
+let searchlights = [];
+let debugMode = false;
+let usedDebugThisGame = false;
+let debugBatMult = 1.0;
+let debugPitchSpeedMult = 1.0;
 let score = {pitch:0, hits:0, hrs:0, best:0, total:0};
 let camOff = {x:0, y:0}, dragStart = null;
 const SWEEP0 = -1.40, SWEEP1 = 2.10;   // バットのヨー角範囲(rad)
@@ -822,14 +1524,47 @@ function startSwing() {
     a.y += clamp(b.y - a.y, -0.20, 0.20)*0.7;
   }
   swing = {s:0, sPrev:0, a, hit:false, phi:0, phiPrev:0, phiV:0, w:0};
+  
+  // スイングトレイルの色変更（ペイント選択に合わせる）
+  const paintHex = $('paintSelect') ? $('paintSelect').value : 'none';
+  const trailColor = (paintHex && paintHex !== 'none') ? new THREE.Color(paintHex) : new THREE.Color(0xffffff);
+  trail.forEach(t => {
+    t.material.color.copy(trailColor);
+  });
+  
   snd.swing();
 }
 function startPitch() {
   if (score.pitch >= 10 || mode !== 'game' || windup || pitch) return;
   score.pitch++; $('pitchNo').textContent = score.pitch;
-  // 1球目はゆっくり、10球目に向けて少しずつ速くなる
-  const kmh = 62 + score.pitch*4.8 + Math.random()*4;
-  const target = new THREE.Vector3(-0.30 + Math.random()*0.55, 0.55 + Math.random()*0.75, 0.35);
+  if (typeof updatePitchHistoryUI === 'function') updatePitchHistoryUI();
+  
+  const baseKmh = 62 + score.pitch*4.8 + Math.random()*4;
+  const kmh = baseKmh * (debugMode ? debugPitchSpeedMult : 1.0);
+  
+  let target = new THREE.Vector3(-0.30 + Math.random()*0.55, 0.55 + Math.random()*0.75, 0.35);
+  
+  if (gameMode === 'challenge') {
+    if (score.pitch === 10) {
+      currentPitchType = 'fireball';
+    } else {
+      const types = ['straight', 'curve', 'slider'];
+      currentPitchType = types[Math.floor(Math.random() * types.length)];
+    }
+  } else {
+    currentPitchType = 'straight';
+  }
+
+  if (currentPitchType === 'curve') {
+    target.x -= 0.15; 
+  } else if (currentPitchType === 'slider') {
+    target.x += 0.15;
+  } else if (currentPitchType === 'fork') {
+    target.y -= 0.30;
+  } else if (currentPitchType === 'fireball') {
+    target.set(-0.05, 0.85, 0.35);
+  }
+  
   windup = {t:0, dur:2.0, kmh, target};   // 2秒のワインドアップゲージ → 0で発射
 }
 function releasePitch() {
@@ -840,14 +1575,70 @@ function releasePitch() {
   ball.position.copy(MOUND);
   ball.visible = true; ballShadow.visible = true;
   snd.release();
+  
+  // 魔球（Fireball）ならボールを発光させる
+  if (currentPitchType === 'fireball') {
+    ball.material.color.setHex(0xff3300);
+    const halo = ball.children[0];
+    if (halo) {
+      halo.material.color.setHex(0xffaa44);
+      halo.scale.setScalar(1.2);
+    }
+    if (!ball._fireLight) {
+      ball._fireLight = new THREE.PointLight(0xff4400, 4.0, 6);
+      ball.add(ball._fireLight);
+    }
+    ball._fireLight.visible = true;
+  } else {
+    ball.material.color.setHex(0xffffff);
+    const halo = ball.children[0];
+    if (halo) {
+      halo.material.color.setHex(0xffffff);
+      halo.scale.setScalar(0.55);
+    }
+    if (ball._fireLight) ball._fireLight.visible = false;
+  }
+  
   const ps = $('pitchSpeed');
-  ps.textContent = '球速 ' + kmh.toFixed(0) + ' km/h';
+  let typeLabel = '';
+  if (gameMode === 'challenge') {
+    if (currentPitchType === 'straight') typeLabel = ' (ストレート)';
+    else if (currentPitchType === 'curve') typeLabel = ' (カーブ)';
+    else if (currentPitchType === 'slider') typeLabel = ' (スライダー)';
+    else if (currentPitchType === 'fork') typeLabel = ' (フォーク)';
+    else if (currentPitchType === 'fireball') typeLabel = ' (魔球・ライジングファイヤ)';
+  }
+  ps.textContent = '球速 ' + kmh.toFixed(0) + ' km/h' + typeLabel;
   ps.style.opacity = 1;
   gameTimeout(() => ps.style.opacity = 0, 900);
 }
+
 function pitchPos(k) {
   const p = pitch.p0.clone().lerp(pitch.p1, k);
-  p.y -= Math.sin(k*Math.PI)*0.45;   // 重力で沈む軌道
+  let gravityDrop = Math.sin(k*Math.PI)*0.45;
+  p.y -= gravityDrop;
+  
+  if (gameMode === 'challenge') {
+    if (currentPitchType === 'curve') {
+      const curveX = Math.sin(k * Math.PI) * 0.45 - (k * k) * 0.35;
+      p.x += curveX;
+    } else if (currentPitchType === 'slider') {
+      const sliderX = (k * k * k) * 0.55;
+      p.x -= sliderX;
+    } else if (currentPitchType === 'fork') {
+      if (k > 0.4) {
+        const t = (k - 0.4) / 0.6;
+        p.y -= t * t * 1.8;
+      }
+    } else if (currentPitchType === 'fireball') {
+      const wobble = Math.sin(k * Math.PI * 5) * 0.15;
+      p.x += wobble;
+      if (k > 0.6) {
+        const rise = (k - 0.6) / 0.4;
+        p.y += rise * rise * 0.5;
+      }
+    }
+  }
   return p;
 }
 
@@ -894,6 +1685,13 @@ function exitVelocity(contact, pitchKmh, BS) {
   const sweetBoost = isSweet ? 1.15 : 1.0;
   vOut.multiplyScalar(sweetBoost);
 
+  // しなり戻りブースト（チャレンジモード限定）
+  let isWhipBoost = false;
+  if (gameMode === 'challenge' && Math.abs(swing.phi) < 0.045) {
+    vOut.multiplyScalar(1.3);
+    isWhipBoost = true;
+  }
+
   // ミートの質 × バット速度 × バット性能の総合点で飛距離が指数関数的に伸びる
   const E = q * clamp(vBat.length()/22, 0, 1.3) * clamp(BS.meff/3, 0.5, 1.2);
   const mult = Math.min(Math.exp(Math.max(0, E - 0.82)*3.2), 12);
@@ -907,7 +1705,7 @@ function exitVelocity(contact, pitchKmh, BS) {
   } else {
     vOut.setLength(spd);
   }
-  return { vOut, q, eA, superHit, mult, isSweet };
+  return { vOut, q, eA, superHit, mult, isSweet, isWhipBoost };
 }
 
 // 衝突: バット面の法線で反射方向を計算
@@ -919,17 +1717,36 @@ function tryContact(h) {
   // --- ヒット！---
   swing.hit = true;
   const res = exitVelocity(contact, pitch.kmh, BS);
-  const { vOut, q, eA, superHit, mult, isSweet } = res;
+  const { vOut, q, eA, superHit, mult, isSweet, isWhipBoost } = res;
+  const matType = $('materialSelect') ? $('materialSelect').value : 'wood';
 
-  if (superHit) {
-    showMsg('⚡ ジャストミート!!', '#7df0ff', 1800);
-    snd.jackpot();
-  } else if (isSweet) {
-    showMsg('✨ クリーンヒット！', '#ffd23a', 1500);
-    snd.hit(q);
+  if (isWhipBoost) {
+    showMsg('✦ WHIP RELEASE BOOST ✦', '#ffd23a', 2000);
+    snd.whip();
+    setTimeout(() => {
+      if (superHit) {
+        if (matType === 'metal') snd.metalHit(q);
+        else snd.jackpot();
+      } else {
+        if (matType === 'metal') snd.metalHit(q);
+        else snd.hit(q);
+      }
+    }, 50);
   } else {
-    snd.hit(q);
+    if (superHit) {
+      showMsg('JUST MEET!!', '#7df0ff', 1800);
+      if (matType === 'metal') snd.metalHit(q);
+      else snd.jackpot();
+    } else if (isSweet) {
+      showMsg('CLEAN HIT!', '#ffd23a', 1500);
+      if (matType === 'metal') snd.metalHit(q);
+      else snd.hit(q);
+    } else {
+      if (matType === 'metal') snd.metalHit(q);
+      else snd.hit(q);
+    }
   }
+
   window.__lastHit = {s:+swing.s.toFixed(3), sE:+contact.sE.toFixed(3), tilt:+contact.d.y.toFixed(3),
     ballY:+ball.position.y.toFixed(3), handsY:+swing.a.y.toFixed(3), ballZ:+ball.position.z.toFixed(3),
     x:+contact.x.toFixed(3), n:contact.n.toArray().map(v=>+v.toFixed(2)), q:+q.toFixed(2),
@@ -952,30 +1769,133 @@ function tryContact(h) {
   for (const t of trail) t.visible = false;
 }
 
+
+function createExplosion(pos) {
+  const count = 150;
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const velocities = [];
+  
+  const colorPalette = [
+    new THREE.Color('#ff2200'),
+    new THREE.Color('#ff8800'),
+    new THREE.Color('#ffffdd'),
+    new THREE.Color('#ff00aa'),
+    new THREE.Color('#8800ff')
+  ];
+
+  for (let i = 0; i < count; i++) {
+    positions[i*3] = pos.x;
+    positions[i*3+1] = pos.y;
+    positions[i*3+2] = pos.z;
+    
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos((Math.random() * 2) - 1);
+    const speed = 2 + Math.random() * 14;
+    
+    const vx = Math.sin(phi) * Math.cos(theta) * speed;
+    const vy = Math.abs(Math.sin(phi) * Math.sin(theta) * speed) + 3.0;
+    const vz = Math.cos(phi) * speed;
+    
+    velocities.push(new THREE.Vector3(vx, vy, vz));
+    
+    const col = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+    colors[i*3] = col.r;
+    colors[i*3+1] = col.g;
+    colors[i*3+2] = col.b;
+  }
+  
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  
+  const mat = new THREE.PointsMaterial({
+    size: 0.85,
+    vertexColors: true,
+    transparent: true,
+    opacity: 1.0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  
+  const points = new THREE.Points(geo, mat);
+  gameGroup.add(points);
+  
+  const ringGeo = new THREE.RingGeometry(0.1, 1.0, 32);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: 0xff8822,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.9,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.position.copy(pos);
+  ring.rotation.x = Math.PI / 2;
+  gameGroup.add(ring);
+  
+  const flash = new THREE.PointLight(0xff6622, 6.0, 35);
+  flash.position.copy(pos);
+  gameGroup.add(flash);
+  
+  explosion = { points, ring, flash, velocities, t: 0, duration: 1.4, pos: pos.clone() };
+}
+
 function sprayLabel(deg) {
   if (deg > 18) return 'レフト'; if (deg > 5) return '左中間';
   if (deg > -5) return 'センター'; if (deg > -18) return '右中間';
   return 'ライト';
 }
+
 function landBall(isGround = true) {
   fly.landed = true;
+  snd.stopCheer();
   const lx = ball.position.x, lz = ball.position.z;
   const dist = Math.round(Math.hypot(lx, lz));
   const spray = Math.atan2(-lx, -lz)*180/Math.PI;   // +が三塁(レフト)側
   const fair = Math.abs(spray) <= 46 && lz < 0;
   $('hdDist').textContent = dist;
   $('hdDir').textContent = fair ? sprayLabel(spray) : 'ファウル';
-  if (!fair) { showMsg('ファウル', '#ffd479'); snd.foul(); }
-  else {
+  
+  if (!fair) {
+    if (score.history) score.history.push({ type: 'foul' });
+    showMsg('ファウル', '#ffd479');
+    snd.foul();
+  } else {
     score.best = Math.max(score.best, dist);
     score.total += dist;
-    if (dist >= 1000) { score.hrs++; showMsg('🌌 ' + dist + ' m！？ 宇宙まで飛んでった！！', '#9df0ff', 3200); snd.hr(); }
-    else if (dist >= 140) { score.hrs++; showMsg('🚀 場外ホームラン！ ' + dist + ' m', '#ffd23a', 2400); snd.hr(); }
-    else if (dist >= 98) { score.hrs++; showMsg('🎉 ホームラン！ ' + dist + ' m', '#ff5e7a', 2000); snd.hr(); }
-    else if (dist >= 25) { score.hits++; showMsg('ヒット！ ' + dist + ' m', '#7dffa0'); }
-    else showMsg(dist + ' m… 内野ゴロ', '#cfd6e4');
+    if (dist >= 98) {
+      score.hrs++;
+      if (score.history) score.history.push({ type: 'hr' });
+      if (dist >= 1000) {
+        showMsg('COSMIC FLY! ' + dist + ' m', '#9df0ff', 3200);
+      } else if (dist >= 140) {
+        showMsg('OUT OF PARK HR! ' + dist + ' m', '#ffd23a', 2400);
+      } else {
+        showMsg('HOME RUN! ' + dist + ' m', '#ff5e7a', 2000);
+      }
+      snd.hr();
+    } else if (dist >= 25) {
+      score.hits++;
+      if (score.history) score.history.push({ type: 'hit' });
+      showMsg('BASE HIT! ' + dist + ' m', '#7dffa0');
+    } else {
+      if (score.history) score.history.push({ type: 'miss' });
+      showMsg('GROUNDER... ' + dist + ' m', '#cfd6e4');
+    }
   }
-  snd.land();
+  
+  if (typeof updatePitchHistoryUI === 'function') {
+    updatePitchHistoryUI();
+  }
+  
+  if (fly.exploded) {
+    snd.explosion();
+  } else {
+    snd.land();
+  }
+  
   $('hits').textContent = score.hits; $('hrs').textContent = score.hrs; $('best').textContent = score.best;
   if (isGround) {
     fly.v.set(fly.v.x*.42, Math.abs(fly.v.y)*.38, fly.v.z*.42);  // バウンド
@@ -1029,7 +1949,11 @@ function renderRank(highlight) {
 function showEnd() {
   $('hitData').style.display = 'none';
   $('totalDist').textContent = score.total;
-  $('regBtn').disabled = false; $('regBtn').textContent = 'ランキングに登録';
+  if (typeof updateRankingBtnState === 'function') {
+    updateRankingBtnState();
+  } else {
+    $('regBtn').disabled = false; $('regBtn').textContent = 'ランキングに登録';
+  }
   renderRank();
   $('endPanel').style.display = 'block';
 }
@@ -1207,6 +2131,25 @@ function resolveBallCollisions() {
       // 1. Correct position
       ball.position.addScaledVector(hit.normal, hit.penetration);
 
+      // Scoreboard Crash Gimmick
+      if (col.isScoreboard && gameMode === 'challenge') {
+        breakScoreboard();
+      }
+
+      // Check if stands collision (Stands Slope or Stands Walls)
+      const isStands = col.type === 'stands_slope' || (col.type === 'cylinder_shell' && col.radius >= 112);
+      if (isStands) {
+        if (!fly.landed) {
+          fly.exploded = true;
+          fly.v.set(0, 0, 0);
+          ball.visible = false;
+          if (ballShadow) ballShadow.visible = false;
+          createExplosion(ball.position);
+          landBall(false);
+        }
+        return;
+      }
+
       // 2. Reflect velocity (restitution e = 0.5)
       const e = 0.5;
       const vDotN = fly.v.dot(hit.normal);
@@ -1223,6 +2166,47 @@ function resolveBallCollisions() {
 }
 
 function updateGame(dt) {
+  // Update searchlights
+  for (const sl of searchlights) {
+    sl.mesh.rotation.z += sl.rotSpeed * dt;
+    sl.mesh.rotation.x = 0.35 + Math.sin(Date.now() * 0.001 * sl.rotSpeed) * 0.15;
+  }
+
+  // Update explosion particles
+  if (explosion) {
+    explosion.t += dt;
+    const progress = explosion.t / explosion.duration;
+    if (progress >= 1.0) {
+      gameGroup.remove(explosion.points);
+      explosion.points.geometry.dispose();
+      explosion.points.material.dispose();
+      gameGroup.remove(explosion.ring);
+      explosion.ring.geometry.dispose();
+      explosion.ring.material.dispose();
+      gameGroup.remove(explosion.flash);
+      explosion = null;
+    } else {
+      const posAttr = explosion.points.geometry.attributes.position;
+      const count = posAttr.count;
+      for (let i = 0; i < count; i++) {
+        const vel = explosion.velocities[i];
+        vel.y -= 9.8 * dt; // gravity
+        vel.multiplyScalar(1 - 1.8 * dt); // air drag
+        posAttr.setX(i, posAttr.getX(i) + vel.x * dt);
+        posAttr.setY(i, posAttr.getY(i) + vel.y * dt);
+        posAttr.setZ(i, posAttr.getZ(i) + vel.z * dt);
+      }
+      posAttr.needsUpdate = true;
+      explosion.points.material.opacity = 1 - progress;
+      
+      const ringScale = 1 + progress * 16;
+      explosion.ring.scale.set(ringScale, ringScale, ringScale);
+      explosion.ring.material.opacity = 0.9 * (1 - progress);
+      
+      explosion.flash.intensity = 6.0 * (1 - progress);
+    }
+  }
+
   if (impact) {
     impact.t += dt;
     ball.position.copy(impact.contactPoint);
@@ -1244,6 +2228,8 @@ function updateGame(dt) {
       $('hdAngle').textContent = impact.launch.toFixed(0) + '°';
       $('hdDir').textContent = '–'; $('hdDist').textContent = '–';
       impact = null;
+      // 打球飛行開始 → 歓声スタート
+      snd.cheer();
     }
     return;
   }
@@ -1269,6 +2255,8 @@ function updateGame(dt) {
         const inZone = Math.abs(pitch.p1.x+0.05) < .3 && pitch.p1.y > .5 && pitch.p1.y < 1.3;
         showMsg(swing ? '空振り！' : (inZone ? '見逃しストライク' : 'ボール'),
                 swing ? '#ff9d6b' : '#cfd6e4');
+        if (score.history) score.history.push({ type: 'miss' });
+        if (typeof updatePitchHistoryUI === 'function') updatePitchHistoryUI();
         pitch = null; ball.visible = false; ballShadow.visible = false;
         gameTimeout(() => { if (score.pitch >= 10) nextPitch(); else startPitch(); }, 1100);
       } else ball.position.copy(pitchPos(kk));
@@ -1286,12 +2274,56 @@ function updateGame(dt) {
       if (swing.s >= 1.45) swing = null;
     }
     if (fly) {
+      const prevZ = ball.position.z;
       fly.v.y -= 9.8*h;
       fly.v.addScaledVector(fly.v.clone().multiplyScalar(-fly.dragK*fly.v.length()), h); // 空気抵抗
       ball.position.addScaledVector(fly.v, h);
-      resolveBallCollisions();
+      
+      // 空中ネオンリング通過判定（チャレンジモード限定）
+      if (gameMode === 'challenge') {
+        const currZ = ball.position.z;
+        targetHoops.forEach(hoop => {
+          if (!hoop.active) return;
+          const hoopZ = hoop.pos.z;
+          const crossed = (prevZ <= hoopZ && currZ >= hoopZ) || (prevZ >= hoopZ && currZ <= hoopZ);
+          if (crossed) {
+            const t = (hoopZ - prevZ) / (currZ - prevZ + 1e-6);
+            const prevX = ball.position.x - fly.v.x * h;
+            const prevY = ball.position.y - fly.v.y * h;
+            const intersectX = prevX + (ball.position.x - prevX) * t;
+            const intersectY = prevY + (ball.position.y - prevY) * t;
+            const dist = Math.hypot(intersectX - hoop.pos.x, intersectY - hoop.pos.y);
+            if (dist <= hoop.outerR) {
+              hoop.active = false;
+              const mesh = hoop.mesh;
+              let animT = 0;
+              const anim = () => {
+                animT += 0.08;
+                if (animT >= 1.0) {
+                  gameGroup.remove(mesh);
+                  mesh.geometry.dispose();
+                  mesh.material.dispose();
+                } else {
+                  const s = 1 + animT * 2.5;
+                  mesh.scale.set(s, s, s);
+                  mesh.material.opacity = 0.8 * (1 - animT);
+                  requestAnimationFrame(anim);
+                }
+              };
+              anim();
+              snd.ringChime();
+              score.total += 150;
+              showMsg('✦ HOOP PASS BONUS: +150m ✦', '#00ffcc', 2000);
+            }
+          }
+        });
+      }
+
+      if (!fly.exploded) {
+        resolveBallCollisions();
+      }
       if (ball.position.y <= BALL_R && !fly.landed) landBall();
-      if (fly.landed && ball.position.y < BALL_R) ball.position.y = BALL_R;
+      if (fly.landed && ball.position.y < BALL_R && !fly.exploded) ball.position.y = BALL_R;
     }
   }
   if (fly && !fly.landed) {  // 軌跡
@@ -1301,6 +2333,10 @@ function updateGame(dt) {
       const t = trail[fly.ti++ % trail.length];
       t.position.copy(ball.position); t.visible = true;
     }
+    // 歓声音量を飛距離に応じて調整
+    const flyDist = Math.hypot(ball.position.x, ball.position.z);
+    const cheerVol = clamp(flyDist / 280, 0.05, 0.38);
+    snd.updateCheer(cheerVol);
   }
   if (ball.visible) { ballShadow.position.set(ball.position.x, .06, ball.position.z); }
   // バット姿勢 / 構え（しなりの遅れ角込み）
@@ -1308,13 +2344,17 @@ function updateGame(dt) {
   else setBatPose(0, aimHands(), 0);
   // 打球追跡カメラ + リアルタイム飛距離
   if (fly && fly.follow) {
-    const hv = new THREE.Vector3(fly.v.x, 0, fly.v.z);
-    if (hv.lengthSq() > 1) hv.normalize();
-    const back = fly.super ? -30 : -7;   // 宇宙弾は引きで追う
-    const tgt = ball.position.clone().addScaledVector(hv, back).add(new THREE.Vector3(0, fly.super ? 12 : 3.2, 0));
-    tgt.y = Math.max(tgt.y, 1.2);
-    camera.position.lerp(tgt, 1 - Math.pow(0.0018, dt));
-    camera.lookAt(ball.position);
+    if (fly.exploded) {
+      camera.lookAt(explosion ? explosion.pos : ball.position);
+    } else {
+      const hv = new THREE.Vector3(fly.v.x, 0, fly.v.z);
+      if (hv.lengthSq() > 1) hv.normalize();
+      const back = fly.super ? -30 : -7;   // 宇宙弾は引きで追う
+      const tgt = ball.position.clone().addScaledVector(hv, back).add(new THREE.Vector3(0, fly.super ? 12 : 3.2, 0));
+      tgt.y = Math.max(tgt.y, 1.2);
+      camera.position.lerp(tgt, 1 - Math.pow(0.0018, dt));
+      camera.lookAt(ball.position);
+    }
     if (!fly.landed) $('hdDist').textContent = Math.round(Math.hypot(ball.position.x, ball.position.z));
   } else if (camHome && !swing) {
     // 定点カメラ（ドラッグオフセット反映）
@@ -1407,11 +2447,22 @@ function clearPlayState() {
   if (ball) ball.visible = false;
   if (ballShadow) ballShadow.visible = false;
   if (pitchGauge) pitchGauge.visible = false;
+  if (explosion) {
+    gameGroup.remove(explosion.points);
+    explosion.points.geometry.dispose();
+    explosion.points.material.dispose();
+    gameGroup.remove(explosion.ring);
+    explosion.ring.geometry.dispose();
+    explosion.ring.material.dispose();
+    gameGroup.remove(explosion.flash);
+    explosion = null;
+  }
 }
 function toCraft() {
   mode = 'craft';
   clearPlayState();   // 進行中の打席を完全に止める
   $('endPanel').style.display = 'none';
+  $('modeSelectModal').style.display = 'none';
   craftGroup.visible = true; gameGroup.visible = false;
   scene.background = new THREE.Color(0x1b1510); scene.fog = null;
   sun.intensity = .25; hemi.intensity = .15; amb.intensity = .3; spot.intensity = 1.8;
@@ -1419,17 +2470,190 @@ function toCraft() {
   $('craftPanel').style.display = 'block'; $('craftStats').style.display = 'block';
   $('gamePanel').style.display = 'none'; $('scoreboard').style.display = 'none';
   $('hitData').style.display = 'none';
+  
+  if ($('debugPresets')) $('debugPresets').style.display = 'block';
+  
   camera.position.set(0, .30, 1.05*Math.max(1, 1.7/camera.aspect));
   camera.lookAt(0, -.02, 0);
   buildCraft();
 }
+function updatePitchHistoryUI() {
+  const container = document.querySelector('.pitch-grid');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  for (let i = 0; i < 10; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'pitch-dot';
+    
+    let state = 'unplayed';
+    let label = (i + 1).toString();
+    
+    if (score.history && i < score.history.length) {
+      const item = score.history[i];
+      state = item.type; // 'hr', 'hit', 'foul', 'miss'
+      if (state === 'hr') {
+        label = `<svg viewBox="0 0 24 24" width="14" height="14" style="fill:currentColor; display:block;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+      } else if (state === 'hit') {
+        label = `<svg viewBox="0 0 24 24" width="14" height="14" style="fill:none; stroke:currentColor; stroke-width:2.5; display:block;"><circle cx="12" cy="12" r="9"/><path d="M7 6c1.5 2.5 1.5 7.5 0 10"/><path d="M17 6c-1.5 2.5-1.5 7.5 0 10"/></svg>`;
+      } else if (state === 'foul') {
+        label = 'F';
+      } else if (state === 'miss') {
+        label = `<svg viewBox="0 0 24 24" width="12" height="12" style="fill:none; stroke:currentColor; stroke-width:3; stroke-linecap:round; display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+      }
+    } else if (i === score.pitch - 1 && (pitch || windup)) {
+      state = 'current';
+    }
+    
+    dot.classList.add(state);
+    dot.innerHTML = label;
+    container.appendChild(dot);
+  }
+}
+
 function resetScore() {
-  score = {pitch:0, hits:0, hrs:0, best:0, total:0};
+  score = {pitch:0, hits:0, hrs:0, best:0, total:0, history:[]};
+  usedDebugThisGame = debugMode;
   $('pitchNo').textContent = 0; $('hits').textContent = 0;
   $('hrs').textContent = 0; $('best').textContent = 0;
   $('endPanel').style.display = 'none';
   clearPlayState();
+  updatePitchHistoryUI();
 }
+
+function updateDebugStats() {
+  if (debugMode) {
+    const baseBS = batStats();
+    if (BS) {
+      BS.meff = baseBS.meff * debugBatMult;
+      BS.flex = baseBS.flex * debugBatMult;
+      BS.swingT = baseBS.swingT / debugBatMult;
+    }
+    if (mode === 'game') {
+      $('batInfo').innerHTML =
+        `あなたのバット (デバッグ倍率 ${debugBatMult.toFixed(1)}x): ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
+        `スイング ${BS.swingT.toFixed(2)}秒`;
+    }
+  } else {
+    const baseBS = batStats();
+    BS = baseBS;
+    if (mode === 'game') {
+      $('batInfo').innerHTML =
+        `あなたのバット: ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
+        `スイング ${BS.swingT.toFixed(2)}秒 — ${BS.swingT > .45 ? '重い！早めに振ろう' : BS.swingT < .26 ? '鋭く振れる！' : 'バランス型'}`;
+    }
+  }
+}
+
+function updateRankingBtnState() {
+  if (usedDebugThisGame) {
+    $('regBtn').disabled = true;
+    $('regBtn').textContent = 'デバッグ使用のため登録不可';
+  } else {
+    const alreadyRegistered = $('regBtn').textContent.includes('登録しました');
+    $('regBtn').disabled = alreadyRegistered;
+    if (!alreadyRegistered) {
+      $('regBtn').textContent = 'ランキングに登録';
+    }
+  }
+}
+
+function updateDebugPanel() {
+  if (!debugMode) return;
+  const s = batStats();
+  
+  $('dbgMass').textContent = (s.M * 1000).toFixed(0) + 'g';
+  $('dbgCom').textContent = (s.com * 100).toFixed(1) + 'cm';
+  $('dbgI').textContent = s.I.toFixed(4);
+  $('dbgCop').textContent = (s.cop * 100).toFixed(1) + 'cm';
+  $('dbgBarrel').textContent = (s.barrel * 200).toFixed(1) + 'cm';
+  $('dbgGrip').textContent = (s.handleR * 200).toFixed(1) + 'cm';
+  
+  const meff = s.meff * debugBatMult;
+  const flex = s.flex * debugBatMult;
+  const swingT = s.swingT / debugBatMult;
+  
+  $('dbgSwingT').textContent = swingT.toFixed(2) + 's';
+  $('dbgMeff').textContent = meff.toFixed(2);
+  $('dbgFlex').textContent = flex.toFixed(2);
+  $('dbgShapeScore').textContent = s.shapeScore.toFixed(2);
+  
+  if (mode === 'game') {
+    $('dbgGameInfo').style.display = 'block';
+    if (pitch) {
+      $('dbgBallSpeed').textContent = pitch.kmh.toFixed(1) + ' km/h';
+      $('dbgT').textContent = pitch.T.toFixed(2) + 's';
+    } else if (windup) {
+      $('dbgBallSpeed').textContent = 'ワインドアップ...';
+      $('dbgT').textContent = '-';
+    } else {
+      $('dbgBallSpeed').textContent = '-';
+      $('dbgT').textContent = '-';
+    }
+    
+    if (fly) {
+      $('dbgFlyV').textContent = fly.v.length().toFixed(1) + ' m/s';
+    } else {
+      $('dbgFlyV').textContent = '-';
+    }
+  } else {
+    $('dbgGameInfo').style.display = 'none';
+  }
+}
+
+function makePowerShape() {
+  for (let i = 0; i <= SEG; i++) {
+    if (i < 14) {
+      radii[i] = 0.013;
+    } else if (i < 38) {
+      const t = (i - 14) / (38 - 14);
+      radii[i] = 0.013 + (0.033 - 0.013) * t;
+    } else {
+      const t = (i - 38) / (SEG - 38);
+      radii[i] = 0.033 - 0.003 * (t * t);
+    }
+  }
+}
+
+function makeBalancedShape() {
+  for (let i = 0; i <= SEG; i++) {
+    if (i < 12) {
+      radii[i] = 0.015;
+    } else if (i < 32) {
+      const t = (i - 12) / (32 - 12);
+      radii[i] = 0.015 + (0.027 - 0.015) * t;
+    } else {
+      const t = (i - 32) / (SEG - 32);
+      radii[i] = 0.027 - 0.001 * (t * t);
+    }
+  }
+}
+
+function makeExtremeShape() {
+  for (let i = 0; i <= SEG; i++) {
+    if (i < 10) {
+      radii[i] = MIN_R;
+    } else if (i > 48) {
+      radii[i] = MIN_R;
+    } else {
+      radii[i] = 0.035;
+    }
+  }
+}
+
+function applyPreset(type) {
+  if (mode !== 'craft') return;
+  if (type === 'power') {
+    makePowerShape();
+  } else if (type === 'balanced') {
+    makeBalancedShape();
+  } else if (type === 'extreme') {
+    makeExtremeShape();
+  }
+  if (craftBat) rebuildBatMesh(craftBat);
+  updateCraftStats();
+}
+
 function toGame() {
   mode = 'game';
   craftGroup.visible = false; gameGroup.visible = true;
@@ -1439,11 +2663,20 @@ function toGame() {
   sun.shadow.camera.top = 25; sun.shadow.camera.bottom = -25;
   $('craftPanel').style.display = 'none'; $('craftStats').style.display = 'none';
   $('gamePanel').style.display = 'block'; $('scoreboard').style.display = 'block';
+  
+  if ($('debugPresets')) $('debugPresets').style.display = 'none';
+  
   BS = batStats();
+  if (debugMode) {
+    BS.meff *= debugBatMult;
+    BS.flex *= debugBatMult;
+    BS.swingT /= debugBatMult;
+  }
+  
   $('batInfo').innerHTML =
     `あなたのバット: ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
     `スイング ${BS.swingT.toFixed(2)}秒 — ${BS.swingT > .45 ? '重い！早めに振ろう' : BS.swingT < .26 ? '鋭く振れる！' : 'バランス型'}`;
-  // 右打者の後方やや三塁側から
+  
   const back = Math.max(1, 1.6/camera.aspect);
   camHome = {pos:new THREE.Vector3(1.45, 2.1, 4.3*back), look:new THREE.Vector3(-.25, 1.25, -9)};
   camera.position.copy(camHome.pos);
@@ -1452,7 +2685,24 @@ function toGame() {
   buildField();
   gameTimeout(startPitch, 1000);
 }
-$('doneBtn').onclick = toGame;
+$('doneBtn').onclick = () => {
+  $('modeSelectModal').style.display = 'flex';
+  snd.ui();
+};
+$('modeCancelBtn').onclick = () => {
+  $('modeSelectModal').style.display = 'none';
+  snd.ui();
+};
+$('modeClassicCard').onclick = () => {
+  $('modeSelectModal').style.display = 'none';
+  gameMode = 'normal';
+  toGame();
+};
+$('modeChallengeCard').onclick = () => {
+  $('modeSelectModal').style.display = 'none';
+  gameMode = 'challenge';
+  toGame();
+};
 $('backBtn').onclick = toCraft;
 $('retryBtn').onclick = () => { resetScore(); gameTimeout(startPitch, 600); };
 $('resetBtn').onclick = () => { radii.fill(LOG_R); buildCraft(); };
@@ -1460,6 +2710,37 @@ $('materialSelect').onchange = () => {
   updateWoodMaterial();
   updateCraftStats();
 };
+
+// Debug Mode events
+$('debugModeCheckbox').onchange = (e) => {
+  debugMode = e.target.checked;
+  $('debugPanel').style.display = debugMode ? 'block' : 'none';
+  if (debugMode && mode === 'game') {
+    usedDebugThisGame = true;
+  }
+  updateDebugStats();
+  if (mode === 'craft') {
+    updateCraftStats();
+  }
+  updateRankingBtnState();
+};
+
+$('debugBatMultSlider').oninput = (e) => {
+  debugBatMult = parseFloat(e.target.value);
+  $('debugBatMultVal').textContent = debugBatMult.toFixed(1) + 'x';
+  updateDebugStats();
+  if (mode === 'craft') {
+    updateCraftStats();
+  }
+};
+
+$('debugPitchSlider').oninput = (e) => {
+  debugPitchSpeedMult = parseFloat(e.target.value);
+  $('debugPitchMultVal').textContent = debugPitchSpeedMult.toFixed(1) + 'x';
+};
+
+$('againBtn').onclick = () => { resetScore(); gameTimeout(startPitch, 600); };
+$('craftBtn2').onclick = toCraft;
 
 // 検証ハーネス（docs/smoke-test.md が依存）— 削除禁止
 window.__bat = {
@@ -1478,6 +2759,11 @@ function loop(now) {
   const dt = Math.min((now-last)/1000, .05); last = now;
   if (mode === 'craft') updateCraft(dt);
   else updateGame(dt);
+  
+  if (debugMode) {
+    updateDebugPanel();
+  }
+  
   renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
