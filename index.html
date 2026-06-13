@@ -300,7 +300,7 @@ renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, .05, 600);
+const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, .05, 1200); // 星を遠方へ置くためfar拡張
 
 // ================= ポストプロセス（Bloom） =================
 // 夜景を光らせる。物理・座標・カメラには一切触れない純粋な描画後処理。
@@ -1211,10 +1211,10 @@ function addBuildings() {
 function addSkyStarsAndMoon() {
   // 宇宙: 星空と月（フォグの影響を受けない）
   {
-    const n = 900, pos = new Float32Array(n*3);
+    const n = 1200, pos = new Float32Array(n*3);
     for (let i = 0; i < n; i++) {
       const u = Math.random()*Math.PI*2, v = Math.acos(1 - Math.random()*0.95);
-      const r = 460;
+      const r = 1000; // より遠方へ（far=1200内）
       pos.set([r*Math.sin(v)*Math.cos(u), r*Math.cos(v) + 5, r*Math.sin(v)*Math.sin(u)], i*3);
     }
     const g3 = new THREE.BufferGeometry();
@@ -1223,8 +1223,8 @@ function addSkyStarsAndMoon() {
     starMat.fog = false;
     gameGroup.add(new THREE.Points(g3, starMat));
     const moonMat = new THREE.MeshBasicMaterial({color:0xfff0cc}); moonMat.fog = false;
-    const moon = new THREE.Mesh(new THREE.SphereGeometry(13, 24, 24), moonMat);
-    moon.position.set(-170, 240, -300);
+    const moon = new THREE.Mesh(new THREE.SphereGeometry(18, 24, 24), moonMat);
+    moon.position.set(-260, 360, -460); // 奥へ後退・サイズUPで遠さを表現
     gameGroup.add(moon);
   }
 }
@@ -1332,6 +1332,7 @@ function addGameBallsAndBat() {
 function buildField() {
   disposeGroup(gameGroup);
   fieldColliders = [];
+  ufos = []; // 旧UFOメッシュはdisposeGroupで破棄済み。追跡配列をリセット
   addGroundAndSkyland();
   addInfieldAndBases();
   addOutfieldStructures();
@@ -1428,6 +1429,7 @@ function breakScoreboard() {
 let aim = {x:.5, y:.5};       // マウス正規化座標
 let swing = null, pitch = null, fly = null, windup = null, impact = null, explosion = null;
 let camShake = 0, sparks = null; // Phase2 打撃エフェクト（描画のみ）
+let ufos = [], ufoSpawnT = 0; // UFOボーナス標的（命中で上方向ジャンプ→弾道延長）
 let searchlights = [];
 let debugMode = false;
 let usedDebugThisGame = false;
@@ -1791,6 +1793,68 @@ function createSparks(pos, strong) {
   flash.position.copy(pos);
   gameGroup.add(flash);
   sparks = {points, flash, velocities, t: 0, duration: strong ? 0.45 : 0.32};
+}
+
+// --- UFO（たまに外野上空を横切るボーナス標的。命中で上方向ジャンプ→弾道が伸びる）---
+const UFO_BOOST_UP = 16, UFO_BOOST_H = 1.12, UFO_SPAWN_INTERVAL = 4.0;
+
+function spawnUfo() {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(2.4, 20, 12),
+    new THREE.MeshStandardMaterial({color:0x9aa6b8, metalness:0.9, roughness:0.3}));
+  body.scale.set(1, 0.32, 1);
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(1.1, 16, 12, 0, Math.PI*2, 0, Math.PI/2),
+    new THREE.MeshStandardMaterial({color:0x8fe9ff, emissive:0x2aa0c8, emissiveIntensity:0.6,
+      metalness:0.2, roughness:0.1, transparent:true, opacity:0.85}));
+  dome.position.y = 0.5;
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.0, 0.18, 8, 28),
+    new THREE.MeshBasicMaterial({color:0x7df0ff})); // 発光＝Bloom映え
+  ring.rotation.x = Math.PI/2; ring.position.y = -0.35;
+  const glow = new THREE.PointLight(0x7df0ff, 2.2, 16); glow.position.y = -0.5;
+  g.add(body, dome, ring, glow);
+  const dir = Math.random() < 0.5 ? 1 : -1;
+  g.position.set(dir * -95, 26 + Math.random()*26, -(55 + Math.random()*70)); // 外野上空
+  g.userData = { vx: dir * (6 + Math.random()*5), hitR: 4.2, bob: Math.random()*Math.PI*2 };
+  gameGroup.add(g); ufos.push(g);
+}
+
+function despawnUfo(i) {
+  const u = ufos[i];
+  gameGroup.remove(u);
+  u.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+  ufos.splice(i, 1);
+}
+
+function clearUfos() { for (let i = ufos.length - 1; i >= 0; i--) despawnUfo(i); ufoSpawnT = 0; }
+
+function updateUfos(dt) {
+  ufoSpawnT += dt;
+  if (ufoSpawnT > UFO_SPAWN_INTERVAL) { ufoSpawnT = 0; if (ufos.length < 2 && Math.random() < 0.7) spawnUfo(); }
+  for (let i = ufos.length - 1; i >= 0; i--) {
+    const u = ufos[i];
+    u.position.x += u.userData.vx * dt;
+    u.rotation.y += dt * 1.2;
+    u.userData.bob += dt;
+    u.position.y += Math.sin(u.userData.bob) * dt * 0.6;
+    if (Math.abs(u.position.x) > 135) despawnUfo(i);
+  }
+}
+
+function checkUfoHit() {
+  for (let i = ufos.length - 1; i >= 0; i--) {
+    if (ball.position.distanceTo(ufos[i].position) < ufos[i].userData.hitR + BALL_R) { hitUfo(i); break; }
+  }
+}
+
+function hitUfo(i) {
+  const p = ufos[i].position.clone();
+  // 上方向ジャンプ＋水平を少し伸ばす（新規ブースト機構・既存の打撃物理には不介入）
+  fly.v.y = Math.max(fly.v.y, 0) + UFO_BOOST_UP;
+  fly.v.x *= UFO_BOOST_H; fly.v.z *= UFO_BOOST_H;
+  createSparks(p, true); addShake(0.12);
+  if (snd.ringChime) snd.ringChime();
+  showMsg('🛸 UFO BOOST!', '#9fefff', 1600);
+  despawnUfo(i);
 }
 
 function sprayLabel(deg) {
@@ -2200,6 +2264,8 @@ function updateGame(dt) {
     }
   }
 
+  updateUfos(dt);
+
   if (impact) {
     impact.t += dt;
     ball.position.copy(impact.contactPoint);
@@ -2277,6 +2343,7 @@ function updateGame(dt) {
       if (!fly.exploded) {
         resolveBallCollisions();
       }
+      if (!fly.exploded && !fly.landed) checkUfoHit();
       if (ball.position.y <= BALL_R && !fly.landed) landBall();
       if (fly.landed && ball.position.y < BALL_R && !fly.exploded) ball.position.y = BALL_R;
     }
@@ -2419,6 +2486,7 @@ function clearPlayState() {
     explosion = null;
   }
   disposeSparks();
+  clearUfos();
   camShake = 0;
 }
 function toCraft() {
