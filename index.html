@@ -1785,10 +1785,10 @@ function nextPitch() {
   else gameTimeout(startPitch, 400);   // ＋ワインドアップ2秒で次の球まで間が空く
 }
 
-// ================= ランキング（共有 + ブラウザ保存） =================
-// Google Apps Script WebアプリのURLを設定すると全プレイヤー共有ランキングになる
-// （未設定の間はブラウザ保存のみ）。デプロイ手順は docs/ranking-setup.md 参照
-const RANK_API = 'https://script.google.com/macros/s/AKfycbyIoOWPkxQFUNZrwf0ngd_Ziq76S04OhegrzRW-Ek0TebZsG-u0nSxy6hLceBjT3lKN/exec';
+// ================= ランキング（ローカル保存 → Game Center） =================
+// アプリ版のランキングはGame Centerで実装する（docs/spec.md §3 参照）。
+// Game Center連携が入るまではローカル保存のみ。Web版のGAS共有は使わない。
+const RANK_API = '';
 const MAT_LABEL = {wood:'木製', carbon:'カーボン', metal:'アルミ', gold:'金', diamond:'ダイヤ', obsidian:'黒曜石'};
 function loadRank() {
   try { return JSON.parse(localStorage.getItem('batcraft_rank') || '[]'); } catch(e) { return []; }
