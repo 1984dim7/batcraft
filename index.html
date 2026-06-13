@@ -70,17 +70,28 @@
   #craftUI {
     position:absolute;
     inset:0;
-    padding: var(--sat) var(--sar) var(--sab) var(--sal);
-    box-sizing:border-box;
     pointer-events:none;
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
   }
-  #craftPanel { max-width:320px; width: 100%; }
-  #craftStats { text-align:left; min-width:260px; max-width:380px; }
-  #craftStats td { font-size:12px; padding:3px 6px; white-space:nowrap; color: #94a3b8; }
-  #craftStats td:last-child { text-align:right; color:#ffd23a; font-weight:bold; font-variant-numeric:tabular-nums; }
+  #craftPanel {
+    pointer-events:auto;
+    position:absolute;
+    bottom:calc(12px + var(--sab));
+    left:50%;
+    transform:translateX(-50%);
+    width:min(380px, calc(100vw - 24px));
+    box-sizing:border-box;
+  }
+  #craftStats {
+    pointer-events:auto;
+    position:absolute;
+    top:calc(12px + var(--sat));
+    right:calc(12px + var(--sar));
+    max-width:min(260px, 50vw);
+    box-sizing:border-box;
+  }
+  #craftStats td { font-size:11px; padding:2px 5px; white-space:nowrap; color:#94a3b8; }
+  #craftStats td:last-child { color:#ffd23a; font-weight:bold; font-variant-numeric:tabular-nums; }
+  .hbtn, .help { display:none !important; }
   #gamePanel {
     position: absolute;
     top: calc(12px + var(--sat));
@@ -133,42 +144,21 @@
     p, .panel p { font-size:11px; }
     button { font-size:13px; padding:9px 16px; }
     button.sub { font-size:11px; padding:7px 11px; }
-    /* クラフトUIを上下分割する */
-    #craftUI {
-      flex-direction: column !important;
-      align-items: stretch !important;
-      justify-content: space-between !important;
-      height: 100vh !important;
-      position: absolute;
-      inset: 0;
-      padding: 0;
-      pointer-events: none;
-    }
     #craftPanel {
-      max-width: none;
-      margin: 8px 12px calc(12px + var(--sab)) 12px;
-      pointer-events: auto;
-      order: 2;
+      width: calc(100vw - 24px) !important;
+      left: 12px !important;
+      transform: none !important;
     }
     #craftStats {
-      max-width: none;
-      min-width: 0;
-      margin: calc(12px + var(--sat)) 12px 8px 12px;
-      pointer-events: auto;
-      order: 1;
+      max-width: min(170px, 46vw) !important;
     }
     #craftStats > div {
-      display: flex !important;
+      flex-direction: column !important;
       align-items: center !important;
-      justify-content: space-between !important;
-      gap: 12px;
-    }
-    #craftStats table {
-      flex: 1;
     }
     #radar {
       width: 120px !important;
-      height: 100px !important;
+      height: 120px !important;
     }
     #gamePanel {
       position: absolute !important;
@@ -385,19 +375,44 @@
     </div>
   </div>
 
-  <div id="craftUI" style="display:none;">
-  <div class="panel" id="craftPanel">
-    <h1><svg class="ui-icon" viewBox="0 0 24 24" width="20" height="20" style="vertical-align:middle; fill:currentColor; margin-right:4px;"><path d="M12 2C6.48 2 2 4.47 2 7.5S6.48 13 12 13s10-2.47 10-5.5S17.52 2 12 2zm0 9c-4.42 0-8-1.79-8-3.5S7.58 4 12 4s8 1.79 8 3.5-3.58 3.5-8 3.5zM2 9.5v5c0 3.03 4.48 5.5 10 5.5s10-2.47 10-5.5v-5c0 2.25-3.48 4.2-8 4.75V17c0 .55-.45 1-1 1s-1-.45-1-1v-2.75c-4.52-.55-8-2.5-8-4.75z"/></svg>バット工房 — 旋盤</h1>
-    <button class="hbtn" onclick="this.closest('.panel').classList.toggle('open')">操作説明 ?</button>
-    <div class="help">
-      <p>回転する丸太に<b>鉋（カンナ）</b>を当てて削ろう</p>
-      <p><b>左ボタン長押し</b>で削る ／ <b>Shift</b>で戻す ／ <b>ホイール</b>で刃の幅</p>
-      <p style="color:#9fb4d9">左端がグリップ、右端が芯（バレル）だ。</p>
+  <!-- 素材選択画面 -->
+  <div class="panel" id="materialSelectUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:280px; max-width:min(400px,92vw); z-index:30;">
+    <h1 style="text-align:center; margin-bottom:4px;">バットの素材を選ぼう</h1>
+    <p style="text-align:center; font-size:11px; color:#94a3b8; margin:0 0 14px 0;">素材の特性がバットの性能を決定します</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
+      <button onclick="selectMaterial('wood')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(139,90,43,0.20);border-color:rgba(200,150,80,0.30);">🪵 木製<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">バランス型</small></button>
+      <button onclick="selectMaterial('carbon')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(50,50,70,0.40);border-color:rgba(160,160,200,0.25);">⚡ カーボン<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">超軽量・高速</small></button>
+      <button onclick="selectMaterial('metal')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(100,120,140,0.25);border-color:rgba(180,200,220,0.25);">🔩 アルミ<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">強反発・高耐久</small></button>
+      <button onclick="selectMaterial('gold')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(160,110,0,0.25);border-color:rgba(255,210,50,0.30);">✨ ゴールド<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">重量級パワー</small></button>
+      <button onclick="selectMaterial('diamond')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(30,60,130,0.25);border-color:rgba(96,160,250,0.30);">💎 ダイヤ<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">究極の硬度</small></button>
+      <button onclick="selectMaterial('obsidian')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(20,5,40,0.45);border-color:rgba(140,80,220,0.30);">🌑 黒曜石<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">漆黒の魔器</small></button>
     </div>
-    <div id="meter"><div id="meterFill"></div></div>
-    <div style="margin:8px 0;font-size:12px;">
-      <label for="materialSelect" style="display:block;margin-bottom:3px;color:#aab6cc;">バットの素材：</label>
-      <select id="materialSelect" style="font-size:12px;padding:5px 8px;border-radius:6px;background:#1d2230;color:#fff;border:1px solid rgba(255,255,255,.2);width:100%;box-sizing:border-box;cursor:pointer;">
+    <button id="matSelectBackBtn" class="sub" style="width:100%;margin:0;padding:10px;">メニューに戻る</button>
+  </div>
+
+  <div id="craftUI" style="display:none;">
+    <!-- バット計測（右上） -->
+    <div class="panel" id="craftStats">
+      <div style="font-size:10px;font-weight:bold;color:#aab6cc;margin-bottom:4px;letter-spacing:0.3px;">バット計測</div>
+      <div style="display:flex;align-items:flex-start;gap:6px;">
+        <table>
+          <tr><td>質量</td><td id="stMass">–</td></tr>
+          <tr><td>重心</td><td id="stCom">–</td></tr>
+          <tr><td>スイング</td><td id="stSwing">–</td></tr>
+          <tr><td>芯の径</td><td id="stBarrel">–</td></tr>
+        </table>
+        <canvas id="radar" width="220" height="220" style="flex-shrink:0;display:block;width:110px;height:110px;"></canvas>
+      </div>
+    </div>
+
+    <!-- 素材ラベル＋ボタン群（下部中央） -->
+    <div class="panel" id="craftPanel">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="font-size:11px;color:#aab6cc;flex-shrink:0;">素材：</span>
+        <span id="craftMatLabel" style="font-size:13px;font-weight:bold;color:#ffd23a;flex:1;">木製</span>
+        <div id="meter" style="width:72px;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;flex-shrink:0;"><div id="meterFill" style="height:100%;width:100%;background:linear-gradient(90deg,#ff9d6b,#e9314f);border-radius:3px;"></div></div>
+      </div>
+      <select id="materialSelect" style="display:none;">
         <option value="wood">木製バット (Wood) - バランス型</option>
         <option value="carbon">カーボン (Carbon) - 超軽量・高速</option>
         <option value="metal">アルミ金属 (Aluminum) - 芯超広・強反発</option>
@@ -405,28 +420,13 @@
         <option value="diamond">ダイヤモンド (Diamond) - 究極の硬度</option>
         <option value="obsidian">黒曜石 (Obsidian) - 漆黒 of 魔器</option>
       </select>
-    </div>
-      <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
-        <button id="doneBtn" style="flex:1 1 auto; margin:0; padding:10px 14px;">完成！</button>
-        <button id="resetBtn" class="sub" style="flex:1 1 auto; margin:0; padding:10px 14px; background:#4a2424; box-shadow:none;">削り直す</button>
-      </div>
-      <div style="display:flex; gap:6px; margin-top:6px;">
-        <button id="craftWarehouseBtn" class="sub" style="flex:1; margin:0; padding:8px 12px;">倉庫を見る</button>
-        <button id="craftMenuBtn" class="sub" style="flex:1; margin:0; padding:8px 12px;">メニュー</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
+        <button id="resetBtn" style="margin:0;background:linear-gradient(135deg,rgba(200,40,40,0.88),rgba(140,10,10,0.88));border:1px solid rgba(255,100,100,0.22);box-shadow:0 4px 14px rgba(200,40,40,0.28);">削り直す</button>
+        <button id="doneBtn" style="margin:0;background:linear-gradient(135deg,rgba(34,160,74,0.90),rgba(16,110,44,0.90));border:1px solid rgba(80,220,120,0.22);box-shadow:0 4px 14px rgba(34,160,74,0.28);">完成！</button>
+        <button id="craftMenuBtn" class="sub" style="margin:0;">メニュー</button>
+        <button id="craftWarehouseBtn" style="margin:0;padding:9px 12px;background:rgba(60,120,220,0.15);border:1px solid rgba(96,165,250,0.28);color:#93c5fd;box-shadow:none;font-size:14px;">倉庫を見る</button>
       </div>
     </div>
-  <div class="panel" id="craftStats">
-    <h1 style="margin-bottom:6px;"><svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><polygon points="5 5 5 19 19 19"/><polygon points="8 11 8 16 13 16"/></svg>バット計測</h1>
-    <div style="display:flex;align-items:flex-start;gap:6px;">
-      <table style="flex:1;min-width:0;">
-        <tr><td>質量</td><td id="stMass">–</td></tr>
-        <tr><td>重心</td><td id="stCom">–</td></tr>
-        <tr><td>スイング時間</td><td id="stSwing">–</td></tr>
-        <tr><td>芯の直径</td><td id="stBarrel">–</td></tr>
-      </table>
-      <canvas id="radar" width="200" height="200" style="flex-shrink:0;display:block;"></canvas>
-    </div>
-  </div>
   </div><!-- /#craftUI -->
 
   <div class="panel" id="gamePanel" style="display:none">
@@ -733,6 +733,13 @@ function updateWoodMaterial() {
     woodMat.color.setHex(0xffffff);
   }
   woodMat.needsUpdate = true;
+  updateCraftMatLabel();
+}
+function updateCraftMatLabel() {
+  const labels = {wood:'木製',carbon:'カーボン',metal:'アルミ',gold:'ゴールド',diamond:'ダイヤ',obsidian:'黒曜石'};
+  const mat = $('materialSelect') ? $('materialSelect').value : 'wood';
+  const el = $('craftMatLabel');
+  if (el) el.textContent = labels[mat] || mat;
 }
 
 // ================= バット形状 =================
@@ -918,7 +925,7 @@ function updateCraftStats() {
 // パワー / 操作性 / しなり / 耐久性 / ミート の五角形レーダーチャート
 function drawRadar(vals5) {
   const cv = $('radar'), g = cv.getContext('2d');
-  const cx = 100, cy = 100, R = 78;
+  const cx = cv.width / 2, cy = cv.height / 2, R = Math.min(cx, cy) * 0.62;
   const N = 5;
   const labels = ['パワー', '操作性', 'しなり', '耐久性', 'ミート'];
   // 角度: 上から時計回り (上, 右上, 右下, 左下, 左上)
@@ -959,16 +966,17 @@ function drawRadar(vals5) {
   g.shadowBlur = 0;
 
   // ラベル描画
-  g.font = 'bold 11px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  const labelR = R + 16;
+  g.font = 'bold 13px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
   const labelOffsets = [
-    [0, -14],   // パワー (top)
-    [16, 0],    // 操作性 (right-top)
-    [10, 10],   // しなり (right-bottom)
-    [-10, 10],  // 耐久性 (left-bottom)
-    [-16, 0],   // ミート (left-top)
+    [0, -12],   // パワー (top)
+    [12, 0],    // 操作性 (right-top)
+    [8, 8],     // しなり (right-bottom)
+    [-8, 8],    // 耐久性 (left-bottom)
+    [-12, 0],   // ミート (left-top)
   ];
   labels.forEach((label, i) => {
-    const [x, y] = pt(angles[i], R + 18);
+    const [x, y] = pt(angles[i], labelR);
     const ox = labelOffsets[i][0], oy = labelOffsets[i][1];
     // ???マスク: 80超のステータスはラベルを???にする
     let displayLabel = label;
@@ -988,8 +996,8 @@ function drawRadar(vals5) {
     if (debugMode) {
       g.font = '9px monospace';
       g.fillStyle = '#ffd479';
-      g.fillText(vals5[i], x + ox, y + oy + 12);
-      g.font = 'bold 11px sans-serif';
+      g.fillText(vals5[i], x + ox, y + oy + 14);
+      g.font = 'bold 13px sans-serif';
     }
   });
 }
@@ -2587,6 +2595,12 @@ function landBall(isGround = true) {
     if (batHP <= 0) {
       batBroken = true;
       snd.batBreak();
+      // ボール飛翔を止めてバッターにカメラを向ける
+      if (fly) { fly.follow = false; fly.v.set(0, 0, 0); }
+      if (typeof ball !== 'undefined' && ball) ball.visible = false;
+      if (typeof ballShadow !== 'undefined' && ballShadow) ballShadow.visible = false;
+      camera.position.set(2.5, 2.2, 4.8);
+      camera.lookAt(-1.05, 1.2, 0.55);
       showMsg('💥 バットが折れた！', '#ff4444', 2800);
       gameTimeout(showEnd, 2600);
       return;
@@ -3781,7 +3795,7 @@ function setupStadiumLighting(lightMode) {
 
 function showScreen(screenId) {
   // Hide all screens
-  const screens = ['menuUI', 'craftUI', 'gamePanel', 'warehouseUI', 'settingsUI', 'rankingUI', 'endPanel', 'batNameModal'];
+  const screens = ['menuUI', 'craftUI', 'gamePanel', 'warehouseUI', 'settingsUI', 'rankingUI', 'endPanel', 'batNameModal', 'materialSelectUI'];
   for (const s of screens) {
     const el = $(s);
     if (el) el.style.display = 'none';
@@ -3880,6 +3894,15 @@ function showScreen(screenId) {
     resetScore();
     buildField();
     gameTimeout(startPitch, 1000);
+  } else if (screenId === 'materialSelectUI') {
+    mode = 'menu';
+    $(screenId).style.display = 'block';
+    craftGroup.visible = false;
+    gameGroup.visible = true;
+    setupStadiumLighting(battingMode === 'challenge' ? 'night' : 'day');
+    camera.position.set(0, 15, 60);
+    camera.lookAt(0, 10, -50);
+    if (gameGroup.children.length === 0) buildField();
   }
 }
 
@@ -3892,7 +3915,7 @@ function toGame() {
 }
 
 // Bind menu actions
-$('menuCraftBtn').onclick = () => { snd.ui(); showScreen('craftUI'); };
+$('menuCraftBtn').onclick = () => { snd.ui(); showScreen('materialSelectUI'); };
 $('menuNormalBtn').onclick = () => { snd.ui(); battingMode = 'normal'; showScreen('gamePanel'); };
 $('menuChallengeBtn').onclick = () => { snd.ui(); battingMode = 'challenge'; showScreen('gamePanel'); };
 $('menuSettingsBtn').onclick = () => { snd.ui(); showScreen('settingsUI'); };
@@ -3900,7 +3923,16 @@ $('menuRankingBtn').onclick = () => { snd.ui(); showScreen('rankingUI'); };
 
 // Bind warehouse actions
 $('warehouseBackBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
-$('warehouseCraftBtn').onclick = () => { snd.ui(); showScreen('craftUI'); };
+$('warehouseCraftBtn').onclick = () => { snd.ui(); showScreen('materialSelectUI'); };
+$('matSelectBackBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
+window.selectMaterial = (mat) => {
+  snd.ui();
+  const sel = $('materialSelect');
+  if (sel) { sel.value = mat; }
+  updateWoodMaterial();
+  updateCraftStats();
+  showScreen('craftUI');
+};
 $('craftWarehouseBtn').onclick = () => { snd.ui(); showScreen('warehouseUI'); };
 $('craftMenuBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
 
@@ -3988,6 +4020,42 @@ $('debugPitchSlider').oninput = (e) => {
   debugPitchSpeedMult = parseFloat(e.target.value);
   $('debugPitchMultVal').textContent = debugPitchSpeedMult.toFixed(1) + 'x';
 };
+
+// デバッグパネルをドラッグ移動可能にする
+(function() {
+  const dp = $('debugPanel');
+  let _drag = null;
+  dp.style.cursor = 'grab';
+  dp.addEventListener('mousedown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.tagName === 'LABEL') return;
+    const rect = dp.getBoundingClientRect();
+    _drag = { startX: e.clientX, startY: e.clientY, initLeft: rect.left, initTop: rect.top };
+    dp.style.right = 'auto'; dp.style.bottom = 'auto';
+    dp.style.left = rect.left + 'px'; dp.style.top = rect.top + 'px';
+    dp.style.cursor = 'grabbing';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!_drag) return;
+    dp.style.left = Math.max(0, Math.min(innerWidth - dp.offsetWidth, _drag.initLeft + e.clientX - _drag.startX)) + 'px';
+    dp.style.top = Math.max(0, Math.min(innerHeight - dp.offsetHeight, _drag.initTop + e.clientY - _drag.startY)) + 'px';
+  });
+  document.addEventListener('mouseup', () => { _drag = null; if (dp) dp.style.cursor = 'grab'; });
+  dp.addEventListener('touchstart', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+    const t = e.touches[0], rect = dp.getBoundingClientRect();
+    _drag = { startX: t.clientX, startY: t.clientY, initLeft: rect.left, initTop: rect.top };
+    dp.style.right = 'auto'; dp.style.bottom = 'auto';
+    dp.style.left = rect.left + 'px'; dp.style.top = rect.top + 'px';
+  }, {passive: true});
+  document.addEventListener('touchmove', e => {
+    if (!_drag) return;
+    const t = e.touches[0];
+    dp.style.left = Math.max(0, Math.min(innerWidth - dp.offsetWidth, _drag.initLeft + t.clientX - _drag.startX)) + 'px';
+    dp.style.top = Math.max(0, Math.min(innerHeight - dp.offsetHeight, _drag.initTop + t.clientY - _drag.startY)) + 'px';
+  }, {passive: true});
+  document.addEventListener('touchend', () => _drag = null);
+})();
 
 // 検証ハーネス（docs/smoke-test.md が依存）— 削除禁止
 window.__bat = {
