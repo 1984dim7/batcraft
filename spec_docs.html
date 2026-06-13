@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Batios - 物理演算＆ゲームパラメータ解説</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --panel-bg: rgba(20, 26, 42, 0.45);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-yellow: #ffd23a;
+      --accent-blue: #00d2ff;
+      --accent-green: #00ff66;
+      --accent-red: #ff2222;
+      --accent-magenta: #dc86ff;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      padding: 40px 20px;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(32px, 6vw, 48px);
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    
+    .subtitle {
+      font-size: clamp(14px, 3.5vw, 18px);
+      color: var(--accent-blue);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      margin: 40px 0 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+    
+    .card {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+    
+    p {
+      margin-bottom: 16px;
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+    
+    strong {
+      color: #fff;
+    }
+    
+    code {
+      font-family: Consolas, Monaco, monospace;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent-yellow);
+      font-size: 14px;
+    }
+    
+    /* 数式表現 */
+    .formula {
+      display: block;
+      background: rgba(0, 0, 0, 0.25);
+      border-left: 3px solid var(--accent-blue);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-family: 'Outfit', Georgia, serif;
+      font-size: 18px;
+      color: #fff;
+      text-align: center;
+      overflow-x: auto;
+    }
+    
+    .formula-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: -8px;
+      margin-bottom: 16px;
+      padding-left: 8px;
+    }
+    
+    /* リスト */
+    ul {
+      list-style-type: none;
+      margin-bottom: 20px;
+    }
+    
+    li {
+      position: relative;
+      padding-left: 24px;
+      margin-bottom: 12px;
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+    
+    li::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 10px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent-blue);
+    }
+    
+    /* マテリアルテーブル */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 14px;
+    }
+    
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    th {
+      font-weight: 600;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    
+    td {
+      color: var(--text-muted);
+    }
+    
+    tr:hover {
+      background: rgba(255, 255, 255, 0.01);
+    }
+    
+    .highlight-cell {
+      font-weight: bold;
+      color: var(--accent-yellow);
+    }
+    
+    /* インタラクティブシミュレータ */
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      .sim-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .control-group {
+      margin-bottom: 18px;
+    }
+    
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+    
+    .control-val {
+      color: var(--accent-blue);
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+    
+    .select-style {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #151a2a;
+      color: #fff;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+    
+    /* パラメータ出力表示 */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+      font-size: 14px;
+    }
+    
+    .stat-row:last-child {
+      border-bottom: none;
+    }
+    
+    .stat-label {
+      color: var(--text-muted);
+    }
+    
+    .stat-val {
+      font-weight: bold;
+      color: var(--accent-yellow);
+      font-variant-numeric: tabular-nums;
+    }
+    
+    /* タイミングインジケータデモ */
+    .timing-preview-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      text-align: center;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .ball-glow-demo {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #fff;
+      margin: 12px auto;
+      box-shadow: 0 0 20px #fff;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #000;
+      font-size: 16px;
+    }
+    
+    .timing-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-top: 6px;
+      transition: all 0.25s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="subtitle">Batios Physics Core</div>
+      <h1>ゲーム物理演算＆パラメータ仕様</h1>
+      <p>『Batios』の削り出しバット性能計算、打撃反射、飛距離マルチプライヤー、および球種とスイングタイミングによる発光システムの完全解説書。</p>
+    </header>
+
+    <!-- 1. バットクラフト物理 -->
+    <div class="section-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      1. バット形状とステータス計算
+    </div>
+    <div class="card">
+      <p>削られたバットの形状（長さ <strong>84 cm</strong>、80個のセグメント半径 <code>radii</code>）から、以下の物理パラメータが実時間で計算されます。</p>
+      
+      <div class="formula">
+        M = &Sigma; dm &nbsp;&nbsp; (dm = &rho; &middot; &pi; &middot; r&sup2; &middot; dx)
+      </div>
+      <div class="formula-desc">各セグメントの半径 r と木材密度 &rho; (750 kg/m&sup3;) から総質量 M (kg) を算出します。太く残すほど重くなります。</div>
+
+      <div class="formula">
+        com = &Sigma; (dm &middot; x) / M
+      </div>
+      <div class="formula-desc">グリップ（0m）からの重心位置 com (m) を算出。先端が太いほど重心は前方（ヘッド側）に寄ります。</div>
+
+      <div class="formula">
+        I = &Sigma; (dm &middot; x&sup2;)
+      </div>
+      <div class="formula-desc">慣性モーメント I (kg&middot;m&sup2;)。バットの振り抜きにくさを表し、重心が遠く、重いほど巨大になります。</div>
+
+      <div class="formula">
+        cop = I / (M &middot; com)
+      </div>
+      <div class="formula-desc"><strong>打撃の中心 (Center of Percussion)</strong>。バットを振った際に手に最も衝撃が来ない、ゲーム内の「芯（スイートスポット）」の位置です。重心 com よりもややヘッド寄りに形成されます。</div>
+
+      <p>これらの基礎物理値から、ゲーム上の実ステータスが決定されます。</p>
+      <ul>
+        <li><strong>スイング時間 (swingT)</strong>: 慣性モーメント <code>I</code> に比例して長くなります。<code>swingT = clamp(0.16 + 0.16 * I, 0.19, 0.75)</code>。重くヘッド寄りのバットほど、タップしてからボールを捉えるまでに時間がかかります。</li>
+        <li><strong>芯の太さ (barrel)</strong>: バットの先端側（60%以降）の最大半径。クリーンヒット判定の許容誤差を広げます。</li>
+        <li><strong>芯での有効質量 (meff)</strong>: <code>meff = I / (cop * cop)</code>。衝突時にボールに伝えられるバットの実行力です。</li>
+        <li><strong>しなりやすさ (flex)</strong>: グリップ周辺（5%〜40%）の最小半径 <code>handleR</code> に反比例します。細いバットほど強烈にしなります。</li>
+      </ul>
+    </div>
+
+    <!-- 2. 打撃反射と飛距離マルチプライヤー -->
+    <div class="section-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 11.5 3 3 5-5"/></svg>
+      2. 打撃反射と飛距離計算
+    </div>
+    <div class="card">
+      <p>バットとボールの衝突が検知されると、精密な跳ね返り物理（反発係数 $eA$）と、ゲーム性を高める飛距離補正が行われます。</p>
+      
+      <div class="formula">
+        q = exp( -((x - cop) / 0.14)&sup2; )
+      </div>
+      <div class="formula-desc">ミートの質 q。バット上の衝突位置 x が、芯 cop からズレるほど指数関数的（ガウス分布）に反発力が減衰します。</div>
+
+      <div class="formula">
+        eA = clamp( (0.05 + 0.50 &middot; q - rr) / (1 + rr), -0.5, 0.6 ) &nbsp;&nbsp; (rr = M_ball / meff)
+      </div>
+      <div class="formula-desc">反発係数 eA。ボール質量 (0.145kg) とバットの有効質量 meff の比率 rr、およびミートの質 q から算出。重いバットで芯に当てるほど反発係数が高まり（最大 0.6）、詰まると押し負けます。</div>
+
+      <p>衝突時の反発速度 $vOut$ は、バット表面の法線ベクトル $n$ を用いた反射ベクトルに、バットスイング速度 $vBat$、ボール速度 $vBall$ を加味して計算されます。</p>
+      
+      <div class="formula">
+        E = q &middot; (vBat / 22) &middot; (meff / 3) &nbsp;&nbsp;&rArr;&nbsp;&nbsp; mult = clamp( exp((E - 0.82) &middot; 3.2), 1.0, 12.0 )
+      </div>
+      <div class="formula-desc"><strong>飛距離マルチプライヤー (mult)</strong>。芯で完璧に捉え、スイング速度が速い（鋭い振り）ほど、飛距離が最大 12倍 まで跳ね上がります。</div>
+
+      <p>さらに、飛翔中の空気抵抗（ドラッグ）は <code>dragK = 0.0042 / mult</code> として計算されます。つまり、<strong>完璧に芯で捉えた打球ほど空気抵抗が弾丸のように激減し、減速せずに遥か場外まで飛んでいく</strong>仕様となっています。</p>
+    </div>
+
+    <!-- 3. タイミングとボール発光システム -->
+    <div class="section-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      3. タイミングとボール発光色
+    </div>
+    <div class="card">
+      <p>投球されたボールは最初は<strong>白色（<code>0xffffff</code>）</strong>で飛んできます。スイングしてボールを捉えた瞬間、タイミングの正確さに応じてボールそのものと周囲の光の輪（ハロー）が以下の通り変化します。</p>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>タイミング</th>
+            <th>比率 t</th>
+            <th>発光色</th>
+            <th>解説</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="highlight-cell" style="color:var(--accent-blue)">Early (早い)</td>
+            <td>0.36 ～ 1.0</td>
+            <td style="color:var(--accent-blue); font-weight:bold;">青 ～ 緑</td>
+            <td>バットの出が早い。引っ張る方向へ飛びやすい。</td>
+          </tr>
+          <tr>
+            <td class="highlight-cell" style="color:var(--accent-yellow)">Perfect (ジャスト)</td>
+            <td>0.32 ～ 0.36</td>
+            <td style="color:var(--accent-yellow); font-weight:bold;">黄色 (Yellow)</td>
+            <td>最もバット速度が速く、芯でミートできる最高の瞬間。</td>
+          </tr>
+          <tr>
+            <td class="highlight-cell" style="color:var(--accent-red)">Late (遅い)</td>
+            <td>0.0 ～ 0.32</td>
+            <td style="color:var(--accent-red); font-weight:bold;">橙 ～ 赤</td>
+            <td>引きつけすぎ、または振り遅れ。流し方向へ飛びやすい。</td>
+          </tr>
+          <tr>
+            <td class="highlight-cell" style="color:#fff">当たる判定外 (空振り)</td>
+            <td>-</td>
+            <td style="color:#fff; font-weight:bold;">白色 (White)</td>
+            <td>タイミングが完全にズレているため、色は変わらず白のまま空振ります。</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <p>※ ジャストタイミング（黄色付近）かつ芯で捉えた大飛球（ジャストミート）の際は、火花エフェクトにも<strong>純白</strong>や<strong>電光水色</strong>がブレンドされ、強烈な閃光が走ります。</p>
+    </div>
+
+    <!-- 4. 素材パラメータ -->
+    <div class="section-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-magenta)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      4. 素材別パラメータ一覧
+    </div>
+    <div class="card" style="padding: 12px 18px;">
+      <p>削り出すマテリアル（素材）によって、性能倍率（パワー、しなり、振りやすさ）が異なります。</p>
+      <table>
+        <thead>
+          <tr>
+            <th>素材</th>
+            <th>パワー倍率</th>
+            <th>しなり倍率</th>
+            <th>スイング時間倍率</th>
+            <th>特徴</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="highlight-cell" style="color:#e2b683">木製</td>
+            <td>1.00</td>
+            <td>1.00</td>
+            <td>1.00</td>
+            <td>バランスが良く、最もスタンダードな素材。</td>
+          </tr>
+          <tr>
+            <td class="highlight-cell" style="color:#a6b1c9">カーボン</td>
+            <td>0.95</td>
+            <td>0.55</td>
+            <td style="color:var(--accent-green); font-weight:bold;">0.72 (速い!)</td>
+            <td>非常に軽量でスイング時間が短く、振り抜きやすい。</td>
+          </tr>
+          <tr>
+            <td class="highlight-cell" style="color:#e5e9f0">アルミ</td>
+            <td>1.25</td>
+            <td>0.30</td>
+            <td>0.95</td>
+            <td>硬くて高反発。金属バット特有の打球速度が出る。</td>
+          </tr>
+          <tr>
+            <td class="highlight-cell" style="color:var(--accent-yellow)">金</td>
+            <td>1.40</td>
+            <td>0.15</td>
+            <td style="color:var(--accent-red); font-weight:bold;">1.25 (重い)</td>
+            <td>金密度が高いため重いが、衝突時の破壊力は絶大。</td>
+          </tr>
+          <tr>
+            <td class="highlight-cell" style="color:#c6f2ff">ダイヤ</td>
+            <td style="color:var(--accent-green); font-weight:bold;">1.60 (最強)</td>
+            <td>0.05</td>
+            <td style="color:var(--accent-red); font-weight:bold;">1.10 (重い)</td>
+            <td>極めて硬くしならないが、最長飛距離を狙えるロマン素材。</td>
+          </tr>
+          <tr>
+            <td class="highlight-cell" style="color:#503e65">黒曜石</td>
+            <td>1.30</td>
+            <td>0.10</td>
+            <td>1.05</td>
+            <td>高反発かつ、やや重量のある鋭い打球を生む。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 5. 簡易インタラクティブ・シミュレータ -->
+    <div class="section-title">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></svg>
+      5. 簡易バット＆タイミング シミュレータ
+    </div>
+    <div class="card">
+      <p style="margin-bottom:20px;">スライダーを調整してバットの削り形状や素材、打撃タイミングを変え、リアルタイムで変化するステータスやボールの光の色の変化を実感してみましょう。</p>
+      
+      <div class="sim-grid">
+        <!-- コントロール部 -->
+        <div>
+          <div style="font-weight:bold; margin-bottom:12px; border-bottom:1.5px solid var(--accent-blue); padding-bottom:4px;">形状調整（太さ）</div>
+          
+          <div class="control-group">
+            <label class="control-label">バット先端（ヘッド） <span class="control-val" id="valTip">3.2 cm</span></label>
+            <input type="range" id="slideTip" min="0.8" max="4.0" step="0.1" value="3.2" oninput="sim()">
+          </div>
+          
+          <div class="control-group">
+            <label class="control-label">バット中央（芯） <span class="control-val" id="valBarrel">2.8 cm</span></label>
+            <input type="range" id="slideBarrel" min="0.8" max="4.0" step="0.1" value="2.8" oninput="sim()">
+          </div>
+          
+          <div class="control-group">
+            <label class="control-label">バット根元（グリップ） <span class="control-val" id="valHandle">1.5 cm</span></label>
+            <input type="range" id="slideHandle" min="0.8" max="2.5" step="0.1" value="1.5" oninput="sim()">
+          </div>
+          
+          <div class="control-group">
+            <label class="control-label">素材選択</label>
+            <select id="selectMat" class="select-style" onchange="sim()">
+              <option value="wood">木製 (Power: 1.0, Weight: 1.0)</option>
+              <option value="carbon">カーボン (Power: 0.95, Weight: 0.72)</option>
+              <option value="metal">アルミ (Power: 1.25, Weight: 0.95)</option>
+              <option value="gold">ゴールド (Power: 1.4, Weight: 1.25)</option>
+              <option value="diamond">ダイヤモンド (Power: 1.6, Weight: 1.10)</option>
+              <option value="obsidian">黒曜石 (Power: 1.3, Weight: 1.05)</option>
+            </select>
+          </div>
+
+          <div style="font-weight:bold; margin-top:24px; margin-bottom:12px; border-bottom:1.5px solid var(--accent-yellow); padding-bottom:4px;">打撃タイミングシミュレート</div>
+          <div class="control-group">
+            <label class="control-label">スイングタイミング（振る瞬間） <span class="control-val" id="valTiming">Just (t=0.34)</span></label>
+            <input type="range" id="slideTiming" min="0.0" max="1.0" step="0.01" value="0.34" oninput="sim()">
+          </div>
+          <div class="control-group">
+            <label class="control-label">
+              当たるタイミングか？
+              <input type="checkbox" id="checkContact" checked onchange="sim()" style="width:16px; height:16px; cursor:pointer;">
+            </label>
+          </div>
+        </div>
+        
+        <!-- 出力表示部 -->
+        <div style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="background:rgba(0,0,0,0.18); border-radius:12px; padding:16px; border:1px solid rgba(255,255,255,0.05); margin-bottom:16px;">
+            <div style="font-weight:bold; margin-bottom:10px; color:#fff;">計算ステータス</div>
+            
+            <div class="stat-row">
+              <span class="stat-label">総質量 (M)</span>
+              <span class="stat-val" id="statM">880 g</span>
+            </div>
+            
+            <div class="stat-row">
+              <span class="stat-label">重心位置 (com)</span>
+              <span class="stat-val" id="statCom">52.4 cm</span>
+            </div>
+            
+            <div class="stat-row">
+              <span class="stat-label">芯の位置 (cop / スイートスポット)</span>
+              <span class="stat-val" id="statCop">64.5 cm</span>
+            </div>
+            
+            <div class="stat-row">
+              <span class="stat-label">スイング秒数 (swingT)</span>
+              <span class="stat-val" id="statSwing">0.32 秒</span>
+            </div>
+            
+            <div class="stat-row">
+              <span class="stat-label">芯の有効反発力 (meff)</span>
+              <span class="stat-val" id="statMeff">1.25x</span>
+            </div>
+            
+            <div class="stat-row">
+              <span class="stat-label">しなりやすさ (flex)</span>
+              <span class="stat-val" id="statFlex">1.10</span>
+            </div>
+          </div>
+          
+          <!-- タイミングインジケータデモ表示 -->
+          <div class="timing-preview-box">
+            <div style="font-size:12px; font-weight:bold; color:#fff; margin-bottom:6px;">ボールの発光インジケータプレビュー</div>
+            <div class="ball-glow-demo" id="ballDemo">球</div>
+            <div class="timing-badge" id="timingBadge">JUST MEET!!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getTimingColorJS(t) {
+      // rgbカラーコード文字列を返す
+      if (t > 0.44) {
+        // 緑〜青 (0.44〜1.0)
+        const ratio = (t - 0.44) / 0.56;
+        const g = Math.floor(255 + (210 - 255) * ratio);
+        const b = Math.floor(102 + (255 - 102) * ratio);
+        return `rgb(0, ${g}, ${b})`;
+      } else if (t > 0.36) {
+        // 黄〜緑 (0.36〜0.44)
+        const ratio = (t - 0.36) / 0.08;
+        const r = Math.floor(255 * (1 - ratio));
+        const g = Math.floor(210 + (255 - 210) * ratio);
+        const b = Math.floor(0 + 102 * ratio);
+        return `rgb(${r}, ${g}, ${b})`;
+      } else if (t >= 0.32) {
+        // 黄色固定 (0.32〜0.36)
+        return `rgb(255, 210, 0)`;
+      } else if (t > 0.24) {
+        // 橙〜黄 (0.24〜0.32)
+        const ratio = (t - 0.24) / 0.08;
+        const g = Math.floor(85 + (210 - 85) * ratio);
+        return `rgb(255, ${g}, 0)`;
+      } else {
+        // 赤〜橙 (0.0〜0.24)
+        const ratio = t / 0.24;
+        const g = Math.floor(34 + (85 - 34) * ratio);
+        return `rgb(255, ${g}, 34)`;
+      }
+    }
+
+    function sim() {
+      // 各スライダー値の取得
+      const tipR = parseFloat(document.getElementById('slideTip').value);
+      const barrelR = parseFloat(document.getElementById('slideBarrel').value);
+      const handleR = parseFloat(document.getElementById('slideHandle').value);
+      const mat = document.getElementById('selectMat').value;
+      const t = parseFloat(document.getElementById('slideTiming').value);
+      const hitContact = document.getElementById('checkContact').checked;
+      
+      // テキスト表示の更新
+      document.getElementById('valTip').textContent = tipR.toFixed(1) + ' cm';
+      document.getElementById('valBarrel').textContent = barrelR.toFixed(1) + ' cm';
+      document.getElementById('valHandle').textContent = handleR.toFixed(1) + ' cm';
+      
+      // タイミングテキストの更新
+      let timingText = '';
+      if (t > 0.44) timingText = 'Early (かなり早い)';
+      else if (t > 0.36) timingText = 'やや早い';
+      else if (t >= 0.32 && t <= 0.36) timingText = 'Perfect (ジャスト)';
+      else if (t > 0.24) timingText = 'やや遅い';
+      else timingText = 'Late (かなり遅い)';
+      document.getElementById('valTiming').textContent = timingText + ` (t=${t.toFixed(2)})`;
+      
+      // 簡易セグメント積分計算
+      // radii配列を簡易生成（80分割を線形補間でエミュレート）
+      const SEG = 80;
+      const radii = [];
+      for (let i = 0; i <= SEG; i++) {
+        const p = i / SEG;
+        let r;
+        if (p < 0.25) {
+          // グリップ付近
+          r = handleR + (barrelR - handleR) * (p / 0.25);
+        } else if (p < 0.75) {
+          // 芯付近
+          r = barrelR;
+        } else {
+          // 先端付近
+          r = barrelR + (tipR - barrelR) * ((p - 0.75) / 0.25);
+        }
+        radii.push(r / 100.0); // メートルに変換
+      }
+      
+      const RHO = 750; // 密度
+      const dx = 0.84 / SEG; // 長さ 84cm
+      let M = 0, Mx = 0, I = 0, maxBarrel = 0;
+      
+      for (let i = 0; i <= SEG; i++) {
+        const x = i * dx;
+        const dm = RHO * Math.PI * radii[i] * radii[i] * dx;
+        M += dm;
+        Mx += dm * x;
+        I += dm * x * x;
+        if (i > SEG * 0.6) maxBarrel = Math.max(maxBarrel, radii[i]);
+      }
+      
+      const com = Mx / M;
+      const cop = I / (M * com);
+      
+      // 素材パラメータ
+      let powerMult = 1.0, flexMult = 1.0, swingTMult = 1.0;
+      if (mat === 'carbon') { powerMult = 0.95; flexMult = 0.55; swingTMult = 0.72; }
+      else if (mat === 'metal') { powerMult = 1.25; flexMult = 0.3; swingTMult = 0.95; }
+      else if (mat === 'gold') { powerMult = 1.4; flexMult = 0.15; swingTMult = 1.25; }
+      else if (mat === 'diamond') { powerMult = 1.6; flexMult = 0.05; swingTMult = 1.10; }
+      else if (mat === 'obsidian') { powerMult = 1.3; flexMult = 0.1; swingTMult = 1.05; }
+      
+      const swingT = Math.min(Math.max((0.16 + 0.16 * I) * swingTMult, 0.19), 0.75);
+      const meff = (I / (cop * cop)) * powerMult;
+      const flex = Math.min(Math.max(Math.pow(0.016 / (handleR/100.0), 3) * (1 + I * 2) * flexMult, 0.2), 3.5);
+      
+      // 表示更新
+      document.getElementById('statM').textContent = (M * 1000).toFixed(0) + ' g';
+      document.getElementById('statCom').textContent = (com * 100).toFixed(1) + ' cm';
+      document.getElementById('statCop').textContent = (cop * 100).toFixed(1) + ' cm';
+      document.getElementById('statSwing').textContent = swingT.toFixed(2) + ' 秒';
+      document.getElementById('statMeff').textContent = meff.toFixed(2) + 'x';
+      document.getElementById('statFlex').textContent = flex.toFixed(2);
+      
+      // タイミングインジケータデモの更新
+      const ballDemo = document.getElementById('ballDemo');
+      const badge = document.getElementById('timingBadge');
+      
+      if (!hitContact) {
+        // 当たる判定外（空振り）
+        ballDemo.style.backgroundColor = '#ffffff';
+        ballDemo.style.boxShadow = '0 0 20px #ffffff';
+        ballDemo.style.color = '#000000';
+        badge.textContent = '当たる判定外 (空振り/白)';
+        badge.style.backgroundColor = 'rgba(255,255,255,0.15)';
+        badge.style.color = '#ffffff';
+      } else {
+        // ヒット時
+        const color = getTimingColorJS(t);
+        ballDemo.style.backgroundColor = color;
+        ballDemo.style.boxShadow = `0 0 25px ${color}`;
+        ballDemo.style.color = '#ffffff';
+        
+        let label = '';
+        let badgeColor = '';
+        let textColor = '#fff';
+        
+        if (t >= 0.32 && t <= 0.36) {
+          label = 'JUST MEET!! (黄色)';
+          badgeColor = 'rgb(255,210,0)';
+          textColor = '#000000';
+        } else if (t > 0.44) {
+          label = 'Early (青/緑)';
+          badgeColor = 'rgb(0,210,255)';
+          textColor = '#000000';
+        } else if (t > 0.36) {
+          label = 'やや早い (緑)';
+          badgeColor = 'rgb(0,255,102)';
+          textColor = '#000000';
+        } else if (t > 0.24) {
+          label = 'やや遅い (橙)';
+          badgeColor = 'rgb(255,140,0)';
+          textColor = '#ffffff';
+        } else {
+          label = 'Late (赤)';
+          badgeColor = 'rgb(255,34,34)';
+          textColor = '#ffffff';
+        }
+        
+        badge.textContent = label;
+        badge.style.backgroundColor = badgeColor;
+        badge.style.color = textColor;
+      }
+    }
+    
+    // 初期起動
+    sim();
+  </script>
+</body>
+</html>

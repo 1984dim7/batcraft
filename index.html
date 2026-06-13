@@ -75,7 +75,7 @@
   #craftPanel {
     pointer-events:auto;
     position:absolute;
-    bottom:calc(55px + var(--sab));
+    bottom:calc(130px + var(--sab));
     left:50%;
     transform:translateX(-50%);
     width:min(380px, calc(100vw - 24px));
@@ -87,7 +87,7 @@
     top:calc(20px + var(--sat));
     left:calc(12px + var(--sal));
     right:auto;
-    width:260px;
+    width:300px;
     box-sizing:border-box;
     padding:8px 10px;
   }
@@ -111,7 +111,7 @@
          text-shadow:0 2px 24px rgba(0,0,0,.8); opacity:0; transition:opacity .15s; pointer-events:none; }
   #pitchSpeed { position:absolute; top:44%; width:100%; text-align:center; font-size:clamp(14px,4vw,20px); color:#cfe3ff;
                 text-shadow:0 1px 8px #000; opacity:0; transition:opacity .2s; pointer-events:none; }
-  #hitData { position:absolute; bottom:calc(14px + var(--sab)); left:50%; transform:translateX(-50%); display:none; text-align:center; white-space:nowrap; }
+  #hitData { display:none !important; }
   #hitData .big { font-size:clamp(18px,5vw,26px); font-weight:bold; color:#ffd23a; font-variant-numeric:tabular-nums; }
   #hitData .lbl { font-size:10px; color:#94a3b8; }
   #hitData .col { display:inline-block; margin:0 8px; }
@@ -155,8 +155,8 @@
       width: calc(100vw - 24px) !important;
     }
     #radar {
-      width: 120px !important;
-      height: 120px !important;
+      width: 150px !important;
+      height: 150px !important;
     }
     #gamePanel {
       position: absolute !important;
@@ -293,12 +293,39 @@
 <div id="ui">
   <!-- メインメニュー画面 -->
   <div class="panel" id="menuUI" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; min-width:320px; box-sizing:border-box; z-index:10;">
-    <h1 style="font-size:24px; margin:0 0 4px 0; text-shadow:0 0 10px rgba(111,224,255,0.5);">Batios</h1>
-    <p style="font-size:11px; color:#cbd5e1; margin:0 0 20px 0;">Bat Craft Baseball</p>
+    <div style="text-align:center; margin:0 0 14px 0; user-select:none;">
+      <svg viewBox="0 0 240 52" width="220" height="52" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;display:block;margin:0 auto;">
+        <defs>
+          <linearGradient id="lgBat" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffe566"/>
+            <stop offset="48%" stop-color="#ff8c42"/>
+            <stop offset="100%" stop-color="#c084fc"/>
+          </linearGradient>
+          <filter id="fglow" x="-25%" y="-25%" width="150%" height="150%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <text x="120" y="44" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="42" fill="url(#lgBat)" filter="url(#fglow)" letter-spacing="-2">BatCraft</text>
+      </svg>
+      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,200,100,0.4),rgba(190,100,255,0.4),transparent);margin:5px auto 0;width:68%;"></div>
+    </div>
+    <div id="menuEquippedBar" style="margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,0.05);border-radius:10px;border:1px solid rgba(255,255,255,0.08);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="flex:1;text-align:left;">
+          <div style="font-size:10px;color:#aab6cc;margin-bottom:2px;">装備中のバット</div>
+          <div id="menuEquippedName" style="font-size:13px;font-weight:bold;color:#ffd23a;">バット未装備</div>
+        </div>
+        <button id="menuWarehouseBtn" class="sub" style="margin:0;font-size:11px;padding:6px 12px;flex-shrink:0;">倉庫</button>
+      </div>
+      <canvas id="menuBatCanvas" width="400" height="56" style="width:100%;height:44px;display:block;border-radius:6px;background:rgba(0,0,0,0.18);"></canvas>
+    </div>
     <div style="display:flex; flex-direction:column; gap:10px;">
       <button id="menuCraftBtn" style="font-size:15px; padding:11px; margin:0; width:100%;">バットを作る</button>
-      <button id="menuNormalBtn" style="font-size:15px; padding:11px; margin:0; width:100%; background:linear-gradient(135deg,rgba(255,157,107,0.85),rgba(255,107,74,0.85)); border:1px solid rgba(255,255,255,0.1); box-shadow:0 6px 18px rgba(255,107,74,.25);">ノーマルモード（昼）</button>
-      <button id="menuChallengeBtn" style="font-size:15px; padding:11px; margin:0; width:100%; background:linear-gradient(135deg,rgba(126,94,255,0.85),rgba(160,74,255,0.85)); border:1px solid rgba(255,255,255,0.1); box-shadow:0 6px 18px rgba(160,74,255,.25);">チャレンジモード（夜）</button>
+      <div style="display:flex;gap:8px;">
+        <button id="menuNormalBtn" style="flex:1;font-size:16px;font-weight:700;padding:13px 0;margin:0;background:linear-gradient(135deg,rgba(255,157,107,0.85),rgba(255,107,74,0.85));border:1px solid rgba(255,255,255,0.1);box-shadow:0 6px 18px rgba(255,107,74,.25);">Normal</button>
+        <button id="menuChallengeBtn" style="flex:1;font-size:16px;font-weight:700;padding:13px 0;margin:0;background:linear-gradient(135deg,rgba(126,94,255,0.85),rgba(160,74,255,0.85));border:1px solid rgba(255,255,255,0.1);box-shadow:0 6px 18px rgba(160,74,255,.25);">Hard</button>
+      </div>
       <button id="menuSettingsBtn" class="sub" style="font-size:13px; padding:9px; margin:0; width:100%;">ゲーム設定</button>
       <button id="menuRankingBtn" class="sub" style="font-size:13px; padding:9px; margin:0; width:100%;">オンラインランキング</button>
     </div>
@@ -374,16 +401,220 @@
   </div>
 
   <!-- 素材選択画面 -->
-  <div class="panel" id="materialSelectUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:280px; max-width:min(400px,92vw); z-index:30;">
-    <h1 style="text-align:center; margin-bottom:4px;">バットの素材を選ぼう</h1>
-    <p style="text-align:center; font-size:11px; color:#94a3b8; margin:0 0 14px 0;">素材の特性がバットの性能を決定します</p>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px;">
-      <button onclick="selectMaterial('wood')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(139,90,43,0.20);border-color:rgba(200,150,80,0.30);">🪵 木製<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">バランス型</small></button>
-      <button onclick="selectMaterial('carbon')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(50,50,70,0.40);border-color:rgba(160,160,200,0.25);">⚡ カーボン<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">超軽量・高速</small></button>
-      <button onclick="selectMaterial('metal')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(100,120,140,0.25);border-color:rgba(180,200,220,0.25);">🔩 アルミ<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">強反発・高耐久</small></button>
-      <button onclick="selectMaterial('gold')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(160,110,0,0.25);border-color:rgba(255,210,50,0.30);">✨ ゴールド<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">重量級パワー</small></button>
-      <button onclick="selectMaterial('diamond')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(30,60,130,0.25);border-color:rgba(96,160,250,0.30);">💎 ダイヤ<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">究極の硬度</small></button>
-      <button onclick="selectMaterial('obsidian')" style="margin:0;padding:14px 10px;text-align:left;font-size:13px;line-height:1.45;background:rgba(20,5,40,0.45);border-color:rgba(140,80,220,0.30);">🌑 黒曜石<br><small style="color:#94a3b8;font-size:10px;font-weight:normal;">漆黒の魔器</small></button>
+  <div class="panel" id="materialSelectUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(340px,92vw); box-sizing:border-box; z-index:30; overflow:hidden;">
+    <h1 style="text-align:center; margin:0 0 4px 0; font-size:16px;">バットの素材を選ぼう</h1>
+    <p style="text-align:center; font-size:11px; color:#94a3b8; margin:0 0 14px 0;">← スワイプで切替 →</p>
+    <!-- Carousel wrapper -->
+    <div style="position:relative; overflow:hidden; margin:0 -4px 12px;">
+      <div id="matTrack" style="display:flex; transition:transform 0.35s cubic-bezier(.4,0,.2,1); will-change:transform;">
+        <!-- wood -->
+        <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
+          <div style="background:rgba(139,90,43,0.22);border:1px solid rgba(200,150,80,0.35);border-radius:14px;padding:20px 16px;text-align:center;">
+            <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 3px 6px rgba(139,90,43,0.4));">
+                <defs>
+                  <linearGradient id="woodTop" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffdfa9" />
+                    <stop offset="100%" stop-color="#e2b378" />
+                  </linearGradient>
+                  <linearGradient id="woodSide" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#c68a4c" />
+                    <stop offset="100%" stop-color="#804c1b" />
+                  </linearGradient>
+                </defs>
+                <!-- アイソメトリック木材（2本の木材ブロックが交差して重なっているデザイン） -->
+                <path d="M2 14l6-3 12 4-6 3-12-4z" fill="url(#woodSide)" stroke="#603010" stroke-width="0.8" />
+                <path d="M2 14v3l6 3v-3l-6-3z" fill="#804c1b" stroke="#603010" stroke-width="0.8" />
+                <path d="M8 17v3l12-4v-3l-12 4z" fill="#502808" stroke="#603010" stroke-width="0.8" />
+                <path d="M5 8l7-3.5 9 3-7 3.5-9-3z" fill="url(#woodTop)" stroke="#9a622a" stroke-width="0.8" />
+                <path d="M5 8v3l9 3v-3l-9-3z" fill="url(#woodSide)" stroke="#603010" stroke-width="0.8" />
+                <path d="M14 11v3l7-3v-3l-7 3z" fill="#603010" stroke="#603010" stroke-width="0.8" />
+                <path d="M8 7.5l6-3M11 9l5-2.5" stroke="#804c1b" stroke-width="0.8" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div style="font-size:20px;font-weight:800;color:#e8c07a;margin-bottom:4px;">木製</div>
+            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">バランス型 · 初心者向け</div>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
+              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:55%;height:100%;background:linear-gradient(90deg,#ff8c42,#ffd23a);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:65%;height:100%;background:linear-gradient(90deg,#ff8c42,#ffd23a);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:50%;height:100%;background:linear-gradient(90deg,#ff8c42,#ffd23a);border-radius:4px;"></div></div>
+            </div>
+            <button onclick="selectMaterial('wood')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(200,140,60,0.8),rgba(160,90,30,0.8));border-color:rgba(200,150,80,0.5);">この素材で作る</button>
+          </div>
+        </div>
+        <!-- carbon -->
+        <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
+          <div style="background:rgba(50,50,80,0.40);border:1px solid rgba(160,160,220,0.30);border-radius:14px;padding:20px 16px;text-align:center;">
+            <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 10px rgba(96,160,255,0.7));">
+                <defs>
+                  <linearGradient id="carbonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#b0e0ff" />
+                    <stop offset="50%" stop-color="#60a0ff" />
+                    <stop offset="100%" stop-color="#2040b0" />
+                  </linearGradient>
+                </defs>
+                <circle cx="12" cy="12" r="10" stroke="rgba(96,160,255,0.15)" stroke-width="0.8" />
+                <!-- フラーレン（C60）格子構造球体 -->
+                <polygon points="12,7.5 16,10.5 14.5,15 9.5,15 8,10.5" stroke="url(#carbonGrad)" stroke-width="1.2" stroke-linejoin="round" />
+                <circle cx="12" cy="7.5" r="1" fill="#ffffff" />
+                <circle cx="16" cy="10.5" r="1" fill="#ffffff" />
+                <circle cx="14.5" cy="15" r="1" fill="#ffffff" />
+                <circle cx="9.5" cy="15" r="1" fill="#ffffff" />
+                <circle cx="8" cy="10.5" r="1" fill="#ffffff" />
+                <path d="M12,7.5 L12,4.5 M16,10.5 L19.5,10 M14.5,15 L17,18.5 M9.5,15 L7,18.5 M8,10.5 L4.5,10" stroke="url(#carbonGrad)" stroke-width="1" />
+                <circle cx="12" cy="4.5" r="1.1" fill="#ffffff" />
+                <circle cx="19.5" cy="10" r="1.1" fill="#ffffff" />
+                <circle cx="17" cy="18.5" r="1.1" fill="#ffffff" />
+                <circle cx="7" cy="18.5" r="1.1" fill="#ffffff" />
+                <circle cx="4.5" cy="10" r="1.1" fill="#ffffff" />
+                <path d="M12,4.5 L19.5,10 L17,18.5 L7,18.5 L4.5,10 Z" stroke="url(#carbonGrad)" stroke-width="0.8" stroke-dasharray="2 1" />
+                <path d="M12,4.5 L16,10.5 M19.5,10 L14.5,15 M17,18.5 L9.5,15 M7,18.5 L8,10.5 M4.5,10 L12,7.5" stroke="rgba(255,255,255,0.3)" stroke-width="0.8" />
+              </svg>
+            </div>
+            <div style="font-size:20px;font-weight:800;color:#a0b8f8;margin-bottom:4px;">カーボン</div>
+            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">超軽量・高速スイング</div>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
+              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:40%;height:100%;background:linear-gradient(90deg,#6080ff,#a0c0ff);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:95%;height:100%;background:linear-gradient(90deg,#6080ff,#a0c0ff);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:30%;height:100%;background:linear-gradient(90deg,#6080ff,#a0c0ff);border-radius:4px;"></div></div>
+            </div>
+            <button onclick="selectMaterial('carbon')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(80,80,160,0.8),rgba(50,50,120,0.8));border-color:rgba(160,160,220,0.4);">この素材で作る</button>
+          </div>
+        </div>
+        <!-- metal -->
+        <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
+          <div style="background:rgba(100,120,150,0.28);border:1px solid rgba(180,210,240,0.28);border-radius:14px;padding:20px 16px;text-align:center;">
+            <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 8px rgba(200,220,240,0.45));">
+                <defs>
+                  <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="50%" stop-color="#a0b5c8" />
+                    <stop offset="100%" stop-color="#506878" />
+                  </linearGradient>
+                </defs>
+                <polygon points="12,3 20,7 20,17 12,21 4,17 4,7" fill="url(#metalGrad)" stroke="#c8d8e8" stroke-width="1.5" />
+                <polygon points="12,6 17,9 17,15 12,18 7,15 7,9" fill="#1e2538" stroke="url(#metalGrad)" stroke-width="1.5" />
+                <circle cx="12" cy="12" r="2.5" fill="url(#metalGrad)" />
+              </svg>
+            </div>
+            <div style="font-size:20px;font-weight:800;color:#c8ddf0;margin-bottom:4px;">アルミ</div>
+            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">強反発・高耐久</div>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
+              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:75%;height:100%;background:linear-gradient(90deg,#80a0c0,#c0d8f0);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:60%;height:100%;background:linear-gradient(90deg,#80a0c0,#c0d8f0);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:85%;height:100%;background:linear-gradient(90deg,#80a0c0,#c0d8f0);border-radius:4px;"></div></div>
+            </div>
+            <button onclick="selectMaterial('metal')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(120,150,180,0.8),rgba(80,110,140,0.8));border-color:rgba(180,210,240,0.4);">この素材で作る</button>
+          </div>
+        </div>
+        <!-- gold -->
+        <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
+          <div style="background:rgba(160,110,0,0.28);border:1px solid rgba(255,210,50,0.35);border-radius:14px;padding:20px 16px;text-align:center;">
+            <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 10px rgba(255,210,50,0.55));">
+                <defs>
+                  <linearGradient id="goldTop" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#fffbeb" />
+                    <stop offset="50%" stop-color="#fde047" />
+                    <stop offset="100%" stop-color="#ca8a04" />
+                  </linearGradient>
+                  <linearGradient id="goldSide" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#eab308" />
+                    <stop offset="100%" stop-color="#854d0e" />
+                  </linearGradient>
+                </defs>
+                <!-- 後ろのインゴット（手前広がりの正しいアイソメトリック） -->
+                <path d="M8 9 L14 9 L15.5 11.5 L6.5 11.5 Z" fill="url(#goldTop)" stroke="#854d0e" stroke-width="0.5" />
+                <path d="M6.5 11.5 L15.5 11.5 L17 15 L5 15 Z" fill="#ca8a04" stroke="#854d0e" stroke-width="0.5" />
+                <!-- 手前のインゴット -->
+                <path d="M4 14 L10 14 L11 16.5 L3 16.5 Z" fill="url(#goldTop)" stroke="#854d0e" stroke-width="0.5" />
+                <path d="M3 16.5 L11 16.5 L12.5 20 L1.5 20 Z" fill="#ca8a04" stroke="#854d0e" stroke-width="0.5" />
+                <!-- キラキラエフェクト -->
+                <path d="M6,5 L6,3 M6,5 L6,7 M6,5 L4,5 M6,5 L8,5" stroke="#ffffff" stroke-width="0.8" stroke-linecap="round" />
+                <path d="M19,13 L19,11 M19,13 L19,15 M19,13 L17,13 M19,13 L21,13" stroke="#ffffff" stroke-width="0.8" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div style="font-size:20px;font-weight:800;color:#ffd23a;margin-bottom:4px;">ゴールド</div>
+            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">重量級パワー型</div>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
+              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:90%;height:100%;background:linear-gradient(90deg,#c8a000,#ffe566);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:25%;height:100%;background:linear-gradient(90deg,#c8a000,#ffe566);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:40%;height:100%;background:linear-gradient(90deg,#c8a000,#ffe566);border-radius:4px;"></div></div>
+            </div>
+            <button onclick="selectMaterial('gold')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(180,130,0,0.85),rgba(120,80,0,0.85));border-color:rgba(255,210,50,0.5);">この素材で作る</button>
+          </div>
+        </div>
+        <!-- diamond -->
+        <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
+          <div style="background:rgba(30,60,140,0.28);border:1px solid rgba(96,170,255,0.35);border-radius:14px;padding:20px 16px;text-align:center;">
+            <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 12px rgba(128,192,255,0.65));">
+                <defs>
+                  <linearGradient id="diaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffffff" />
+                    <stop offset="50%" stop-color="#80c0ff" />
+                    <stop offset="100%" stop-color="#2050a0" />
+                  </linearGradient>
+                </defs>
+                <path d="M6 3h12l4 5-10 13L2 8l4-5z" fill="url(#diaGrad)" stroke="#b0e0ff" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M6 3l4 5 2-5 2 5 4-5" stroke="#ffffff" stroke-width="1" />
+                <path d="M2 8h20" stroke="#ffffff" stroke-width="1" />
+                <path d="M10 8l2 13 2-13" stroke="#ffffff" stroke-width="1" />
+              </svg>
+            </div>
+            <div style="font-size:20px;font-weight:800;color:#90c8ff;margin-bottom:4px;">ダイヤ</div>
+            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">究極の硬度・超高反発</div>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
+              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:100%;height:100%;background:linear-gradient(90deg,#4090e0,#90d0ff);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:45%;height:100%;background:linear-gradient(90deg,#4090e0,#90d0ff);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:100%;height:100%;background:linear-gradient(90deg,#4090e0,#90d0ff);border-radius:4px;"></div></div>
+            </div>
+            <button onclick="selectMaterial('diamond')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(40,90,200,0.85),rgba(20,60,150,0.85));border-color:rgba(96,170,255,0.4);">この素材で作る</button>
+          </div>
+        </div>
+        <!-- obsidian -->
+        <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
+          <div style="background:rgba(20,5,40,0.50);border:1px solid rgba(140,80,220,0.35);border-radius:14px;padding:20px 16px;text-align:center;">
+            <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 12px rgba(180,96,255,0.6));">
+                <defs>
+                  <linearGradient id="obsGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#d98eff" />
+                    <stop offset="50%" stop-color="#7020c0" />
+                    <stop offset="100%" stop-color="#15002a" />
+                  </linearGradient>
+                </defs>
+                <path d="M12 2L3 9v6l9 7 9-7V9l-9-7z" fill="url(#obsGrad)" stroke="#c080ff" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M12 2v20M3 9h18M3 15h18" stroke="rgba(255,255,255,0.25)" stroke-width="1" />
+                <polygon points="12,5 17,9 12,13 7,9" stroke="#e0a0ff" stroke-width="1" fill="none" />
+                <polygon points="12,13 17,15 12,19 7,15" stroke="#e0a0ff" stroke-width="1" fill="none" />
+              </svg>
+            </div>
+            <div style="font-size:20px;font-weight:800;color:#c084fc;margin-bottom:4px;">黒曜石</div>
+            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">漆黒の魔器・呪われし力</div>
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
+              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:80%;height:100%;background:linear-gradient(90deg,#8020c0,#e060ff);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:50%;height:100%;background:linear-gradient(90deg,#8020c0,#e060ff);border-radius:4px;"></div></div>
+              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:75%;height:100%;background:linear-gradient(90deg,#8020c0,#e060ff);border-radius:4px;"></div></div>
+            </div>
+            <button onclick="selectMaterial('obsidian')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(80,10,140,0.85),rgba(40,5,80,0.85));border-color:rgba(140,80,220,0.4);">この素材で作る</button>
+          </div>
+        </div>
+      </div>
+      <!-- nav arrows -->
+      <button id="matPrev" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;margin:0;padding:0;font-size:18px;line-height:1;background:rgba(0,0,0,0.45);border-color:rgba(255,255,255,0.15);opacity:0.8;">‹</button>
+      <button id="matNext" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;margin:0;padding:0;font-size:18px;line-height:1;background:rgba(0,0,0,0.45);border-color:rgba(255,255,255,0.15);opacity:0.8;">›</button>
+    </div>
+    <!-- dots -->
+    <div id="matDots" style="display:flex;justify-content:center;gap:6px;margin-bottom:12px;">
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:#ffd23a;transition:background .2s;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
     </div>
     <button id="matSelectBackBtn" class="sub" style="width:100%;margin:0;padding:10px;">メニューに戻る</button>
   </div>
@@ -399,7 +630,7 @@
           <tr><td>スイング</td><td id="stSwing">–</td></tr>
           <tr><td>芯の径</td><td id="stBarrel">–</td></tr>
         </table>
-        <canvas id="radar" width="240" height="240" style="flex-shrink:0;display:block;width:120px;height:120px;"></canvas>
+        <canvas id="radar" width="340" height="340" style="flex-shrink:0;display:block;width:150px;height:150px;"></canvas>
       </div>
     </div>
 
@@ -450,6 +681,12 @@
     <div class="col"><div class="big" id="hdAngle">–</div><div class="lbl">打球角度</div></div>
     <div class="col"><div class="big" id="hdDir">–</div><div class="lbl">方向</div></div>
     <div class="col"><div class="big" id="hdDist">–</div><div class="lbl">飛距離 m</div></div>
+  </div>
+  <!-- リアルタイム飛距離HUD -->
+  <div id="liveDistHUD" style="display:none; position:absolute; bottom:calc(90px + var(--sab)); left:50%; transform:translateX(-50%); text-align:center; pointer-events:none; z-index:50; white-space:nowrap;">
+    <div id="liveDistNum" style="font-size:clamp(28px,9vw,48px); font-weight:900; color:#ffd23a; text-shadow:0 0 20px rgba(255,210,60,0.9), 0 2px 10px rgba(0,0,0,0.9); font-variant-numeric:tabular-nums; line-height:1;">0</div>
+    <div style="font-size:12px; color:#94a3b8; letter-spacing:2px; margin-top:2px;">m</div>
+    <div id="liveDistSpeed" style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:1px; display:none;">⏩ 4×</div>
   </div>
   <!-- Debug Mode toggle & panel -->
   <div id="debugToggleContainer" style="position:absolute; bottom:calc(14px + var(--sab)); left:calc(14px + var(--sal)); pointer-events:auto; font-size:11px; z-index:100;">
@@ -827,40 +1064,40 @@ function batStats() {
   let meetMult = 1.0;  // ミート倍率
   
   if (matType === 'carbon') {
-    powerMult = 0.95;
-    flexMult = 0.55;
-    swingTMult = 0.72;
-    durMult = 0.70;    // 軽量だが折れやすい
-    meetMult = 1.15;   // 芯が広い
+    powerMult = 0.90;
+    flexMult = 0.65;
+    swingTMult = 0.70;
+    durMult = 0.55;    // 軽量だが折れやすい
+    meetMult = 1.20;   // 芯が広い
   } else if (matType === 'metal') {
     powerMult = 1.25;
-    flexMult = 0.3;
-    swingTMult = 0.95;
-    durMult = 1.30;    // 金属は頑丈
-    meetMult = 1.10;
+    flexMult = 0.35;
+    swingTMult = 0.90;
+    durMult = 1.45;    // 金属は高耐久
+    meetMult = 1.05;
   } else if (matType === 'gold') {
-    powerMult = 1.40;
+    powerMult = 1.50;  // 黄金は破壊力抜群
     flexMult = 0.15;
-    swingTMult = 1.25;
-    durMult = 1.50;    // 最も頑丈
-    meetMult = 0.85;   // 重くて芯が狭い
+    swingTMult = 1.35; // ただし極めて重い
+    durMult = 0.65;    // 金は柔らかいので耐久は低め
+    meetMult = 0.85;
   } else if (matType === 'diamond') {
-    powerMult = 1.60;
+    powerMult = 1.65;  // 究極パワー
     flexMult = 0.05;
     swingTMult = 1.10;
-    durMult = 1.40;    // 硬いが高耐久
-    meetMult = 0.75;   // 最も芯が狭い
+    durMult = 1.75;    // ダイヤは最強の耐久度
+    meetMult = 0.70;   // 芯は最も狭い
   } else if (matType === 'obsidian') {
-    powerMult = 1.30;
+    powerMult = 1.35;
     flexMult = 0.10;
     swingTMult = 1.05;
-    durMult = 0.50;    // 最も脆い
+    durMult = 1.25;    // 魔術で高耐久
     meetMult = 0.90;
   } else { // wood
     powerMult = 1.0;
     flexMult = 1.0;
     swingTMult = 1.0;
-    durMult = 1.0;
+    durMult = 0.80;    // 木製は標準よりやや脆い
     meetMult = 1.0;
   }
 
@@ -923,7 +1160,7 @@ function updateCraftStats() {
 // パワー / 操作性 / しなり / 耐久性 / ミート の五角形レーダーチャート
 function drawRadar(vals5) {
   const cv = $('radar'), g = cv.getContext('2d');
-  const cx = cv.width / 2, cy = cv.height / 2, R = Math.min(cx, cy) * 0.62;
+  const cx = cv.width / 2, cy = cv.height / 2, R = Math.min(cx, cy) * 0.48;
   const N = 5;
   const labels = ['パワー', '操作性', 'しなり', '耐久性', 'ミート'];
   // 角度: 上から時計回り (上, 右上, 右下, 左下, 左上)
@@ -943,16 +1180,10 @@ function drawRadar(vals5) {
   // 軸線
   angles.forEach(a => { const [x, y] = pt(a, R); g.beginPath(); g.moveTo(cx, cy); g.lineTo(x, y); g.strokeStyle = 'rgba(140,170,220,.22)'; g.stroke(); });
 
-  // データの五角形を描画
-  // ???マスク: 80超の値は描画上80でクランプ（デバッグモード時はそのまま）
-  const displayVals = vals5.map(v => {
-    if (!debugMode && v > 80) return 80;
-    return v;
-  });
-
+  // データの五角形（上限撤廃: 100超でも全力描画。視覚clampは1.5まで）
   g.beginPath();
   angles.forEach((a, i) => {
-    const [x, y] = pt(a, R * clamp(displayVals[i] / 100, 0.04, 1));
+    const [x, y] = pt(a, R * Math.min(vals5[i] / 100, 1.5));
     i ? g.lineTo(x, y) : g.moveTo(x, y);
   });
   g.closePath();
@@ -964,29 +1195,48 @@ function drawRadar(vals5) {
   g.shadowBlur = 0;
 
   // ラベル描画
-  const labelR = R + 16;
-  g.font = 'bold 13px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  const labelR = R + 36;
+  g.font = 'bold 24px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
   const labelOffsets = [
-    [0, -12],   // パワー (top)
-    [12, 0],    // 操作性 (right-top)
-    [8, 8],     // しなり (right-bottom)
-    [-8, 8],    // 耐久性 (left-bottom)
-    [-12, 0],   // ミート (left-top)
+    [0, -14],   // パワー (top)
+    [16, 0],    // 操作性 (right-top)
+    [10, 10],   // しなり (right-bottom)
+    [-10, 10],  // 耐久性 (left-bottom)
+    [-16, 0],   // ミート (left-top)
   ];
   labels.forEach((label, i) => {
     const [x, y] = pt(angles[i], labelR);
     const ox = labelOffsets[i][0], oy = labelOffsets[i][1];
-    // ラベルテキスト（80超は???, 耐久性は常時グレー）
-    const labelMasked = !debugMode && vals5[i] > 80;
-    const numMasked   = !debugMode && (vals5[i] > 80 || i === 3);
-    g.fillStyle = labelMasked ? '#ffd23a' : (i === 3 && !debugMode) ? '#8a96ad' : '#dce8ff';
-    g.fillText(labelMasked ? '???' : label, x + ox, y + oy);
-    // 数値（常時表示: 0-100 整数、マスク対象は???）
+    const numMasked = !debugMode && (vals5[i] > 90 || i === 3);
+    const isOver90 = !debugMode && vals5[i] > 90;
+    // ラベル
+    g.fillStyle = isOver90 ? '#ffd23a' : (i === 3 && !debugMode) ? '#8a96ad' : '#dce8ff';
+    g.fillText(label, x + ox, y + oy);
+    // 数値
     const numStr = debugMode ? String(Math.round(vals5[i])) : (numMasked ? '???' : String(Math.round(vals5[i])));
-    g.font = '10px monospace';
-    g.fillStyle = debugMode ? '#ffd479' : (numMasked ? '#5a6270' : '#7a9ab8');
-    g.fillText(numStr, x + ox, y + oy + 13);
-    g.font = 'bold 13px sans-serif';
+    g.font = 'bold 20px monospace';
+    g.fillStyle = debugMode ? '#ffd479' : (numMasked ? '#6a7280' : '#c8e8ff');
+    g.fillText(numStr, x + ox, y + oy + 26);
+    g.font = 'bold 24px sans-serif';
+    // ???頂点グロー（ネオンマルチレイヤー強発光）
+    if (isOver90) {
+      const [vx, vy] = pt(angles[i], R);
+      g.save();
+      g.globalCompositeOperation = 'screen';
+      // 1. 広範囲の柔らかな光
+      g.shadowColor = '#ffd23a'; g.shadowBlur = 32;
+      g.beginPath(); g.arc(vx, vy, 16, 0, Math.PI*2);
+      g.fillStyle = 'rgba(255, 210, 58, 0.18)'; g.fill();
+      // 2. 中範囲のコア光
+      g.shadowBlur = 16;
+      g.beginPath(); g.arc(vx, vy, 10, 0, Math.PI*2);
+      g.fillStyle = 'rgba(255, 220, 80, 0.45)'; g.fill();
+      // 3. 中心コア（白熱光）
+      g.shadowBlur = 6;
+      g.beginPath(); g.arc(vx, vy, 5, 0, Math.PI*2);
+      g.fillStyle = '#ffffff'; g.fill();
+      g.restore();
+    }
   });
 }
 // ================= 効果音（WebAudio合成） =================
@@ -1082,6 +1332,21 @@ const snd = {
     noiseSnd(.18, 40, 400, .65);
     setTimeout(() => noiseSnd(.12, 100, 1200, .30), 25);
     tone(160, .10, 'square', .38, 55);
+    // 悲しいマイナーコード（Aマイナー）のフェードアウト余韻 ＋ ピッチの下降（力抜け）
+    try {
+      const ac = audio(), t = ac.currentTime;
+      [220, 261.6, 329.6].forEach(f => {
+        const o = ac.createOscillator(), gn = ac.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(f, t);
+        o.frequency.exponentialRampToValueAtTime(f * 0.82, t + 1.8); // 悲痛なピッチ低下
+        gn.gain.setValueAtTime(0, t);
+        gn.gain.linearRampToValueAtTime(0.12, t + 0.12);
+        gn.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
+        o.connect(gn).connect(ac.destination);
+        o.start(t); o.stop(t + 1.95);
+      });
+    } catch(e) {}
   },
   // 滞空歓声シンセ
   _cheerNodes: null,
@@ -2083,7 +2348,8 @@ function startPitch() {
     const baseKmh = 60 + score.pitch * 3.5 + Math.random() * 3;
     kmh = baseKmh * (debugMode ? debugPitchSpeedMult : 1.0);
   } else {
-    const baseKmh = 85 + score.pitch * 6.0 + Math.random() * 4;
+    // Hardモード（Challenge）：開始120km/h付近〜最大165km/h超の豪速球
+    const baseKmh = 115 + score.pitch * 5.0 + Math.random() * 5;
     kmh = baseKmh * (debugMode ? debugPitchSpeedMult : 1.0);
   }
   
@@ -2523,6 +2789,7 @@ function sprayLabel(deg) {
 
 function landBall(isGround = true) {
   fly.landed = true;
+  const _lhud = $('liveDistHUD'); if (_lhud) _lhud.style.display = 'none';
   snd.stopCheer();
   const lx = ball.position.x, lz = ball.position.z;
   const dist = Math.round(Math.hypot(lx, lz));
@@ -2575,31 +2842,13 @@ function landBall(isGround = true) {
   if (isGround) {
     fly.v.set(fly.v.x*.42, Math.abs(fly.v.y)*.38, fly.v.z*.42);  // バウンド
   }
-  // 耐久値消費（打球ごと。空振りはlandBallを通らないので自動除外）
-  if (!batBroken) {
-    const q = (fly && fly.q !== undefined) ? fly.q : 0.5;
-    const dmg = (4 + (1 - q) * 8) * (fair ? 1.0 : 0.7);
-    batHP = Math.max(0, batHP - dmg);
-    if (batHP <= 0) {
-      batBroken = true;
-      snd.batBreak();
-      // ボール飛翔を止めてバッターにカメラを向ける
-      if (fly) { fly.follow = false; fly.v.set(0, 0, 0); }
-      if (typeof ball !== 'undefined' && ball) ball.visible = false;
-      if (typeof ballShadow !== 'undefined' && ballShadow) ballShadow.visible = false;
-      camera.position.set(2.5, 2.2, 4.8);
-      camera.lookAt(-1.05, 1.2, 0.55);
-      showMsg('💥 バットが折れた！', '#ff4444', 2800);
-      gameTimeout(showEnd, 2600);
-      return;
-    }
-  }
   const delay = fly.scoreboardHit ? 2800 : (fly.super ? 2200 : 1500);
   gameTimeout(nextPitch, delay);
 }
 let camHome = null;
 function nextPitch() {
   ball.visible = false; ballShadow.visible = false; fly = null;
+  const _nh = $('liveDistHUD'); if (_nh) _nh.style.display = 'none';
   if (camHome) { camera.position.copy(camHome.pos); camera.lookAt(camHome.look); }
   if (score.pitch >= 10) showEnd();
   else gameTimeout(startPitch, 400);   // ＋ワインドアップ2秒で次の球まで間が空く
@@ -2989,6 +3238,24 @@ function updateGame(dt) {
       $('hdSpeed').textContent = impact.exitKmh.toFixed(0);
       $('hdAngle').textContent = impact.launch.toFixed(0) + '°';
       $('hdDir').textContent = '–'; $('hdDist').textContent = '–';
+      // 耐久値消費（バットに当たった瞬間）
+      if (!batBroken) {
+        const dmg = 4 + (1 - impact.q) * 8;
+        batHP = Math.max(0, batHP - dmg);
+        if (batHP <= 0) {
+          batBroken = true;
+          snd.batBreak();
+          ball.visible = false;
+          if (ballShadow) ballShadow.visible = false;
+          camera.position.set(2.5, 2.2, 4.8);
+          camera.lookAt(-1.05, 1.2, 0.55);
+          showMsg('💥 バットが折れた！', '#ff4444', 2800);
+          gameTimeout(showEnd, 2600);
+          fly = null;
+          impact = null;
+          return;
+        }
+      }
       impact = null;
       // 打球飛行開始 → 歓声スタート
       snd.cheer();
@@ -3037,9 +3304,18 @@ function updateGame(dt) {
     }
     if (fly) {
       const prevZ = ball.position.z;
-      fly.v.y -= 9.8*h;
-      fly.v.addScaledVector(fly.v.clone().multiplyScalar(-fly.dragK*fly.v.length()), h); // 空気抵抗
-      ball.position.addScaledVector(fly.v, h);
+      // 場外ホームラン倍速: 距離80m超＆下降中はtime step 4倍
+      const flyMult = (fly.super && !fly.landed && Math.hypot(ball.position.x, ball.position.z) > 80 && fly.v.y < 0) ? 4 : 1;
+      const fh = h * flyMult;
+      fly.v.y -= 9.8*fh;
+      fly.v.addScaledVector(fly.v.clone().multiplyScalar(-fly.dragK*fly.v.length()), fh); // 空気抵抗
+      ball.position.addScaledVector(fly.v, fh);
+      // flyMult用に4倍分の残りステップをスキップして追加計算
+      for (let _m = 1; _m < flyMult; _m++) {
+        fly.v.y -= 9.8*fh;
+        fly.v.addScaledVector(fly.v.clone().multiplyScalar(-fly.dragK*fly.v.length()), fh);
+        ball.position.addScaledVector(fly.v, fh);
+      }
       
       // チャレンジモード廃止: ホープ判定削除
 
@@ -3083,7 +3359,17 @@ function updateGame(dt) {
       camera.position.lerp(tgt, 1 - Math.pow(0.0018, dt));
       camera.lookAt(ball.position);
     }
-    if (!fly.landed) $('hdDist').textContent = Math.round(Math.hypot(ball.position.x, ball.position.z));
+    if (!fly.landed) {
+      const _liveDist = Math.round(Math.hypot(ball.position.x, ball.position.z));
+      $('hdDist').textContent = _liveDist;
+      const _hud = $('liveDistHUD');
+      if (_hud) {
+        _hud.style.display = 'block';
+        $('liveDistNum').textContent = _liveDist;
+        const _sp = $('liveDistSpeed');
+        if (_sp) _sp.style.display = (fly.super && _liveDist > 80) ? 'block' : 'none';
+      }
+    }
   } else if (camHome && !swing) {
     // 定点カメラ（ドラッグオフセット反映）
     camera.position.set(camHome.pos.x + camOff.x, camHome.pos.y + camOff.y, camHome.pos.z + camOff.x*0.3);
@@ -3809,6 +4095,13 @@ function showScreen(screenId) {
     if (gameGroup.children.length === 0) {
       buildField();
     }
+    // 装備中バット表示を更新
+    const _eid = localStorage.getItem('batios_equipped_id');
+    const _wh = JSON.parse(localStorage.getItem('batios_warehouse') || '[]');
+    const _eb = _wh.find(b => b.id === _eid);
+    const _en = $('menuEquippedName');
+    if (_en) _en.textContent = _eb ? (_eb.name || 'バット') : 'バット未装備';
+    if (typeof drawMenuBatPreview === 'function') drawMenuBatPreview(_eb || null);
   } else if (screenId === 'craftUI') {
     mode = 'craft';
     $(screenId).style.display = 'block';
@@ -3820,8 +4113,8 @@ function showScreen(screenId) {
     
     const aspect = camera.aspect || (innerWidth / innerHeight) || 1.0;
     const craftZ = aspect < 0.75 ? 0.95 : 1.7;
-    camera.position.set(0, .20, 1.05*Math.max(0.9, craftZ/aspect));
-    camera.lookAt(0, -0.20, 0);
+    camera.position.set(0, .25, 1.05*Math.max(0.9, craftZ/aspect));
+    camera.lookAt(0, -0.05, 0);
     buildCraft();
   } else if (screenId === 'warehouseUI') {
     mode = 'warehouse';
@@ -3910,9 +4203,85 @@ $('menuSettingsBtn').onclick = () => { snd.ui(); showScreen('settingsUI'); };
 $('menuRankingBtn').onclick = () => { snd.ui(); showScreen('rankingUI'); };
 
 // Bind warehouse actions
+$('menuWarehouseBtn').onclick = () => { snd.ui(); showScreen('warehouseUI'); };
 $('warehouseBackBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
 $('warehouseCraftBtn').onclick = () => { snd.ui(); showScreen('materialSelectUI'); };
 $('matSelectBackBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
+
+// ── 素材カルーセル ──
+let matIndex = 0;
+const MAT_ORDER = ['wood','carbon','metal','gold','diamond','obsidian'];
+function matGoTo(idx) {
+  matIndex = ((idx % 6) + 6) % 6;
+  const track = $('matTrack');
+  if (track) track.style.transform = `translateX(-${matIndex * 100}%)`;
+  document.querySelectorAll('.mat-dot').forEach((d, i) => {
+    d.style.background = i === matIndex ? '#ffd23a' : 'rgba(255,255,255,0.25)';
+  });
+}
+(function initMatCarousel() {
+  const prev = $('matPrev'), next = $('matNext'), track = $('matTrack');
+  if (!prev || !next || !track) return;
+  prev.onclick = () => { snd.ui(); matGoTo(matIndex - 1); };
+  next.onclick = () => { snd.ui(); matGoTo(matIndex + 1); };
+  // touch swipe
+  let tx0 = 0;
+  track.addEventListener('touchstart', e => { tx0 = e.touches[0].clientX; }, {passive:true});
+  track.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx0;
+    if (Math.abs(dx) > 36) matGoTo(matIndex + (dx < 0 ? 1 : -1));
+  }, {passive:true});
+  // dot clicks
+  document.querySelectorAll('.mat-dot').forEach((d, i) => { d.onclick = () => matGoTo(i); });
+})();
+
+// ── メニューバットプレビュー ──
+function drawMenuBatPreview(bat) {
+  const cv = $('menuBatCanvas');
+  if (!cv) return;
+  const g = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  g.clearRect(0, 0, W, H);
+  if (!bat || !bat.radii) {
+    g.fillStyle = 'rgba(255,255,255,0.06)';
+    g.fillRect(0, 0, W, H);
+    g.font = '14px sans-serif'; g.fillStyle = '#4a5568'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('バット未装備', W/2, H/2);
+    return;
+  }
+  const matGrads = {
+    wood:    ['#c8893a','#f0b060'],
+    carbon:  ['#303050','#6870a8'],
+    metal:   ['#7890a8','#c0d4e8'],
+    gold:    ['#a07800','#ffd700'],
+    diamond: ['#3060b0','#80c0ff'],
+    obsidian:['#1a0530','#9040e0'],
+  };
+  const [c1, c2] = matGrads[bat.material] || matGrads.wood;
+  const radii = bat.radii;
+  const seg = radii.length - 1;
+  const maxR = Math.max(...radii);
+  const padX = 18, batW = W - padX * 2;
+  const scale = (H * 0.40) / maxR;
+  const cY = H / 2;
+  // bat body path
+  const grad = g.createLinearGradient(0, cY - maxR * scale, 0, cY + maxR * scale);
+  grad.addColorStop(0, c2); grad.addColorStop(0.5, c1); grad.addColorStop(1, c2);
+  g.beginPath();
+  for (let i = 0; i <= seg; i++) {
+    const x = padX + (i / seg) * batW;
+    const r = radii[i] * scale;
+    i === 0 ? g.moveTo(x, cY - r) : g.lineTo(x, cY - r);
+  }
+  for (let i = seg; i >= 0; i--) {
+    g.lineTo(padX + (i / seg) * batW, cY + radii[i] * scale);
+  }
+  g.closePath();
+  g.fillStyle = grad; g.fill();
+  g.strokeStyle = c2; g.lineWidth = 1.5; g.globalAlpha = 0.6; g.stroke();
+  g.globalAlpha = 1;
+}
+
 window.selectMaterial = (mat) => {
   snd.ui();
   const sel = $('materialSelect');
