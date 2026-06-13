@@ -1572,7 +1572,7 @@ function createEarthTexture() {
 function addGroundAndSkyland() {
   // ナイター: 夕暮れの空 + 照明に照らされたフィールド
   scene.background = new THREE.Color(0x0d1830);
-  scene.fog = new THREE.Fog(0x141f38, 160, 520);
+  scene.fog = new THREE.Fog(0x141f38, 160, 780);
   // 芝生 + 刈り込みリング
   const grass = new THREE.Mesh(new THREE.CircleGeometry(260, 64),
     new THREE.MeshStandardMaterial({color:0x3f9e4e, roughness:.95}));
@@ -1829,6 +1829,10 @@ function addBuildings() {
   }
   
   const placed = []; // Array to store {x, z, w} to prevent overlaps
+  // ランドマーク（富士山、東京タワー、ピラミッド）を一般ビルとの重なり防止用に登録
+  placed.push({ x: 40, z: -650, w: 180 });
+  placed.push({ x: -200, z: -450, w: 30 });
+  placed.push({ x: 220, z: -480, w: 60 });
   
   for (let i = 0; i < 160; i++) {
     let th = 0, r = 0, w = 0, hgt = 0, heightFactor = 1.0;
@@ -2049,15 +2053,167 @@ function addBuildings() {
     
     gameGroup.add(b);
     
-    // Register collider
-    fieldColliders.push({
-      type: 'rotated_box',
-      center: b.position.clone(),
-      size: new THREE.Vector3(w, hgt, w),
-      rotY: b.rotation.y,
       landing: true
     });
   }
+  // 遠方の場外ランドマークの生成
+  addCyberLandmarks();
+}
+
+function addCyberLandmarks() {
+  const isNight = (battingMode === 'challenge');
+  
+  // 1. サイバー富士山 (Cyber Fuji)
+  const fujiGroup = new THREE.Group();
+  fujiGroup.position.set(40, -5, -650);
+  
+  const baseGeo = new THREE.ConeGeometry(180, 160, 16, 1, true);
+  const baseMat = new THREE.MeshStandardMaterial({
+    color: 0x07112b,
+    roughness: 0.8,
+    metalness: 0.2,
+    flatShading: true
+  });
+  if (isNight) {
+    baseMat.emissive = new THREE.Color(0x04081c);
+  }
+  const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+  baseMesh.position.y = 80;
+  fujiGroup.add(baseMesh);
+
+  // サイバー富士山のワイヤーフレーム重ね描き
+  const fujiWireMat = new THREE.MeshBasicMaterial({
+    color: 0x00d2ff,
+    wireframe: true,
+    transparent: true,
+    opacity: isNight ? 0.35 : 0.08,
+    blending: THREE.AdditiveBlending
+  });
+  const fujiWireMesh = new THREE.Mesh(baseGeo, fujiWireMat);
+  fujiWireMesh.position.copy(baseMesh.position);
+  fujiGroup.add(fujiWireMesh);
+  
+  const snowGeo = new THREE.ConeGeometry(75, 60, 16, 1, true);
+  const snowMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.9,
+    metalness: 0.1,
+    emissive: isNight ? new THREE.Color(0xb0d8ff) : new THREE.Color(0x000000),
+    emissiveIntensity: 0.35,
+    flatShading: true
+  });
+  const snowMesh = new THREE.Mesh(snowGeo, snowMat);
+  snowMesh.position.y = 130;
+  fujiGroup.add(snowMesh);
+  
+  const fujiLight = new THREE.PointLight(0x00d2ff, isNight ? 3.5 : 0, 150);
+  fujiLight.position.set(0, 160, 0);
+  fujiGroup.add(fujiLight);
+  gameGroup.add(fujiGroup);
+  
+  // 2. サイバー東京タワー (Neon Tokyo Tower)
+  const towerGroup = new THREE.Group();
+  towerGroup.position.set(-200, 0, -450);
+  
+  const lowerGeo = new THREE.ConeGeometry(24, 60, 4, 1, true);
+  const lowerMat = new THREE.MeshStandardMaterial({
+    color: 0xff2200,
+    wireframe: true,
+    emissive: isNight ? new THREE.Color(0xff2200) : new THREE.Color(0x000000),
+    emissiveIntensity: isNight ? 0.8 : 0.0
+  });
+  const lowerMesh = new THREE.Mesh(lowerGeo, lowerMat);
+  lowerMesh.position.y = 30;
+  lowerMesh.rotation.y = Math.PI / 4;
+  towerGroup.add(lowerMesh);
+  
+  const upperGeo = new THREE.ConeGeometry(8, 120, 4, 1, true);
+  const upperMat = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    wireframe: true,
+    emissive: isNight ? new THREE.Color(0xaaaaaa) : new THREE.Color(0x000000),
+    emissiveIntensity: isNight ? 0.6 : 0.0
+  });
+  const upperMesh = new THREE.Mesh(upperGeo, upperMat);
+  upperMesh.position.y = 110;
+  upperMesh.rotation.y = Math.PI / 4;
+  towerGroup.add(upperMesh);
+  
+  const deckGeo = new THREE.CylinderGeometry(14, 14, 6, 8);
+  const deckMat = new THREE.MeshStandardMaterial({
+    color: 0x151a24,
+    metalness: 0.8,
+    roughness: 0.2,
+    emissive: isNight ? new THREE.Color(0xff8c00) : new THREE.Color(0x000000),
+    emissiveIntensity: 0.85
+  });
+  const deckMesh = new THREE.Mesh(deckGeo, deckMat);
+  deckMesh.position.y = 80;
+  towerGroup.add(deckMesh);
+  
+  const antGeo = new THREE.CylinderGeometry(1.2, 0.1, 40, 4);
+  const antMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9 });
+  const antMesh = new THREE.Mesh(antGeo, antMat);
+  antMesh.position.y = 180;
+  towerGroup.add(antMesh);
+  
+  const beaconGeo = new THREE.SphereGeometry(1.8, 8, 8);
+  const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 1.0 });
+  const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+  beacon.position.set(0, 200, 0);
+  towerGroup.add(beacon);
+  buildingBeacons.push({ material: beaconMat, phase: Math.random() * Math.PI * 2, speed: 5 });
+  
+  const towerLight = new THREE.PointLight(0xff2200, isNight ? 4.0 : 0, 100);
+  towerLight.position.set(0, 200, 0);
+  towerGroup.add(towerLight);
+  gameGroup.add(towerGroup);
+  
+  // 3. サイバーピラミッド (Neon Pyramid)
+  const pyrGroup = new THREE.Group();
+  pyrGroup.position.set(220, 0, -480);
+  
+  const pyrGeo = new THREE.ConeGeometry(55, 60, 4);
+  const pyrMat = new THREE.MeshStandardMaterial({
+    color: 0x050e18,
+    roughness: 0.15,
+    metalness: 0.85,
+    flatShading: true,
+    emissive: isNight ? new THREE.Color(0x7e22ce) : new THREE.Color(0x000000),
+    emissiveIntensity: 0.25
+  });
+  const pyrMesh = new THREE.Mesh(pyrGeo, pyrMat);
+  pyrMesh.position.y = 30;
+  pyrMesh.rotation.y = Math.PI / 4;
+  pyrGroup.add(pyrMesh);
+  
+  const wireMat = new THREE.MeshBasicMaterial({
+    color: 0xa855f7,
+    wireframe: true,
+    transparent: true,
+    opacity: isNight ? 0.75 : 0.15,
+    blending: THREE.AdditiveBlending
+  });
+  const wireMesh = new THREE.Mesh(pyrGeo, wireMat);
+  wireMesh.position.copy(pyrMesh.position);
+  wireMesh.rotation.copy(pyrMesh.rotation);
+  pyrGroup.add(wireMesh);
+  
+  if (isNight) {
+    const beamGeo = new THREE.CylinderGeometry(1.5, 8, 300, 8, 1, true);
+    const beamMat = new THREE.MeshBasicMaterial({
+      color: 0x8b5cf6,
+      transparent: true,
+      opacity: 0.20,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const beam = new THREE.Mesh(beamGeo, beamMat);
+    beam.position.set(0, 210, 0);
+    pyrGroup.add(beam);
+  }
+  gameGroup.add(pyrGroup);
 }
 
 function addSkyStarsAndMoon() {
@@ -2288,6 +2444,7 @@ function breakScoreboard() {
 let aim = {x:.5, y:.5};       // マウス正規化座標
 let swing = null, pitch = null, fly = null, windup = null, impact = null, explosion = null;
 let camShake = 0, sparks = null; // Phase2 打撃エフェクト（描画のみ）
+let isLongPressing = false;   // 画面長押しでの倍速早送りフラグ
 let ufos = [], ufoSpawnT = 0; // UFOボーナス標的（命中で上方向ジャンプ→弾道延長）
 let searchlights = [];
 let buildingBeacons = [];
@@ -2323,7 +2480,7 @@ function setBatPose(s, a, phi) {
   gameBat.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), d);
 }
 function startSwing() {
-  if (mode !== 'game' || swing) return;
+  if (mode !== 'game' || swing || fly || impact) return;
   const a = aimHands();
   // スイングアシスト: 接触予定時刻 of ボール位置へ構えを部分的に吸い付ける（空振り救済）
   if (pitch) {
@@ -3304,17 +3461,17 @@ function updateGame(dt) {
     }
     if (fly) {
       const prevZ = ball.position.z;
-      // 場外ホームラン倍速: 距離80m超＆下降中はtime step 4倍
-      const flyMult = (fly.super && !fly.landed && Math.hypot(ball.position.x, ball.position.z) > 80 && fly.v.y < 0) ? 4 : 1;
-      const fh = h * flyMult;
-      fly.v.y -= 9.8*fh;
-      fly.v.addScaledVector(fly.v.clone().multiplyScalar(-fly.dragK*fly.v.length()), fh); // 空気抵抗
-      ball.position.addScaledVector(fly.v, fh);
-      // flyMult用に4倍分の残りステップをスキップして追加計算
-      for (let _m = 1; _m < flyMult; _m++) {
-        fly.v.y -= 9.8*fh;
-        fly.v.addScaledVector(fly.v.clone().multiplyScalar(-fly.dragK*fly.v.length()), fh);
-        ball.position.addScaledVector(fly.v, fh);
+      // 場外ホームラン倍速: 距離80m超＆下降中は4倍、さらに画面長押し中は2倍（最大8倍）
+      // 場外ホームラン（fly.super）のフライト中のみ長押し倍速を適用
+      const pressMult = (fly.super && isLongPressing) ? 2 : 1;
+      const baseMult = (fly.super && !fly.landed && Math.hypot(ball.position.x, ball.position.z) > 80 && fly.v.y < 0) ? 4 : 1;
+      const flyMult = baseMult * pressMult;
+      
+      // 物理計算のステップ幅を崩さないよう flyMult 回ループして時間を進める
+      for (let _m = 0; _m < flyMult; _m++) {
+        fly.v.y -= 9.8 * h;
+        fly.v.addScaledVector(fly.v.clone().multiplyScalar(-fly.dragK * fly.v.length()), h); // 空気抵抗
+        ball.position.addScaledVector(fly.v, h);
       }
       
       // チャレンジモード廃止: ホープ判定削除
@@ -3367,7 +3524,17 @@ function updateGame(dt) {
         _hud.style.display = 'block';
         $('liveDistNum').textContent = _liveDist;
         const _sp = $('liveDistSpeed');
-        if (_sp) _sp.style.display = (fly.super && _liveDist > 80) ? 'block' : 'none';
+        if (_sp) {
+          let currentMult = 1;
+          if (fly.super) {
+            const isDescending = (_liveDist > 80 && fly.v.y < 0);
+            const base = isDescending ? 4 : 1;
+            const press = isLongPressing ? 2 : 1;
+            currentMult = base * press;
+          }
+          _sp.style.display = (currentMult > 1) ? 'block' : 'none';
+          _sp.textContent = `⏩ ${currentMult}×`;
+        }
       }
     }
   } else if (camHome && !swing) {
@@ -4042,9 +4209,9 @@ function setupStadiumLighting(lightMode) {
   if (scene.fog) {
     scene.fog.color.setHex(isNight ? 0x141f38 : 0xbfe0ff);
     scene.fog.near = isNight ? 160 : 200;
-    scene.fog.far = isNight ? 520 : 600;
+    scene.fog.far = isNight ? 780 : 880;
   } else {
-    scene.fog = new THREE.Fog(isNight ? 0x141f38 : 0xbfe0ff, isNight ? 160 : 200, isNight ? 520 : 600);
+    scene.fog = new THREE.Fog(isNight ? 0x141f38 : 0xbfe0ff, isNight ? 160 : 200, isNight ? 780 : 880);
   }
 
   // Adjust specific night elements
@@ -4201,6 +4368,15 @@ $('menuNormalBtn').onclick = () => { snd.ui(); battingMode = 'normal'; showScree
 $('menuChallengeBtn').onclick = () => { snd.ui(); battingMode = 'challenge'; showScreen('gamePanel'); };
 $('menuSettingsBtn').onclick = () => { snd.ui(); showScreen('settingsUI'); };
 $('menuRankingBtn').onclick = () => { snd.ui(); showScreen('rankingUI'); };
+
+// ── 倍速長押しプレビュー ──
+window.addEventListener('pointerdown', (e) => {
+  if (mode === 'game' && fly && !fly.landed) {
+    isLongPressing = true;
+  }
+});
+window.addEventListener('pointerup', () => { isLongPressing = false; });
+window.addEventListener('pointercancel', () => { isLongPressing = false; });
 
 // Bind warehouse actions
 $('menuWarehouseBtn').onclick = () => { snd.ui(); showScreen('warehouseUI'); };
