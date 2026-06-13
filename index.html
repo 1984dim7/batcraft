@@ -2053,6 +2053,12 @@ function addBuildings() {
     
     gameGroup.add(b);
     
+    // Register collider
+    fieldColliders.push({
+      type: 'rotated_box',
+      center: b.position.clone(),
+      size: new THREE.Vector3(w, hgt, w),
+      rotY: b.rotation.y,
       landing: true
     });
   }
