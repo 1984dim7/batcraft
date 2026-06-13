@@ -3,66 +3,191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>バット工房 ⚾ Bat Craft Baseball</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <style>
-  body { margin:0; overflow:hidden; font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; background:#15110d; touch-action:none; -webkit-user-select:none; user-select:none; }
+  body { margin:0; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; background:#060810; touch-action:none; -webkit-user-select:none; user-select:none; }
   :root { --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
           --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px); }
   #ui { position:absolute; inset:0; pointer-events:none; color:#fff; }
-  .panel { pointer-events:auto; background:rgba(15,18,28,.78); backdrop-filter:blur(8px);
-           border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px 14px; margin:8px; }
-  h1 { font-size:15px; margin:0 0 6px; letter-spacing:.5px; }
-  p { font-size:12px; margin:2px 0; line-height:1.55; }
-  b { color:#ffd479; }
-  button { font-size:14px; padding:9px 18px; border:none; border-radius:9px; font-weight:bold;
-           background:linear-gradient(135deg,#ff6b4a,#e9314f); color:#fff; cursor:pointer; margin:6px 6px 0 0;
-           box-shadow:0 3px 10px rgba(233,49,79,.35); -webkit-tap-highlight-color:transparent; }
-  button:hover { filter:brightness(1.15); }
-  button.sub { background:#3a4152; box-shadow:none; font-size:12px; padding:7px 12px; }
+  .panel {
+    pointer-events: auto;
+    background: rgba(10, 15, 30, 0.42);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin: 12px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+  h1 { font-size:16px; margin:0 0 8px; letter-spacing:.5px; font-weight: 700; color: #fff; }
+  p { font-size:12px; margin:2px 0; line-height:1.6; color: #cbd5e1; }
+  b { color:#ffd23a; }
+  button {
+    font-size:14px;
+    padding: 11px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    cursor: pointer;
+    margin: 0;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    -webkit-tap-highlight-color:transparent;
+  }
+  button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+  button:active {
+    transform: translateY(1px);
+  }
+  button.sub {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: none;
+    font-size: 12px;
+    padding: 9px 16px;
+    color: #94a3b8;
+  }
+  button.sub:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
   .help { display:none; }
-  .panel.open .help { display:block; }
-  .hbtn { background:none; box-shadow:none; border:1px solid rgba(255,255,255,.25); color:#aab6cc;
-          font-size:11px; padding:3px 9px; margin:0 0 4px; border-radius:999px; font-weight:normal; }
-  .hbtn:hover { color:#fff; }
-  #craftUI { position:absolute; inset:0; padding:var(--sat) var(--sar) var(--sab) var(--sal); box-sizing:border-box;
-             pointer-events:none; display:flex; justify-content:space-between; align-items:flex-start; }
-  #craftPanel { max-width:min(300px, 55vw); }
-  #craftStats { text-align:left; min-width:220px; max-width:min(360px,46vw); }
-  #craftStats td { font-size:11px; padding:1px 4px; white-space:nowrap; }
-  #craftStats td:last-child { text-align:right; color:#ffd479; font-weight:bold; font-variant-numeric:tabular-nums; }
-  #gamePanel { position:absolute; top:var(--sat); left:var(--sal); max-width:min(270px,55vw); }
-  #scoreboard { position:absolute; top:var(--sat); right:var(--sar); text-align:right; font-variant-numeric:tabular-nums; max-width:min(180px,42vw); }
-  #scoreboard p { font-size:12px; }
+  .panel.open .help { display:block; margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 8px; }
+  .hbtn { background:none; box-shadow:none; border:1px solid rgba(255,255,255,0.15); color:#94a3b8;
+          font-size:11px; padding:4px 12px; margin:0 0 6px; border-radius:999px; font-weight:normal; }
+  .hbtn:hover { color:#fff; border-color: rgba(255,255,255,0.3); }
+  #craftUI {
+    position:absolute;
+    inset:0;
+    padding: var(--sat) var(--sar) var(--sab) var(--sal);
+    box-sizing:border-box;
+    pointer-events:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+  }
+  #craftPanel { max-width:320px; width: 100%; }
+  #craftStats { text-align:left; min-width:260px; max-width:380px; }
+  #craftStats td { font-size:12px; padding:3px 6px; white-space:nowrap; color: #94a3b8; }
+  #craftStats td:last-child { text-align:right; color:#ffd23a; font-weight:bold; font-variant-numeric:tabular-nums; }
+  #gamePanel {
+    position: absolute;
+    top: calc(12px + var(--sat));
+    left: calc(12px + var(--sal));
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    width: auto;
+    max-width: none;
+    z-index: 100;
+  }
   #msg { position:absolute; top:28%; width:100%; text-align:center; font-size:clamp(26px,8vw,44px); font-weight:bold;
          text-shadow:0 2px 24px rgba(0,0,0,.8); opacity:0; transition:opacity .15s; pointer-events:none; }
   #pitchSpeed { position:absolute; top:44%; width:100%; text-align:center; font-size:clamp(14px,4vw,20px); color:#cfe3ff;
                 text-shadow:0 1px 8px #000; opacity:0; transition:opacity .2s; pointer-events:none; }
   #hitData { position:absolute; bottom:calc(14px + var(--sab)); left:50%; transform:translateX(-50%); display:none; text-align:center; white-space:nowrap; }
-  #hitData .big { font-size:clamp(18px,5vw,26px); font-weight:bold; color:#ffd479; font-variant-numeric:tabular-nums; }
-  #hitData .lbl { font-size:10px; color:#aab6cc; }
+  #hitData .big { font-size:clamp(18px,5vw,26px); font-weight:bold; color:#ffd23a; font-variant-numeric:tabular-nums; }
+  #hitData .lbl { font-size:10px; color:#94a3b8; }
   #hitData .col { display:inline-block; margin:0 8px; }
-  #meter { width:100%; height:7px; background:#2a2f3c; border-radius:4px; margin-top:6px; }
-  #meterFill { height:100%; width:100%; background:linear-gradient(90deg,#f5a623,#e9314f); border-radius:4px; }
+  #meter { width:100%; height:6px; background:rgba(255,255,255,0.06); border-radius:3px; margin-top:8px; overflow:hidden; }
+  #meterFill { height:100%; width:100%; background:linear-gradient(90deg,#ff9d6b,#e9314f); border-radius:3px; }
+
+  /* Swiper カルーセルスタイル */
+  .swiper {
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 10px;
+  }
+  .swiper-slide {
+    width: 240px;
+    height: 110px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    filter: blur(1px) opacity(0.5);
+    transform: scale(0.9);
+  }
+  .swiper-slide-active {
+    filter: none;
+    transform: scale(1.05);
+  }
 
   /* スマホ縦長レイアウト */
   @media (max-width: 580px) {
-    .panel { padding:7px 10px; margin:5px; border-radius:10px; }
-    h1 { font-size:13px; margin-bottom:4px; }
+    .panel { padding:10px 14px; margin:6px; border-radius:12px; }
+    h1 { font-size:14px; margin-bottom:4px; }
     p, .panel p { font-size:11px; }
-    button { font-size:13px; padding:8px 14px; }
-    button.sub { font-size:11px; padding:6px 10px; }
-    /* クラフトUIを縦積みにする */
-    #craftUI { flex-direction:column; align-items:stretch; height:auto; }
-    #craftPanel { max-width:none; }
-    #craftStats { max-width:none; min-width:0; }
-    #gamePanel { max-width: calc(58vw); }
-    #scoreboard { max-width: 38vw; }
-    #scoreboard p { font-size:11px; }
+    button { font-size:13px; padding:9px 16px; }
+    button.sub { font-size:11px; padding:7px 11px; }
+    /* クラフトUIを上下分割する */
+    #craftUI {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      justify-content: space-between !important;
+      height: 100vh !important;
+      position: absolute;
+      inset: 0;
+      padding: 0;
+      pointer-events: none;
+    }
+    #craftPanel {
+      max-width: none;
+      margin: 8px 12px calc(12px + var(--sab)) 12px;
+      pointer-events: auto;
+      order: 2;
+    }
+    #craftStats {
+      max-width: none;
+      min-width: 0;
+      margin: calc(12px + var(--sat)) 12px 8px 12px;
+      pointer-events: auto;
+      order: 1;
+    }
+    #craftStats > div {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 12px;
+    }
+    #craftStats table {
+      flex: 1;
+    }
+    #radar {
+      width: 120px !important;
+      height: 100px !important;
+    }
+    #gamePanel {
+      position: absolute !important;
+      top: calc(12px + var(--sat)) !important;
+      left: 12px !important;
+      margin: 0 !important;
+      max-width: calc(100vw - 24px) !important;
+      width: auto !important;
+      display: flex;
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 8px !important;
+      padding: 5px 8px !important;
+    }
     #debugToggleContainer { bottom:6px; left:6px; font-size:10px; }
     #debugPanel { right:6px; bottom:6px; width:calc(100vw - 12px); box-sizing:border-box; }
     #hitData .col { margin:0 5px; }
-    .pitch-dot { width:22px; height:22px; font-size:10px; }
-    .pitch-grid { gap:4px; }
+    .pitch-dot { width:18px; height:18px; font-size:8px; }
+    .pitch-grid { gap:3px; }
     #endPanel { min-width:min(320px, 96vw) !important; }
   }
   
@@ -70,23 +195,27 @@
   .pitch-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    margin-top: 4px;
-    margin-bottom: 8px;
+    gap: 4px;
+    margin-top: 0;
+    margin-bottom: 0;
   }
   .pitch-dot {
-    width: 26px;
-    height: 26px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: #1a2233;
-    border: 2px solid #3d4c66;
+    border: 1.5px solid #3d4c66;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: bold;
     color: #889ec2;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .pitch-dot svg {
+    width: 55%;
+    height: 55%;
   }
   .pitch-dot.current {
     border-color: #ffd23a;
@@ -125,11 +254,138 @@
     100% { transform: scale(1.18); }
   }
 
+  /* Bat Warehouse Cards & Custom UI */
+  .bat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+  }
+  .bat-card.equipped {
+    border-color: #ffd23a;
+    box-shadow: 0 0 10px rgba(255, 210, 58, 0.22);
+    background: rgba(255, 210, 58, 0.04);
+  }
+  .bat-card h3 {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .bat-card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+    font-size: 10px;
+    color: #aab6cc;
+    margin-bottom: 8px;
+  }
+  .bat-card-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .bat-card-actions button {
+    font-size: 10.5px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    flex: 1;
+    margin: 0;
+    cursor: pointer;
+  }
+
 </style>
 </head>
 <body>
 <div id="ui">
-  <div id="craftUI">
+  <!-- メインメニュー画面 -->
+  <div class="panel" id="menuUI" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; min-width:320px; box-sizing:border-box; z-index:10;">
+    <h1 style="font-size:24px; margin:0 0 4px 0; text-shadow:0 0 10px rgba(111,224,255,0.5);">Batios</h1>
+    <p style="font-size:11px; color:#cbd5e1; margin:0 0 20px 0;">Bat Craft Baseball</p>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button id="menuCraftBtn" style="font-size:15px; padding:11px; margin:0; width:100%;">バットを作る</button>
+      <button id="menuNormalBtn" style="font-size:15px; padding:11px; margin:0; width:100%; background:linear-gradient(135deg,rgba(255,157,107,0.85),rgba(255,107,74,0.85)); border:1px solid rgba(255,255,255,0.1); box-shadow:0 6px 18px rgba(255,107,74,.25);">ノーマルモード（昼）</button>
+      <button id="menuChallengeBtn" style="font-size:15px; padding:11px; margin:0; width:100%; background:linear-gradient(135deg,rgba(126,94,255,0.85),rgba(160,74,255,0.85)); border:1px solid rgba(255,255,255,0.1); box-shadow:0 6px 18px rgba(160,74,255,.25);">チャレンジモード（夜）</button>
+      <button id="menuSettingsBtn" class="sub" style="font-size:13px; padding:9px; margin:0; width:100%;">ゲーム設定</button>
+      <button id="menuRankingBtn" class="sub" style="font-size:13px; padding:9px; margin:0; width:100%;">オンラインランキング</button>
+    </div>
+  </div>
+
+  <!-- バット倉庫画面 -->
+  <div class="panel" id="warehouseUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:90vw; max-width:420px; max-height:92vh; display:flex; flex-direction:column; box-sizing:border-box; z-index:20;">
+    <h1 style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:8px; margin:0 0 8px 0; font-size:16px;">
+      <span>バット倉庫</span>
+      <span id="warehouseCount" style="font-size:12px; color:#ffd23a;">0 / 20 本</span>
+    </h1>
+    
+    <!-- Swiper スワイパーコンテナ -->
+    <div class="swiper" id="warehouseSwiper" style="width: 100%; height: 130px; margin: 4px 0;">
+      <div class="swiper-wrapper" id="warehouseList">
+        <!-- 保存されたバットがスライドとして並びます -->
+      </div>
+    </div>
+    
+    <!-- 連動詳細表示エリア -->
+    <div id="warehouseDetail" style="margin-bottom:12px; min-height: 180px;">
+      <!-- スワイプで選択されたバットの詳細が動的にここに描画されます -->
+    </div>
+    
+    <div style="display:flex; gap:8px; width:100%;">
+      <button id="warehouseBackBtn" class="sub" style="flex:1; margin:0; padding:10px;">メニューに戻る</button>
+      <button id="warehouseCraftBtn" style="flex:1; margin:0; font-size:12px; padding:10px; background:linear-gradient(135deg,rgba(76,175,80,0.85),rgba(46,125,50,0.85)); border:1px solid rgba(255,255,255,0.1); box-shadow:0 6px 18px rgba(76,175,80,.25);">新しく削る</button>
+    </div>
+  </div>
+
+  <!-- ゲーム設定画面 -->
+  <div class="panel" id="settingsUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:300px; max-width:90vw; z-index:20;">
+    <h1 style="border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:8px; margin:0 0 15px 0; font-size:16px;">ゲーム設定</h1>
+    <div style="margin-bottom:18px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:bold; font-size:12px;">
+        <span>効果音音量:</span>
+        <b id="settingsVolumeVal" style="color:#ffd23a;">100%</b>
+      </div>
+      <input type="range" id="settingsVolumeSlider" min="0" max="1" step="0.05" value="1.0" style="width:100%; cursor:pointer; margin:8px 0;">
+    </div>
+    <div style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-weight:bold; font-size:12px;">高画質エフェクト (Bloom):</span>
+      <input type="checkbox" id="settingsBloomCheckbox" checked style="cursor:pointer; width:18px; height:18px;">
+    </div>
+    <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.15); padding-top:12px;">
+      <span style="font-weight:bold; font-size:12px; color:#94a3b8;">デバッグ表示:</span>
+      <input type="checkbox" id="settingsDebugCheckbox" style="cursor:pointer; width:18px; height:18px;">
+    </div>
+    <button id="settingsBackBtn" class="sub" style="width:100%; margin:0; padding:10px;">メニューに戻る</button>
+  </div>
+
+  <!-- ランキング画面 -->
+  <div class="panel" id="rankingUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:320px; max-width:90vw; z-index:20;">
+    <h1 style="border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:8px; margin:0 0 12px 0; font-size:16px; display:flex; align-items:center; gap:6px;">オンラインランキング</h1>
+    <p style="font-size:11px; color:#cbd5e1; margin:0 0 12px 0;">10球の総飛距離ランキング</p>
+    <div id="rankingListContainer" style="max-height:260px; overflow-y:auto; margin-bottom:15px; padding-right:4px;">
+      <ol id="rankingOl" style="text-align:left; font-size:13px; line-height:2.0; margin:0; padding-left:24px; color:#fff;">
+        <!-- ランキングリストがコピーされます -->
+      </ol>
+    </div>
+    <button id="rankingBackBtn" class="sub" style="width:100%; margin:0; padding:10px;">メニューに戻る</button>
+  </div>
+
+  <!-- バット名入力モーダル -->
+  <div class="panel" id="batNameModal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:300px; max-width:90vw; z-index:100; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+    <h1 style="color:#ffd23a; margin:0 0 8px 0; font-size:16px;">バットが完成！</h1>
+    <p style="font-size:11px; color:#cfe3ff; margin:0 0 15px 0;">名前をつけてバット倉庫に保存します。</p>
+    <input type="text" id="batNameInput" placeholder="バットの名前" maxlength="16" style="font-size:14px; padding:8px 12px; border-radius:8px; border:1px solid #555; background:#1d2230; color:#fff; text-align:center; width:90%; box-sizing:border-box; margin-bottom:15px; font-weight:bold;">
+    <div style="display:flex; gap:8px; width:100%;">
+      <button id="batNameCancelBtn" class="sub" style="flex:1; margin:0; padding:8px;">キャンセル</button>
+      <button id="batNameSaveBtn" style="flex:1; margin:0; padding:8px; background:linear-gradient(135deg,rgba(255,107,74,0.85),rgba(233,49,79,0.85)); border:1px solid rgba(255,255,255,0.1);">倉庫に保存</button>
+    </div>
+  </div>
+
+  <div id="craftUI" style="display:none;">
   <div class="panel" id="craftPanel">
     <h1><svg class="ui-icon" viewBox="0 0 24 24" width="20" height="20" style="vertical-align:middle; fill:currentColor; margin-right:4px;"><path d="M12 2C6.48 2 2 4.47 2 7.5S6.48 13 12 13s10-2.47 10-5.5S17.52 2 12 2zm0 9c-4.42 0-8-1.79-8-3.5S7.58 4 12 4s8 1.79 8 3.5-3.58 3.5-8 3.5zM2 9.5v5c0 3.03 4.48 5.5 10 5.5s10-2.47 10-5.5v-5c0 2.25-3.48 4.2-8 4.75V17c0 .55-.45 1-1 1s-1-.45-1-1v-2.75c-4.52-.55-8-2.5-8-4.75z"/></svg>バット工房 — 旋盤</h1>
     <button class="hbtn" onclick="this.closest('.panel').classList.toggle('open')">操作説明 ?</button>
@@ -147,14 +403,18 @@
         <option value="metal">アルミ金属 (Aluminum) - 芯超広・強反発</option>
         <option value="gold">金バット (Gold) - 重量級パワー</option>
         <option value="diamond">ダイヤモンド (Diamond) - 究極の硬度</option>
-        <option value="obsidian">黒曜石 (Obsidian) - 漆黒の魔器</option>
+        <option value="obsidian">黒曜石 (Obsidian) - 漆黒 of 魔器</option>
       </select>
     </div>
-    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
-      <button id="resetBtn" class="sub" style="margin:0;">丸太からやり直す</button>
-      <button id="doneBtn" style="margin:0;">完成！打席に立つ</button>
+      <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+        <button id="doneBtn" style="flex:1 1 auto; margin:0; padding:10px 14px;">完成！</button>
+        <button id="resetBtn" class="sub" style="flex:1 1 auto; margin:0; padding:10px 14px; background:#4a2424; box-shadow:none;">削り直す</button>
+      </div>
+      <div style="display:flex; gap:6px; margin-top:6px;">
+        <button id="craftWarehouseBtn" class="sub" style="flex:1; margin:0; padding:8px 12px;">倉庫を見る</button>
+        <button id="craftMenuBtn" class="sub" style="flex:1; margin:0; padding:8px 12px;">メニュー</button>
+      </div>
     </div>
-  </div>
   <div class="panel" id="craftStats">
     <h1 style="margin-bottom:6px;"><svg class="ui-icon" viewBox="0 0 24 24" width="18" height="18" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><polygon points="5 5 5 19 19 19"/><polygon points="8 11 8 16 13 16"/></svg>バット計測</h1>
     <div style="display:flex;align-items:flex-start;gap:6px;">
@@ -164,30 +424,16 @@
         <tr><td>スイング時間</td><td id="stSwing">–</td></tr>
         <tr><td>芯の直径</td><td id="stBarrel">–</td></tr>
       </table>
-      <canvas id="radar" width="156" height="128" style="flex-shrink:0;display:block;"></canvas>
+      <canvas id="radar" width="200" height="200" style="flex-shrink:0;display:block;"></canvas>
     </div>
   </div>
   </div><!-- /#craftUI -->
 
   <div class="panel" id="gamePanel" style="display:none">
-    <h1><svg class="ui-icon" viewBox="0 0 24 24" width="20" height="20" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; margin-right:4px;"><circle cx="12" cy="12" r="9"/><path d="M7 6c2 3 2 9 0 12"/><path d="M17 6c-2 3-2 9 0 12"/></svg>打撃チャレンジ</h1>
-    <button class="hbtn" onclick="this.closest('.panel').classList.toggle('open')">操作説明 ?</button>
-    <div class="help">
-      <p><b>タップ / クリック / スペース</b>でスイング ／ <b>長押しドラッグ</b>で視点</p>
-      <p>青い円が縮みきった瞬間に投球！球速は1球ごとに上がる</p>
-      <p id="batInfo" style="color:#9fb4d9"></p>
-    </div>
-    <div id="pitchHistory" style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.12); padding-top:10px;">
-      <p style="font-size:11.5px; color:#aab6cc; margin:0 0 6px; font-weight:bold; letter-spacing:0.5px;">投球履歴 (10球)</p>
+    <div id="pitchHistory">
       <div class="pitch-grid"></div>
     </div>
-    <button id="backBtn" class="sub">工房に戻る</button>
-    <button id="retryBtn" class="sub">もう一度10球</button>
-  </div>
-  <div class="panel" id="scoreboard" style="display:none">
-    <p>投球 <b id="pitchNo">0</b> / 10</p>
-    <p>ヒット <b id="hits">0</b>　HR <b id="hrs">0</b></p>
-    <p>最長 <b id="best">0</b> m</p>
+    <button id="backBtn" class="sub">メニューに戻る</button>
   </div>
   <div id="msg"></div>
   <div id="pitchSpeed"></div>
@@ -199,8 +445,7 @@
        border-radius:8px;border:1px solid #555;background:#1d2230;color:#fff;text-align:center"></p>
     <button id="regBtn">ランキングに登録</button>
     <ol id="rankList" style="text-align:left;font-size:13px;line-height:1.9;margin:10px 0 0;padding-left:26px"></ol>
-    <button id="againBtn" class="sub">もう一度10球</button>
-    <button id="craftBtn2" class="sub">工房に戻る</button>
+    <button id="craftBtn2" class="sub">メニューに戻る</button>
   </div>
   <div class="panel" id="hitData">
     <div class="col"><div class="big" id="hdSpeed">–</div><div class="lbl">打球速度 km/h</div></div>
@@ -269,6 +514,7 @@
         <div>球速: <span id="dbgBallSpeed" style="color:#ffd479;">-</span></div>
         <div>投球時間(T): <span id="dbgT" style="color:#ffd479;">-</span></div>
         <div>現在飛行速度: <span id="dbgFlyV" style="color:#ffd479;">-</span></div>
+        <div>バット耐久値: <span id="dbgBatHP" style="color:#ffd479;">-</span></div>
       </div>
     </div>
   </div>
@@ -290,6 +536,24 @@
 <script src="vendor/shaders/SMAAShader.js"></script>
 <script src="vendor/postprocessing/SMAAPass.js"></script>
 <script>
+window.onerror = function(msg, url, line, col, error) {
+  const div = document.createElement('div');
+  div.style.position = 'absolute';
+  div.style.top = '10px';
+  div.style.left = '10px';
+  div.style.background = 'rgba(255, 0, 0, 0.9)';
+  div.style.color = 'white';
+  div.style.padding = '10px';
+  div.style.zIndex = '99999';
+  div.style.fontSize = '12px';
+  div.style.fontFamily = 'monospace';
+  div.style.whiteSpace = 'pre-wrap';
+  div.style.maxWidth = '90vw';
+  div.style.pointerEvents = 'auto';
+  div.innerHTML = `Error: ${msg}<br>URL: ${url}<br>Line: ${line}:${col}<br>Stack: ${error ? error.stack : ''}`;
+  document.body.appendChild(div);
+  return false;
+};
 // ================= 基本 =================
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -538,11 +802,13 @@ function getBatShapeScore() {
 function batStats() {
   const dx = BAT_LEN/SEG;
   let M = 0, Mx = 0, I = 0, barrel = 0, handleR = 1;
+  let minRadius = 1; // Track thinnest point for durability
   for (let i = 0; i <= SEG; i++) {
     const x = i*dx, dm = RHO*Math.PI*radii[i]*radii[i]*dx;
     M += dm; Mx += dm*x; I += dm*x*x;
     if (i > SEG*0.6) barrel = Math.max(barrel, radii[i]);
     if (i >= SEG*0.05 && i <= SEG*0.4) handleR = Math.min(handleR, radii[i]);
+    if (radii[i] < minRadius) minRadius = radii[i];
   }
   const com = Mx/M;
   const cop = I/(M*com);                                // 芯（打撃の中心）
@@ -552,31 +818,45 @@ function batStats() {
   let powerMult = 1.0;
   let flexMult = 1.0;
   let swingTMult = 1.0;
+  let durMult = 1.0;   // 耐久性倍率
+  let meetMult = 1.0;  // ミート倍率
   
   if (matType === 'carbon') {
     powerMult = 0.95;
     flexMult = 0.55;
     swingTMult = 0.72;
+    durMult = 0.70;    // 軽量だが折れやすい
+    meetMult = 1.15;   // 芯が広い
   } else if (matType === 'metal') {
     powerMult = 1.25;
     flexMult = 0.3;
     swingTMult = 0.95;
+    durMult = 1.30;    // 金属は頑丈
+    meetMult = 1.10;
   } else if (matType === 'gold') {
     powerMult = 1.40;
     flexMult = 0.15;
     swingTMult = 1.25;
+    durMult = 1.50;    // 最も頑丈
+    meetMult = 0.85;   // 重くて芯が狭い
   } else if (matType === 'diamond') {
     powerMult = 1.60;
     flexMult = 0.05;
     swingTMult = 1.10;
+    durMult = 1.40;    // 硬いが高耐久
+    meetMult = 0.75;   // 最も芯が狭い
   } else if (matType === 'obsidian') {
     powerMult = 1.30;
     flexMult = 0.10;
     swingTMult = 1.05;
+    durMult = 0.50;    // 最も脆い
+    meetMult = 0.90;
   } else { // wood
     powerMult = 1.0;
     flexMult = 1.0;
     swingTMult = 1.0;
+    durMult = 1.0;
+    meetMult = 1.0;
   }
 
   const swingT = clamp((0.16 + 0.16*I) * swingTMult, 0.19, 0.75);      // 重い→振りが遅い
@@ -588,7 +868,37 @@ function batStats() {
   meff *= shapeScore;
   flex *= shapeScore;
 
-  return {M, com, I, cop, barrel, swingT, meff, flex, handleR, shapeScore};
+  // === 耐久性 (Durability) の計算 ===
+  // 最薄部のペナルティ: 極端に細い部分があると耐久性が激減
+  const thinnestPenalty = Math.max(0, 0.018 - minRadius) * 80;
+  // 形状の均整度: セグメント間の半径変化の標準偏差
+  let sumDiff = 0, sumDiffSq = 0;
+  for (let i = 0; i < SEG; i++) {
+    const diff = Math.abs(radii[i+1] - radii[i]);
+    sumDiff += diff;
+    sumDiffSq += diff * diff;
+  }
+  const avgDiff = sumDiff / SEG;
+  const stdDiff = Math.sqrt(sumDiffSq / SEG - avgDiff * avgDiff);
+  const uniformity = clamp(1.0 - stdDiff * 15, 0, 1);
+  const baseDurability = clamp((uniformity - thinnestPenalty) * 100 * durMult * shapeScore, 5, 100);
+  const durability = Math.round(baseDurability);
+
+  // === ミート (Meet) の計算 ===
+  // 芯の太さ＝当てやすさ: 芯付近で最大半径の80%以上あるセグメントの割合
+  let maxBarrelR = 0;
+  for (let i = Math.floor(SEG*0.5); i <= SEG; i++) maxBarrelR = Math.max(maxBarrelR, radii[i]);
+  let barrelCount = 0;
+  const barrelStart = Math.floor(SEG * 0.5);
+  const barrelEnd = Math.floor(SEG * 0.95);
+  for (let i = barrelStart; i <= barrelEnd; i++) {
+    if (radii[i] >= maxBarrelR * 0.80) barrelCount++;
+  }
+  const barrelWidth = barrelCount / (barrelEnd - barrelStart + 1);
+  const baseMeet = clamp(barrelWidth * barrel * 2500 * meetMult * shapeScore, 5, 100);
+  const meet = Math.round(baseMeet);
+
+  return {M, com, I, cop, barrel, swingT, meff, flex, handleR, shapeScore, durability, meet, minRadius};
 }
 function updateCraftStats() {
   const s = batStats();
@@ -597,38 +907,92 @@ function updateCraftStats() {
   $('stSwing').textContent = s.swingT.toFixed(2) + ' 秒';
   $('stBarrel').textContent = (s.barrel*200).toFixed(1) + ' cm';
   $('meterFill').style.width = clamp(s.M/8.0, 0, 1)*100 + '%';
-  drawRadar(clamp(s.meff/3.5, .06, 1), clamp((0.8-s.swingT)/0.55, .06, 1), clamp(s.flex/3, .06, 1));
+  // 5項目の正規化 (0〜100)
+  const power = Math.round(clamp(s.meff/3.5, .06, 1) * 100);
+  const handling = Math.round(clamp((0.8-s.swingT)/0.55, .06, 1) * 100);
+  const flexVal = Math.round(clamp(s.flex/3, .06, 1) * 100);
+  const durVal = s.durability; // already 0-100
+  const meetVal = s.meet;      // already 0-100
+  drawRadar([power, handling, flexVal, durVal, meetVal]);
 }
-// パワー / 操作性 / しなり の三角レーダーチャート
-function drawRadar(p, h, f) {
+// パワー / 操作性 / しなり / 耐久性 / ミート の五角形レーダーチャート
+function drawRadar(vals5) {
   const cv = $('radar'), g = cv.getContext('2d');
-  const cx = 78, cy = 68, R = 48;
-  const axes = [-Math.PI/2, Math.PI/2 + Math.PI/3, Math.PI/2 - Math.PI/3]; // 上, 左下, 右下
+  const cx = 100, cy = 100, R = 78;
+  const N = 5;
+  const labels = ['パワー', '操作性', 'しなり', '耐久性', 'ミート'];
+  // 角度: 上から時計回り (上, 右上, 右下, 左下, 左上)
+  const angles = [];
+  for (let i = 0; i < N; i++) angles.push(-Math.PI/2 + (Math.PI*2/N)*i);
   const pt = (ang, r) => [cx + Math.cos(ang)*r, cy + Math.sin(ang)*r];
+
   g.clearRect(0, 0, cv.width, cv.height);
-  for (let k = 3; k >= 1; k--) {
+
+  // 背景のグリッド（5段階の五角形）
+  for (let k = 5; k >= 1; k--) {
     g.beginPath();
-    axes.forEach((a, i) => { const [x, y] = pt(a, R*k/3); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+    angles.forEach((a, i) => { const [x, y] = pt(a, R*k/5); i ? g.lineTo(x, y) : g.moveTo(x, y); });
     g.closePath();
-    g.strokeStyle = 'rgba(140,170,220,.28)'; g.lineWidth = 1; g.stroke();
+    g.strokeStyle = 'rgba(140,170,220,.22)'; g.lineWidth = 1; g.stroke();
   }
-  axes.forEach(a => { const [x, y] = pt(a, R); g.beginPath(); g.moveTo(cx, cy); g.lineTo(x, y); g.stroke(); });
-  const vals = [p, h, f];
+  // 軸線
+  angles.forEach(a => { const [x, y] = pt(a, R); g.beginPath(); g.moveTo(cx, cy); g.lineTo(x, y); g.strokeStyle = 'rgba(140,170,220,.22)'; g.stroke(); });
+
+  // データの五角形を描画
+  // ???マスク: 80超の値は描画上80でクランプ（デバッグモード時はそのまま）
+  const displayVals = vals5.map(v => {
+    if (!debugMode && v > 80) return 80;
+    return v;
+  });
+
   g.beginPath();
-  axes.forEach((a, i) => { const [x, y] = pt(a, R*vals[i]); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+  angles.forEach((a, i) => {
+    const [x, y] = pt(a, R * clamp(displayVals[i] / 100, 0.04, 1));
+    i ? g.lineTo(x, y) : g.moveTo(x, y);
+  });
   g.closePath();
   const grad = g.createLinearGradient(cx, cy-R, cx, cy+R);
-  grad.addColorStop(0, 'rgba(90,220,255,.55)'); grad.addColorStop(1, 'rgba(255,110,150,.45)');
+  grad.addColorStop(0, 'rgba(90,220,255,.50)'); grad.addColorStop(1, 'rgba(255,110,150,.40)');
   g.fillStyle = grad; g.fill();
   g.shadowColor = '#6fe0ff'; g.shadowBlur = 8;
   g.strokeStyle = '#8ff0ff'; g.lineWidth = 2; g.stroke();
   g.shadowBlur = 0;
-  g.fillStyle = '#dce8ff'; g.font = 'bold 11px sans-serif'; g.textAlign = 'center';
-  g.fillText('パワー', cx, cy - R - 6);
-  g.fillText('操作性', cx - R + 2, cy + R*0.62 + 14);
-  g.fillText('しなり', cx + R - 2, cy + R*0.62 + 14);
-}
 
+  // ラベル描画
+  g.font = 'bold 11px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  const labelOffsets = [
+    [0, -14],   // パワー (top)
+    [16, 0],    // 操作性 (right-top)
+    [10, 10],   // しなり (right-bottom)
+    [-10, 10],  // 耐久性 (left-bottom)
+    [-16, 0],   // ミート (left-top)
+  ];
+  labels.forEach((label, i) => {
+    const [x, y] = pt(angles[i], R + 18);
+    const ox = labelOffsets[i][0], oy = labelOffsets[i][1];
+    // ???マスク: 80超のステータスはラベルを???にする
+    let displayLabel = label;
+    let displayNum = '';
+    if (!debugMode && vals5[i] > 80) {
+      displayLabel = '???';
+      g.fillStyle = '#ffd23a';
+    } else if (i === 3 && !debugMode) {
+      // 耐久性は通常モードでもラベルだけ表示（値は隠す）
+      displayLabel = label;
+      g.fillStyle = '#8a96ad';
+    } else {
+      g.fillStyle = '#dce8ff';
+    }
+    g.fillText(displayLabel, x + ox, y + oy);
+    // デバッグモード: 数値を小さく表示
+    if (debugMode) {
+      g.font = '9px monospace';
+      g.fillStyle = '#ffd479';
+      g.fillText(vals5[i], x + ox, y + oy + 12);
+      g.font = 'bold 11px sans-serif';
+    }
+  });
+}
 // ================= 効果音（WebAudio合成） =================
 let AC = null;
 function audio() {
@@ -641,7 +1005,7 @@ function tone(freq, dur, type, vol, slideTo) {
     const ac = audio(), o = ac.createOscillator(), gn = ac.createGain(), t = ac.currentTime;
     o.type = type || 'sine'; o.frequency.setValueAtTime(freq, t);
     if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
-    gn.gain.setValueAtTime(vol || .15, t);
+    gn.gain.setValueAtTime((vol || .15) * masterVolume, t);
     gn.gain.exponentialRampToValueAtTime(.0008, t + dur);
     o.connect(gn).connect(ac.destination);
     o.start(t); o.stop(t + dur + .02);
@@ -658,7 +1022,7 @@ function noiseSnd(dur, fLo, fHi, vol) {
     bp.frequency.setValueAtTime(fLo, t);
     bp.frequency.exponentialRampToValueAtTime(fHi, t + dur);
     const gn = ac.createGain();
-    gn.gain.setValueAtTime(vol, t);
+    gn.gain.setValueAtTime(vol * masterVolume, t);
     gn.gain.exponentialRampToValueAtTime(.001, t + dur);
     src.connect(bp).connect(gn).connect(ac.destination);
     src.start(t);
@@ -717,6 +1081,11 @@ const snd = {
     [880, 1100, 1320, 1760].forEach((f, i) => {
       setTimeout(() => tone(f, .3, 'sine', .12), i * 65);
     });
+  },
+  batBreak: () => {
+    noiseSnd(.18, 40, 400, .65);
+    setTimeout(() => noiseSnd(.12, 100, 1200, .30), 25);
+    tone(160, .10, 'square', .38, 55);
   },
   // 滞空歓声シンセ
   _cheerNodes: null,
@@ -897,6 +1266,48 @@ function updateCraft(dt) {
 let gameBat, batterParts, ball, ballShadow, aimRing, pitchGauge, trail = [];
 const MOUND = new THREE.Vector3(0.25, 1.85, -18.0);
 let fieldColliders = [];
+function createEarthTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  
+  // Base concrete gray
+  ctx.fillStyle = '#607d8b';
+  ctx.fillRect(0, 0, 256, 256);
+  
+  // Monotone concrete sand grain noise
+  for (let i = 0; i < 6000; i++) {
+    const x = Math.random() * 256;
+    const y = Math.random() * 256;
+    const size = 1 + Math.random() * 1.2;
+    const val = (Math.random() - 0.5) * 20; 
+    const r = Math.floor(96 + val);
+    const g = Math.floor(125 + val);
+    const b = Math.floor(139 + val);
+    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillRect(x, y, size, size);
+  }
+  
+  // Draw subtle joint lines for concrete blocks
+  ctx.strokeStyle = 'rgba(40, 50, 60, 0.16)';
+  ctx.lineWidth = 1.0;
+  for (let offset = 0; offset <= 256; offset += 64) {
+    ctx.beginPath();
+    ctx.moveTo(offset, 0); ctx.lineTo(offset, 256);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(0, offset); ctx.lineTo(256, offset);
+    ctx.stroke();
+  }
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(160, 160);
+  return tex;
+}
+
 function addGroundAndSkyland() {
   // ナイター: 夕暮れの空 + 照明に照らされたフィールド
   scene.background = new THREE.Color(0x0d1830);
@@ -907,8 +1318,13 @@ function addGroundAndSkyland() {
   grass.rotation.x = -Math.PI/2; grass.receiveShadow = true;
   gameGroup.add(grass);
   // 場外〜宇宙弾の着地用に大地をずっと先まで
+  const earthTex = createEarthTexture();
   const earth = new THREE.Mesh(new THREE.RingGeometry(258, 7000, 48),
-    new THREE.MeshBasicMaterial({color:0x1a3518}));
+    new THREE.MeshStandardMaterial({
+      map: earthTex,
+      roughness: 0.95,
+      metalness: 0.05
+    }));
   earth.rotation.x = -Math.PI/2; earth.position.y = -.05;
   gameGroup.add(earth);
   // ファウル領域を薄暗く（フェアゾーン ±45° 以外に半透明の影）
@@ -1065,28 +1481,43 @@ function addOutfieldStructures() {
 }
 
 const buildingTexCache = {};
-function getBuildingMaterial(color, emissiveColorHex) {
-  const cacheKey = color.getHexString() + '_' + emissiveColorHex;
+function getBuildingMaterial(color, emissiveColorHex, isNight = true) {
+  const cacheKey = color.getHexString() + '_' + emissiveColorHex + '_' + (isNight ? 'N' : 'D');
   if (buildingTexCache[cacheKey]) return buildingTexCache[cacheKey];
   
   const canvas = document.createElement('canvas');
-  canvas.width = 64;
-  canvas.height = 128;
+  canvas.width = 128; // Higher resolution for crisper window rendering
+  canvas.height = 256;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#0a0d14';
-  ctx.fillRect(0, 0, 64, 128);
   
-  // Grid of windows
-  ctx.fillStyle = emissiveColorHex;
+  let matColor = color;
+  if (!isNight) {
+    matColor = color.clone().multiplyScalar(2.0).addScalar(0.2);
+    matColor.r = Math.min(matColor.r, 1);
+    matColor.g = Math.min(matColor.g, 1);
+    matColor.b = Math.min(matColor.b, 1);
+  }
+  
+  if (isNight) {
+    ctx.fillStyle = '#090d16'; // Sleek dark silhouette
+    ctx.fillRect(0, 0, 128, 256);
+    ctx.fillStyle = emissiveColorHex;
+  } else {
+    ctx.fillStyle = '#' + matColor.getHexString(); // Bright day styling
+    ctx.fillRect(0, 0, 128, 256);
+    ctx.fillStyle = '#263238'; // Dark window styling
+  }
+  
+  // Grid of windows - cols = 4, rows = 10 (larger windows, less dense)
   const cols = 4;
-  const rows = 12;
-  const w = 64 / cols;
-  const h = 128 / rows;
+  const rows = 10;
+  const w = 128 / cols;
+  const h = 256 / rows;
   for (let r = 0; r < rows; r++) {
-    if (Math.random() < 0.15) continue;
+    if (isNight && Math.random() < 0.12) continue; // Random unlit floors
     for (let c = 0; c < cols; c++) {
-      if (Math.random() < 0.25) continue;
-      ctx.fillRect(c * w + w * 0.2, r * h + h * 0.2, w * 0.6, h * 0.6);
+      if (isNight && Math.random() < 0.22) continue; // Random unlit rooms
+      ctx.fillRect(c * w + w * 0.20, r * h + h * 0.20, w * 0.60, h * 0.60);
     }
   }
   
@@ -1095,11 +1526,11 @@ function getBuildingMaterial(color, emissiveColorHex) {
   tex.wrapT = THREE.RepeatWrapping;
   
   const mat = new THREE.MeshStandardMaterial({
-    color: color,
-    roughness: 0.35,
-    metalness: 0.6,
-    emissiveMap: tex,
-    emissive: new THREE.Color(emissiveColorHex).multiplyScalar(0.4),
+    color: matColor,
+    roughness: isNight ? 0.3 : 0.4,
+    metalness: isNight ? 0.6 : 0.3,
+    emissiveMap: isNight ? tex : null,
+    emissive: isNight ? new THREE.Color(emissiveColorHex).multiplyScalar(0.55) : new THREE.Color(0x000000),
     map: tex
   });
   
@@ -1108,6 +1539,7 @@ function getBuildingMaterial(color, emissiveColorHex) {
 }
 
 function addBuildings() {
+  const isNight = (battingMode === 'challenge');
   const colors = [
     new THREE.Color(0x111625),
     new THREE.Color(0x181c2b),
@@ -1119,80 +1551,239 @@ function addBuildings() {
   const startTh = Math.PI * 0.62;
   const endTh = Math.PI * 1.38;
   
+  function createClonedMaterial(baseMat, repeatU, repeatV) {
+    const cloned = baseMat.clone();
+    if (baseMat.map) {
+      cloned.map = baseMat.map.clone();
+      cloned.map.repeat.set(repeatU, repeatV);
+      cloned.map.needsUpdate = true;
+    }
+    if (baseMat.emissiveMap) {
+      cloned.emissiveMap = baseMat.emissiveMap.clone();
+      cloned.emissiveMap.repeat.set(repeatU, repeatV);
+      cloned.emissiveMap.needsUpdate = true;
+    }
+    cloned.needsUpdate = true;
+    return cloned;
+  }
+  
+  const placed = []; // Array to store {x, z, w} to prevent overlaps
+  
   for (let i = 0; i < 160; i++) {
-    const th = startTh + Math.random() * (endTh - startTh);
-    // Expand radius: from 130m out to 750m
-    const r = 130 + Math.pow(Math.random(), 1.3) * 620;
-    const hgt = 12 + Math.random() * 55;
-    const w = 9 + Math.random() * 16;
+    let th = 0, r = 0, w = 0, hgt = 0, heightFactor = 1.0;
+    let x = 0, z = 0;
+    
+    // Try up to 15 times to find a non-overlapping position
+    for (let attempt = 0; attempt < 15; attempt++) {
+      th = startTh + Math.random() * (endTh - startTh);
+      // Expand radius: from 130m out to 750m
+      r = 130 + Math.pow(Math.random(), 1.3) * 620;
+      
+      // Closer buildings are shorter/flatter; further ones can be taller landmark spires
+      heightFactor = r < 250 ? 0.7 : 1.0;
+      hgt = (12 + Math.random() * 55) * heightFactor;
+      w = 9 + Math.random() * 16;
+      
+      x = r * Math.sin(th);
+      z = r * Math.cos(th);
+      
+      // Check collision against already placed buildings
+      let collision = false;
+      for (let j = 0; j < placed.length; j++) {
+        const other = placed[j];
+        const dx = x - other.x;
+        const dz = z - other.z;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        const minDist = (w + other.w) * 0.9 + 8.0; // radius boundaries + clearance margin
+        if (dist < minDist) {
+          collision = true;
+          break;
+        }
+      }
+      if (!collision) {
+        break; // Found a valid spot
+      }
+    }
+    
+    placed.push({ x, z, w });
     
     const col = colors[Math.floor(Math.random() * colors.length)];
     const emissiveCol = emissiveColors[Math.floor(Math.random() * emissiveColors.length)];
     
-    let geom, mat, b;
+    let b;
     const type = Math.random();
     
-    if (type < 0.45) {
-      // Type 1: Skyscraper with glowing window texture
-      geom = new THREE.BoxGeometry(w, hgt, w);
-      mat = getBuildingMaterial(col, emissiveCol);
-      b = new THREE.Mesh(geom, mat);
+    if (type < 0.40) {
+      // Type 1: Modern Skyscraper with uniform windows and mechanical penthouse
+      const buildingGroup = new THREE.Group();
+      
+      // Main tower - less repeat for larger windows
+      const mainGeom = new THREE.BoxGeometry(w, hgt, w);
+      const repU = Math.max(1, Math.round(w / 8.0));
+      const repV = Math.max(2, Math.round(hgt / 10.0));
+      const baseMat = getBuildingMaterial(col, emissiveCol, isNight);
+      const mainMat = createClonedMaterial(baseMat, repU, repV);
+      const mainMesh = new THREE.Mesh(mainGeom, mainMat);
+      mainMesh.position.y = 0;
+      buildingGroup.add(mainMesh);
+      
+      // Penthouse
+      const pentW = w * 0.55;
+      const pentH = hgt * 0.09;
+      const pentGeom = new THREE.BoxGeometry(pentW, pentH, pentW);
+      const pentMat = new THREE.MeshStandardMaterial({
+        color: col.clone().multiplyScalar(0.7),
+        roughness: 0.6,
+        metalness: 0.8
+      });
+      const pentMesh = new THREE.Mesh(pentGeom, pentMat);
+      pentMesh.position.y = hgt / 2 + pentH / 2;
+      buildingGroup.add(pentMesh);
+      
+      // Beacon Light on top of penthouse
+      const beaconGeo = new THREE.SphereGeometry(0.26, 8, 8);
+      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff3333, transparent: true });
+      const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+      beacon.position.set(0, hgt / 2 + pentH + 0.2, 0);
+      buildingGroup.add(beacon);
+      buildingBeacons.push({ material: beaconMat, phase: Math.random() * Math.PI * 2, speed: 4 + Math.random() * 2 });
+      
+      b = buildingGroup;
     } else if (type < 0.75) {
-      // Type 2: Tapered glass tower
-      geom = new THREE.CylinderGeometry(w * 0.45, w * 0.75, hgt, 4, 1);
-      geom.rotateY(Math.PI / 4); // rotate to make it look like a diamond/square tower
-      mat = new THREE.MeshStandardMaterial({
-        color: col,
+      // Type 2: Sleek Neo-Glass Stepped Tower with glowing neon bands
+      const buildingGroup = new THREE.Group();
+      
+      const tier1H = hgt * 0.45;
+      const tier2H = hgt * 0.35;
+      const tier3H = hgt * 0.20;
+      
+      const w1 = w;
+      const w2 = w * 0.8;
+      const w3 = w * 0.6;
+      
+      const baseMat = getBuildingMaterial(col, emissiveCol, isNight);
+      
+      // Tier 1 (Bottom)
+      const t1Geom = new THREE.BoxGeometry(w1, tier1H, w1);
+      const repU1 = Math.max(1, Math.round(w1 / 8.0));
+      const repV1 = Math.max(1, Math.round(tier1H / 10.0));
+      const t1Mat = createClonedMaterial(baseMat, repU1, repV1);
+      const t1Mesh = new THREE.Mesh(t1Geom, t1Mat);
+      t1Mesh.position.y = -hgt / 2 + tier1H / 2;
+      buildingGroup.add(t1Mesh);
+      
+      // Tier 2 (Middle)
+      const t2Geom = new THREE.BoxGeometry(w2, tier2H, w2);
+      const repU2 = Math.max(1, Math.round(w2 / 8.0));
+      const repV2 = Math.max(1, Math.round(tier2H / 10.0));
+      const t2Mat = createClonedMaterial(baseMat, repU2, repV2);
+      const t2Mesh = new THREE.Mesh(t2Geom, t2Mat);
+      t2Mesh.position.y = -hgt / 2 + tier1H + tier2H / 2;
+      buildingGroup.add(t2Mesh);
+      
+      // Tier 3 (Top)
+      const t3Geom = new THREE.BoxGeometry(w3, tier3H, w3);
+      const repU3 = Math.max(1, Math.round(w3 / 8.0));
+      const repV3 = Math.max(1, Math.round(tier3H / 10.0));
+      const t3Mat = createClonedMaterial(baseMat, repU3, repV3);
+      const t3Mesh = new THREE.Mesh(t3Geom, t3Mat);
+      t3Mesh.position.y = -hgt / 2 + tier1H + tier2H + tier3H / 2;
+      buildingGroup.add(t3Mesh);
+      
+      // Glowing bands/neon stripes at the steps
+      const neonMat = new THREE.MeshBasicMaterial({ color: isNight ? emissiveCol : 0x37474f });
+      
+      const b1Geom = new THREE.BoxGeometry(w1 * 1.01, 0.2, w1 * 1.01);
+      const b1Mesh = new THREE.Mesh(b1Geom, neonMat);
+      b1Mesh.position.y = -hgt / 2 + tier1H;
+      buildingGroup.add(b1Mesh);
+      
+      const b2Geom = new THREE.BoxGeometry(w2 * 1.01, 0.2, w2 * 1.01);
+      const b2Mesh = new THREE.Mesh(b2Geom, neonMat);
+      b2Mesh.position.y = -hgt / 2 + tier1H + tier2H;
+      buildingGroup.add(b2Mesh);
+      
+      const b3Geom = new THREE.BoxGeometry(w3 * 1.01, 0.2, w3 * 1.01);
+      const b3Mesh = new THREE.Mesh(b3Geom, neonMat);
+      b3Mesh.position.y = hgt / 2;
+      buildingGroup.add(b3Mesh);
+      
+      // Beacon Light on top
+      const beaconGeo = new THREE.SphereGeometry(0.26, 8, 8);
+      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff3333, transparent: true });
+      const beacon = new THREE.Mesh(beaconGeo, beaconMat);
+      beacon.position.set(0, hgt / 2 + 0.2, 0);
+      buildingGroup.add(beacon);
+      buildingBeacons.push({ material: beaconMat, phase: Math.random() * Math.PI * 2, speed: 4 + Math.random() * 2 });
+      
+      b = buildingGroup;
+    } else {
+      // Type 3: High-Tech Landmark Tower with observation deck and spire antenna
+      const buildingGroup = new THREE.Group();
+      
+      const shaftH = hgt * 0.85;
+      const deckH = hgt * 0.055;
+      const antH = hgt * 0.12;
+      const shaftR = w * 0.32;
+      const deckR = w * 0.52;
+      
+      // Shaft
+      const shaftGeom = new THREE.CylinderGeometry(shaftR, shaftR * 1.1, shaftH, 16);
+      const repU = Math.max(2, Math.round(shaftR * 2 * Math.PI / 8.0));
+      const repV = Math.max(3, Math.round(shaftH / 10.0));
+      const baseMat = getBuildingMaterial(col, emissiveCol, isNight);
+      const shaftMat = createClonedMaterial(baseMat, repU, repV);
+      const shaftMesh = new THREE.Mesh(shaftGeom, shaftMat);
+      shaftMesh.position.y = -hgt / 2 + shaftH / 2;
+      buildingGroup.add(shaftMesh);
+      
+      // Observation deck (thick disc)
+      const deckGeom = new THREE.CylinderGeometry(deckR, deckR, deckH, 20);
+      const deckMat = new THREE.MeshStandardMaterial({
+        color: col.clone().multiplyScalar(0.8),
         roughness: 0.15,
         metalness: 0.85,
-        emissive: new THREE.Color(emissiveCol).multiplyScalar(0.2)
+        emissive: isNight ? new THREE.Color(emissiveCol).multiplyScalar(0.85) : new THREE.Color(0x000000)
       });
-      b = new THREE.Mesh(geom, mat);
+      const deckMesh = new THREE.Mesh(deckGeom, deckMat);
+      deckMesh.position.y = -hgt / 2 + shaftH + deckH / 2;
+      buildingGroup.add(deckMesh);
       
-      // Add glowing vertical stripes on the edges
-      const stripeGeo = new THREE.BoxGeometry(0.2, hgt, 0.2);
-      const stripeMat = new THREE.MeshBasicMaterial({ color: emissiveCol });
-      for (const sx of [-1, 1]) {
-        for (const sz of [-1, 1]) {
-          const stripe = new THREE.Mesh(stripeGeo, stripeMat);
-          stripe.position.set(sx * w * 0.48, 0, sz * w * 0.48);
-          b.add(stripe);
-        }
-      }
-    } else {
-      // Type 3: Cylindrical tower with antenna spire
-      geom = new THREE.CylinderGeometry(w * 0.5, w * 0.5, hgt, 8);
-      mat = new THREE.MeshStandardMaterial({
-        color: col,
-        roughness: 0.2,
-        metalness: 0.7,
-        emissive: new THREE.Color(emissiveCol).multiplyScalar(0.15)
+      // Antenna spire
+      const antGeom = new THREE.CylinderGeometry(0.04, 0.1, antH, 6);
+      const antMat = new THREE.MeshStandardMaterial({
+        color: 0x9fb4d9,
+        roughness: 0.25,
+        metalness: 0.85
       });
-      b = new THREE.Mesh(geom, mat);
+      const antMesh = new THREE.Mesh(antGeom, antMat);
+      antMesh.position.y = -hgt / 2 + shaftH + deckH + antH / 2;
+      buildingGroup.add(antMesh);
       
-      // Antenna
-      const antLen = 6 + Math.random() * 8;
-      const antGeo = new THREE.CylinderGeometry(0.08, 0.08, antLen, 4);
-      const antMat = new THREE.MeshBasicMaterial({ color: 0xcccccc });
-      const ant = new THREE.Mesh(antGeo, antMat);
-      ant.position.y = hgt/2 + antLen/2;
-      b.add(ant);
-      
-      // Beacon light
-      const beaconGeo = new THREE.SphereGeometry(0.25, 8, 8);
-      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff3333 });
+      // Beacon Light at antenna tip
+      const beaconGeo = new THREE.SphereGeometry(0.3, 8, 8);
+      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff1111, transparent: true });
       const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-      beacon.position.y = antLen / 2;
-      ant.add(beacon);
+      beacon.position.set(0, -hgt / 2 + shaftH + deckH + antH + 0.15, 0);
+      buildingGroup.add(beacon);
+      buildingBeacons.push({ material: beaconMat, phase: Math.random() * Math.PI * 2, speed: 5 + Math.random() * 2.5 });
+      
+      b = buildingGroup;
     }
     
     b.position.set(r * Math.sin(th), hgt / 2, r * Math.cos(th));
-    b.rotation.y = Math.random() * Math.PI;
+    
+    // Align buildings to face stadium center (radial direction) with small organic variation
+    b.rotation.y = th + (Math.random() - 0.5) * 0.15;
     
     // Performance optimization: only cast/receive shadow if close
     if (r < 220) {
-      b.castShadow = true;
-      b.receiveShadow = true;
+      b.traverse(child => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
     }
     
     gameGroup.add(b);
@@ -1221,10 +1812,13 @@ function addSkyStarsAndMoon() {
     g3.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     const starMat = new THREE.PointsMaterial({color:0xcfe0ff, size:1.6, sizeAttenuation:false});
     starMat.fog = false;
-    gameGroup.add(new THREE.Points(g3, starMat));
+    const stars = new THREE.Points(g3, starMat);
+    stars.name = "stars";
+    gameGroup.add(stars);
     const moonMat = new THREE.MeshBasicMaterial({color:0xfff0cc}); moonMat.fog = false;
     const moon = new THREE.Mesh(new THREE.SphereGeometry(18, 24, 24), moonMat);
     moon.position.set(-260, 360, -460); // 奥へ後退・サイズUPで遠さを表現
+    moon.name = "moon";
     gameGroup.add(moon);
   }
 }
@@ -1333,6 +1927,7 @@ function buildField() {
   disposeGroup(gameGroup);
   fieldColliders = [];
   ufos = []; // 旧UFOメッシュはdisposeGroupで破棄済み。追跡配列をリセット
+  buildingBeacons = [];
   addGroundAndSkyland();
   addInfieldAndBases();
   addOutfieldStructures();
@@ -1340,6 +1935,9 @@ function buildField() {
   addSkyStarsAndMoon();
   addPlayersAndGuides();
   addGameBallsAndBat();
+  
+  // Set up day/night lighting and adjust visibility of night objects
+  setupStadiumLighting(battingMode === 'challenge' ? 'night' : 'day');
   
   // 空中ネオンリング（Challenge Mode限定）
   targetHoops = [];
@@ -1365,7 +1963,7 @@ function drawScoreboardText(line1, line2, isBroken = false) {
     g2.fillStyle = '#ff3333'; g2.font = 'bold 58px monospace'; g2.textAlign = 'center';
     g2.fillText('SYSTEM ERROR', 256, 88);
     g2.fillStyle = '#ff6666'; g2.font = 'bold 36px monospace';
-    g2.fillText('OUT OF RANGE: +300m', 256, 160);
+    g2.fillText('OUT OF RANGE: +100m', 256, 160);
   } else {
     g2.fillStyle = '#ffd23a'; g2.font = 'bold 52px sans-serif'; g2.textAlign = 'center';
     g2.fillText(line1, 256, 88);
@@ -1423,18 +2021,21 @@ function breakScoreboard() {
   scoreboardTex.needsUpdate = true;
   
   snd.glassShatter();
-  score.total += 300;
-  showMsg('✦ SCOREBOARD CRASH BONUS: +300m ✦', '#ff3333', 2500);
+  score.total += 100;
+  showMsg('✦ SCOREBOARD CRASH BONUS: +100m ✦', '#ff3333', 2500);
 }
 let aim = {x:.5, y:.5};       // マウス正規化座標
 let swing = null, pitch = null, fly = null, windup = null, impact = null, explosion = null;
 let camShake = 0, sparks = null; // Phase2 打撃エフェクト（描画のみ）
 let ufos = [], ufoSpawnT = 0; // UFOボーナス標的（命中で上方向ジャンプ→弾道延長）
 let searchlights = [];
+let buildingBeacons = [];
 let debugMode = false;
 let usedDebugThisGame = false;
 let debugBatMult = 1.0;
 let debugPitchSpeedMult = 1.0;
+let batHP = 100, batMaxHP = 100;
+let batBroken = false;
 let score = {pitch:0, hits:0, hrs:0, best:0, total:0};
 let camOff = {x:0, y:0}, dragStart = null;
 const SWEEP0 = -1.40, SWEEP1 = 2.10;   // バットのヨー角範囲(rad)
@@ -1478,11 +2079,17 @@ function startSwing() {
 }
 function startPitch() {
   if (score.pitch >= 10 || mode !== 'game' || windup || pitch) return;
-  score.pitch++; $('pitchNo').textContent = score.pitch;
+  score.pitch++; if ($('pitchNo')) $('pitchNo').textContent = score.pitch;
   if (typeof updatePitchHistoryUI === 'function') updatePitchHistoryUI();
   
-  const baseKmh = 62 + score.pitch*4.8 + Math.random()*4;
-  const kmh = baseKmh * (debugMode ? debugPitchSpeedMult : 1.0);
+  let kmh;
+  if (battingMode === 'normal') {
+    const baseKmh = 60 + score.pitch * 3.5 + Math.random() * 3;
+    kmh = baseKmh * (debugMode ? debugPitchSpeedMult : 1.0);
+  } else {
+    const baseKmh = 85 + score.pitch * 6.0 + Math.random() * 4;
+    kmh = baseKmh * (debugMode ? debugPitchSpeedMult : 1.0);
+  }
   
   let target = new THREE.Vector3(0.0, 0.85, 0.35);
   
@@ -1601,7 +2208,10 @@ function exitVelocity(contact, pitchKmh, BS) {
   const mult = Math.min(Math.exp(Math.max(0, E - 0.82)*3.2), 12);
   vOut.multiplyScalar(mult);
   const spd = Math.min(vOut.length(), 320);
-  const superHit = mult > 2.5;
+  let superHit = mult > 2.5;
+  if (battingMode === 'normal') {
+    superHit = false;
+  }
   if (superHit) {
     const dir = vOut.clone().normalize();
     dir.y = Math.max(dir.y, 0.55); dir.normalize();   // 大飛球は高く打ち上がる
@@ -1620,6 +2230,19 @@ function tryContact(h) {
 
   // --- ヒット！---
   swing.hit = true;
+  
+  // Update ball and halo colors based on timing
+  const t = clamp((swing.s - 0.08) / (0.95 - 0.08), 0, 1);
+  const timingColor = getTimingColor(t);
+  if (ball && ball.material) {
+    ball.material.color.copy(timingColor);
+    const halo = ball.children[0];
+    if (halo && halo.material) {
+      halo.material.color.copy(timingColor);
+      halo.scale.setScalar(1.4);
+    }
+  }
+  
   const res = exitVelocity(contact, pitch.kmh, BS);
   const { vOut, q, eA, superHit, mult, isSweet, isWhipBoost } = res;
   const matType = $('materialSelect') ? $('materialSelect').value : 'wood';
@@ -1652,7 +2275,7 @@ function tryContact(h) {
   }
 
   // 打撃エフェクト（火花＋カメラシェイク・描画のみ）
-  createSparks(contact.C, superHit);
+  createSparks(contact.C, superHit, swing.s);
   addShake(superHit ? 0.10 : isSweet ? 0.06 : 0.035);
 
   window.__lastHit = {s:+swing.s.toFixed(3), sE:+contact.sE.toFixed(3), tilt:+contact.d.y.toFixed(3),
@@ -1668,7 +2291,7 @@ function tryContact(h) {
     contactPoint: contact.C.clone(),
     vOut: vOut.clone(),
     superHit: superHit,
-    mult: mult,
+    q, mult,
     dragK: 0.0042/mult,
     peak: ball.position.y,
     exitKmh: vOut.length()*3.6,
@@ -1762,15 +2385,52 @@ function disposeSparks() {
   sparks = null;
 }
 
-function createSparks(pos, strong) {
+function getTimingColor(t) {
+  const c = new THREE.Color();
+  if (t > 0.44) {
+    const ratio = (t - 0.44) / 0.56;
+    c.set(0x00ff66).lerp(new THREE.Color(0x00d2ff), ratio); // Green to Blue
+  } else if (t > 0.36) {
+    const ratio = (t - 0.36) / 0.08;
+    c.set(0xffd200).lerp(new THREE.Color(0x00ff66), ratio); // Yellow to Green
+  } else if (t >= 0.32) {
+    c.set(0xffd200); // Perfect Yellow
+  } else if (t > 0.24) {
+    const ratio = (t - 0.24) / 0.08;
+    c.set(0xff5500).lerp(new THREE.Color(0xffd200), ratio); // Orange to Yellow
+  } else {
+    const ratio = t / 0.24;
+    c.set(0xff2222).lerp(new THREE.Color(0xff5500), ratio); // Red to Orange
+  }
+  return c;
+}
+
+function createSparks(pos, strong, swingS = 0.38) {
   disposeSparks(); // 直前の火花が残っていれば差し替え
   const count = strong ? 70 : 36;
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   const velocities = [];
-  const palette = strong
-    ? ['#7df0ff', '#ffffff', '#bfefff', '#ffe9a8'].map(c => new THREE.Color(c))  // ジャストミート=電光
-    : ['#fff2cc', '#ffffff', '#ffcf6b'].map(c => new THREE.Color(c));            // 通常=火花
+  
+  // Calculate timing ratio t (0.0 = Late, 1.0 = Early) based on swingS (range 0.08 to 0.95)
+  const t = clamp((swingS - 0.08) / (0.95 - 0.08), 0, 1);
+  const baseColor = getTimingColor(t);
+  
+  // Perfect timing check around MEET.sE (t = 0.34, yellow range)
+  const isTimingPerfect = Math.abs(t - 0.34) < 0.015;
+  
+  const palette = [];
+  if (isTimingPerfect && strong) {
+    palette.push(new THREE.Color(0xffffff));
+    palette.push(new THREE.Color(0xffea00)); // Strong Yellow
+    palette.push(new THREE.Color(0x00ff66)); // Vibrant Green
+    palette.push(baseColor);
+  } else {
+    palette.push(baseColor);
+    palette.push(new THREE.Color(0xffffff).lerp(baseColor, 0.45));
+    palette.push(baseColor.clone().multiplyScalar(0.65));
+  }
+  
   for (let i = 0; i < count; i++) {
     positions[i*3] = pos.x; positions[i*3+1] = pos.y; positions[i*3+2] = pos.z;
     const theta = Math.random()*Math.PI*2, phi = Math.acos(Math.random()*2 - 1);
@@ -1789,7 +2449,9 @@ function createSparks(pos, strong) {
     transparent: true, opacity: 1.0, blending: THREE.AdditiveBlending, depthWrite: false});
   const points = new THREE.Points(geo, mat);
   gameGroup.add(points);
-  const flash = new THREE.PointLight(strong ? 0x9fefff : 0xffe6b0, strong ? 9 : 4.5, strong ? 22 : 14);
+  
+  const flashColor = baseColor.getHex();
+  const flash = new THREE.PointLight(flashColor, strong ? 9 : 4.5, strong ? 22 : 14);
   flash.position.copy(pos);
   gameGroup.add(flash);
   sparks = {points, flash, velocities, t: 0, duration: strong ? 0.45 : 0.32};
@@ -1911,11 +2573,27 @@ function landBall(isGround = true) {
     snd.land();
   }
   
-  $('hits').textContent = score.hits; $('hrs').textContent = score.hrs; $('best').textContent = score.best;
+  if ($('hits')) $('hits').textContent = score.hits;
+  if ($('hrs')) $('hrs').textContent = score.hrs;
+  if ($('best')) $('best').textContent = score.best;
   if (isGround) {
     fly.v.set(fly.v.x*.42, Math.abs(fly.v.y)*.38, fly.v.z*.42);  // バウンド
   }
-  gameTimeout(nextPitch, fly.super ? 2200 : 1500);
+  // 耐久値消費（打球ごと。空振りはlandBallを通らないので自動除外）
+  if (!batBroken) {
+    const q = (fly && fly.q !== undefined) ? fly.q : 0.5;
+    const dmg = (4 + (1 - q) * 8) * (fair ? 1.0 : 0.7);
+    batHP = Math.max(0, batHP - dmg);
+    if (batHP <= 0) {
+      batBroken = true;
+      snd.batBreak();
+      showMsg('💥 バットが折れた！', '#ff4444', 2800);
+      gameTimeout(showEnd, 2600);
+      return;
+    }
+  }
+  const delay = fly.scoreboardHit ? 2800 : (fly.super ? 2200 : 1500);
+  gameTimeout(nextPitch, delay);
 }
 let camHome = null;
 function nextPitch() {
@@ -1981,6 +2659,12 @@ function renderRank(highlight) {
 function showEnd() {
   $('hitData').style.display = 'none';
   $('totalDist').textContent = score.total;
+  // バット破損時はパネルのタイトルと飛距離ラベルを書き換える
+  const _h1 = $('endPanel').querySelector('h1');
+  if (_h1 && _h1.lastChild) _h1.lastChild.textContent = batBroken ? 'バット破損！' : '試合終了！';
+  const _p = $('endPanel').querySelector('p');
+  if (_p && _p.firstChild) _p.firstChild.textContent = batBroken
+    ? score.pitch + '球目 飛距離合計 ' : '10球の総飛距離 ';
   if (typeof updateRankingBtnState === 'function') {
     updateRankingBtnState();
   } else {
@@ -2170,8 +2854,19 @@ function resolveBallCollisions() {
       ball.position.addScaledVector(hit.normal, hit.penetration);
 
       // Scoreboard Crash Gimmick
-      // スコアボード破壊ギミック (チャレンジモード廃止につき無効)
-      // if (col.isScoreboard) { breakScoreboard(); }
+      if (col.isScoreboard) {
+        if (!fly.landed) {
+          fly.scoreboardHit = true;
+          fly.exploded = true;
+          fly.v.set(0, 0, 0);
+          ball.visible = false;
+          if (ballShadow) ballShadow.visible = false;
+          breakScoreboard();
+          createExplosion(new THREE.Vector3(0, 12.5, -100));
+          landBall(false);
+        }
+        return;
+      }
 
       // Check if stands collision (Stands Slope or Stands Walls)
       const isStands = col.type === 'stands_slope' || (col.type === 'cylinder_shell' && col.radius >= 112);
@@ -2207,6 +2902,12 @@ function updateGame(dt) {
   for (const sl of searchlights) {
     sl.mesh.rotation.z += sl.rotSpeed * dt;
     sl.mesh.rotation.x = 0.35 + Math.sin(Date.now() * 0.001 * sl.rotSpeed) * 0.15;
+  }
+
+  // Update building beacons (slow pulsing)
+  for (const beacon of buildingBeacons) {
+    const intensity = 0.15 + 0.85 * (0.5 + 0.5 * Math.sin(Date.now() * 0.001 * beacon.speed + beacon.phase));
+    beacon.material.opacity = intensity;
   }
 
   // Update explosion particles
@@ -2281,7 +2982,7 @@ function updateGame(dt) {
     
     if (impact.t >= impact.duration) {
       fly = {v:impact.vOut, t:0, landed:false, follow:true, super:impact.superHit, dragK:impact.dragK,
-             trailT:0, ti:0, peak:impact.peak};
+             trailT:0, ti:0, peak:impact.peak, scoreboardHit:false, q:impact.q};
       $('hitData').style.display = 'block';
       $('hdSpeed').textContent = impact.exitKmh.toFixed(0);
       $('hdAngle').textContent = impact.launch.toFixed(0) + '°';
@@ -2366,7 +3067,10 @@ function updateGame(dt) {
   else setBatPose(0, aimHands(), 0);
   // 打球追跡カメラ + リアルタイム飛距離
   if (fly && fly.follow) {
-    if (fly.exploded) {
+    if (fly.scoreboardHit) {
+      camera.position.set(0, 11.5, -80);
+      camera.lookAt(0, 12.5, -100);
+    } else if (fly.exploded) {
       camera.lookAt(explosion ? explosion.pos : ball.position);
     } else {
       const hv = new THREE.Vector3(fly.v.x, 0, fly.v.z);
@@ -2391,7 +3095,7 @@ function updateGame(dt) {
     camShake *= Math.pow(0.0009, dt);
   } else camShake = 0;
   // ミートポイントの輪
-  if (aimRing) {
+  if (aimRing && BS) {
     const a = aimHands();
     // ミート想定点: 接触が起きる s≈0.38 でのバットの芯の位置
     aimRing.position.copy(batPointAt(MEET.sE, a, BS.cop));
@@ -2499,13 +3203,14 @@ function toCraft() {
   sun.intensity = .25; hemi.intensity = .15; amb.intensity = .3; spot.intensity = 1.8;
   sun.position.set(3, 5, 4);
   $('craftPanel').style.display = 'block'; $('craftStats').style.display = 'block';
-  $('gamePanel').style.display = 'none'; $('scoreboard').style.display = 'none';
+  $('gamePanel').style.display = 'none';
   $('hitData').style.display = 'none';
   
   if ($('debugPresets')) $('debugPresets').style.display = 'block';
   
-  const craftZ = camera.aspect < 0.75 ? 0.95 : 1.7;
-  camera.position.set(0, .20, 1.05*Math.max(0.9, craftZ/camera.aspect));
+  const aspect = camera.aspect || (innerWidth / innerHeight) || 1.0;
+  const craftZ = aspect < 0.75 ? 0.95 : 1.7;
+  camera.position.set(0, .20, 1.05*Math.max(0.9, craftZ/aspect));
   camera.lookAt(0, .05, 0);
   buildCraft();
 }
@@ -2525,13 +3230,13 @@ function updatePitchHistoryUI() {
       const item = score.history[i];
       state = item.type; // 'hr', 'hit', 'foul', 'miss'
       if (state === 'hr') {
-        label = `<svg viewBox="0 0 24 24" width="14" height="14" style="fill:currentColor; display:block;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+        label = `<svg viewBox="0 0 24 24" style="fill:currentColor; display:block;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
       } else if (state === 'hit') {
-        label = `<svg viewBox="0 0 24 24" width="14" height="14" style="fill:none; stroke:currentColor; stroke-width:2.5; display:block;"><circle cx="12" cy="12" r="9"/><path d="M7 6c1.5 2.5 1.5 7.5 0 10"/><path d="M17 6c-1.5 2.5-1.5 7.5 0 10"/></svg>`;
+        label = `<svg viewBox="0 0 24 24" style="fill:none; stroke:currentColor; stroke-width:2.5; display:block;"><circle cx="12" cy="12" r="9"/><path d="M7 6c1.5 2.5 1.5 7.5 0 10"/><path d="M17 6c-1.5 2.5-1.5 7.5 0 10"/></svg>`;
       } else if (state === 'foul') {
         label = 'F';
       } else if (state === 'miss') {
-        label = `<svg viewBox="0 0 24 24" width="12" height="12" style="fill:none; stroke:currentColor; stroke-width:3; stroke-linecap:round; display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+        label = `<svg viewBox="0 0 24 24" style="fill:none; stroke:currentColor; stroke-width:3; stroke-linecap:round; display:block;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
       }
     } else if (i === score.pitch - 1 && (pitch || windup)) {
       state = 'current';
@@ -2546,8 +3251,11 @@ function updatePitchHistoryUI() {
 function resetScore() {
   score = {pitch:0, hits:0, hrs:0, best:0, total:0, history:[]};
   usedDebugThisGame = debugMode;
-  $('pitchNo').textContent = 0; $('hits').textContent = 0;
-  $('hrs').textContent = 0; $('best').textContent = 0;
+  batHP = batStats().durability; batMaxHP = batHP; batBroken = false;
+  if ($('pitchNo')) $('pitchNo').textContent = 0;
+  if ($('hits')) $('hits').textContent = 0;
+  if ($('hrs')) $('hrs').textContent = 0;
+  if ($('best')) $('best').textContent = 0;
   $('endPanel').style.display = 'none';
   clearPlayState();
   updatePitchHistoryUI();
@@ -2562,17 +3270,23 @@ function updateDebugStats() {
       BS.swingT = baseBS.swingT / debugBatMult;
     }
     if (mode === 'game') {
-      $('batInfo').innerHTML =
-        `あなたのバット (デバッグ倍率 ${debugBatMult.toFixed(1)}x): ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
-        `スイング ${BS.swingT.toFixed(2)}秒`;
+      const batInfoEl = $('batInfo');
+      if (batInfoEl) {
+        batInfoEl.innerHTML =
+          `あなたのバット (デバッグ倍率 ${debugBatMult.toFixed(1)}x): ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
+          `スイング ${BS.swingT.toFixed(2)}秒`;
+      }
     }
   } else {
     const baseBS = batStats();
     BS = baseBS;
     if (mode === 'game') {
-      $('batInfo').innerHTML =
-        `あなたのバット: ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
-        `スイング ${BS.swingT.toFixed(2)}秒 — ${BS.swingT > .45 ? '重い！早めに振ろう' : BS.swingT < .26 ? '鋭く振れる！' : 'バランス型'}`;
+      const batInfoEl = $('batInfo');
+      if (batInfoEl) {
+        batInfoEl.innerHTML =
+          `あなたのバット: ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
+          `スイング ${BS.swingT.toFixed(2)}秒 — ${BS.swingT > .45 ? '重い！早めに振ろう' : BS.swingT < .26 ? '鋭く振れる！' : 'バランス型'}`;
+      }
     }
   }
 }
@@ -2628,6 +3342,7 @@ function updateDebugPanel() {
     } else {
       $('dbgFlyV').textContent = '-';
     }
+    if ($('dbgBatHP')) $('dbgBatHP').textContent = Math.ceil(batHP) + ' / ' + Math.round(batMaxHP);
   } else {
     $('dbgGameInfo').style.display = 'none';
   }
@@ -2686,54 +3401,543 @@ function applyPreset(type) {
   updateCraftStats();
 }
 
-function toGame() {
-  mode = 'game';
-  craftGroup.visible = false; gameGroup.visible = true;
-  sun.intensity = 1.15; hemi.intensity = .55; amb.intensity = .35; spot.intensity = 0;
-  sun.position.set(-30, 50, -10);
-  sun.shadow.camera.left = -25; sun.shadow.camera.right = 25;
-  sun.shadow.camera.top = 25; sun.shadow.camera.bottom = -25;
-  $('craftPanel').style.display = 'none'; $('craftStats').style.display = 'none';
-  $('gamePanel').style.display = 'block'; $('scoreboard').style.display = 'block';
+let masterVolume = 1.0;
+let battingMode = 'challenge'; // 'normal' (day, slower speed, no just-meet) or 'challenge' (night, faster speed, just-meet)
+
+const STORAGE_KEY = 'batios_warehouse';
+const EQUIPPED_KEY = 'batios_equipped_id';
+const MAX_BATS = 20;
+
+function getSavedBats() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch(e) {
+    return [];
+  }
+}
+
+function saveWarehouseBats(bats) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(bats));
+  } catch(e) {}
+}
+
+function getEquippedBatId() {
+  return localStorage.getItem(EQUIPPED_KEY) || null;
+}
+
+function setEquippedBatId(id) {
+  localStorage.setItem(EQUIPPED_KEY, id);
+}
+
+function applyEquippedBat(bat) {
+  if (!bat) return;
+  for (let i = 0; i <= SEG; i++) {
+    radii[i] = bat.radii[i];
+  }
+  const matSelect = $('materialSelect');
+  if (matSelect) {
+    matSelect.value = bat.material;
+    updateWoodMaterial();
+  }
+}
+
+function initEquippedBat() {
+  const bats = getSavedBats();
+  const eqId = getEquippedBatId();
+  let equipped = bats.find(b => b.id === eqId);
+  if (!equipped && bats.length > 0) {
+    equipped = bats[0];
+    setEquippedBatId(equipped.id);
+  }
+  if (equipped) {
+    applyEquippedBat(equipped);
+  }
+}
+
+function generateAutoName() {
+  const mat = $('materialSelect').value;
+  const matNames = {
+    wood: 'ウッド',
+    carbon: 'カーボン',
+    metal: 'メタル',
+    gold: 'ゴールド',
+    diamond: 'ダイヤ',
+    obsidian: '黒曜石'
+  };
+  const matName = matNames[mat] || 'バット';
   
-  if ($('debugPresets')) $('debugPresets').style.display = 'none';
+  const bs = batStats();
+  let prefix = '標準の';
+  if (bs.M > 0.850) prefix = '重撃の';
+  else if (bs.M < 0.500) prefix = '超軽量';
+  else if (bs.swingT < 0.25) prefix = '神速の';
+  else if (bs.cop > 0.58) prefix = '巨砲の';
   
-  BS = batStats();
-  if (debugMode) {
-    BS.meff *= debugBatMult;
-    BS.flex *= debugBatMult;
-    BS.swingT /= debugBatMult;
+  const number = Math.floor(100 + Math.random() * 900);
+  return `${prefix}${matName}#${number}`;
+}
+
+function saveCurrentBat(name) {
+  const bats = getSavedBats();
+  if (bats.length >= MAX_BATS) {
+    alert(`倉庫がいっぱいです（最大${MAX_BATS}本）。不要なバットを削除してください。`);
+    return false;
   }
   
-  $('batInfo').innerHTML =
-    `あなたのバット: ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
-    `スイング ${BS.swingT.toFixed(2)}秒 — ${BS.swingT > .45 ? '重い！早めに振ろう' : BS.swingT < .26 ? '鋭く振れる！' : 'バランス型'}`;
+  const id = 'bat_' + Date.now();
+  const mat = $('materialSelect').value;
+  const bs = batStats();
   
-  const isMobile = camera.aspect < 0.75;
-  const back = Math.max(1, (isMobile ? 1.0 : 1.6)/camera.aspect);
-  camHome = {pos:new THREE.Vector3(1.45, 2.1, 4.3*back), look:new THREE.Vector3(-.25, 1.25, isMobile ? -5 : -9)};
-  camera.position.copy(camHome.pos);
-  camera.lookAt(camHome.look);
-  resetScore();
-  buildField();
-  gameTimeout(startPitch, 1000);
+  const newBat = {
+    id,
+    name: name.trim() || generateAutoName(),
+    material: mat,
+    radii: [...radii],
+    stats: {
+      M: bs.M,
+      cop: bs.cop,
+      swingT: bs.swingT,
+      barrel: bs.barrel,
+      meet: bs.meet,
+      durability: bs.durability
+    },
+    date: new Date().toLocaleDateString('ja-JP')
+  };
+  
+  bats.push(newBat);
+  saveWarehouseBats(bats);
+  setEquippedBatId(id);
+  
+  applyEquippedBat(newBat);
+  return true;
 }
-$('doneBtn').onclick = () => {
+
+let warehouseSwiper = null;
+
+function drawBatSilhouette(canvas, radii, material) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  
+  // 素材ごとの上質なグラデーション背景
+  const grad = ctx.createLinearGradient(0, 0, w, 0);
+  if (material === 'carbon') {
+    grad.addColorStop(0, '#111318'); grad.addColorStop(1, '#3a3e47');
+  } else if (material === 'metal') {
+    grad.addColorStop(0, '#4a5568'); grad.addColorStop(1, '#cbd5e0');
+  } else if (material === 'gold') {
+    grad.addColorStop(0, '#92400e'); grad.addColorStop(1, '#fbbf24');
+  } else if (material === 'diamond') {
+    grad.addColorStop(0, '#1e3a8a'); grad.addColorStop(1, '#93c5fd');
+  } else if (material === 'obsidian') {
+    grad.addColorStop(0, '#2e1065'); grad.addColorStop(1, '#a78bfa');
+  } else { // wood
+    grad.addColorStop(0, '#78350f'); grad.addColorStop(1, '#fcd34d');
+  }
+  
+  ctx.save();
+  ctx.translate(0, h/2); // Y軸中央を基準線にする
+  
+  const dx = w / radii.length;
+  ctx.beginPath();
+  
+  // 上半分のバットのシルエット
+  ctx.moveTo(0, 0);
+  for (let i = 0; i < radii.length; i++) {
+    const rScaled = (radii[i] / 0.062) * (h * 0.28);
+    ctx.lineTo(i * dx, -rScaled);
+  }
+  
+  // バット先端キャップ
+  ctx.lineTo(w, 0);
+  
+  // 下半分のバットのシルエット
+  for (let i = radii.length - 1; i >= 0; i--) {
+    const rScaled = (radii[i] / 0.062) * (h * 0.28);
+    ctx.lineTo(i * dx, rScaled);
+  }
+  
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+  
+  // 光沢のある境界ハイライト
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  
+  ctx.restore();
+}
+
+function updateWarehouseDetail(batId) {
+  const bats = getSavedBats();
+  const bat = bats.find(b => b.id === batId);
+  const detailContainer = $('warehouseDetail');
+  if (!bat || !detailContainer) return;
+  
+  const eqId = getEquippedBatId();
+  const isCurrentlyEquipped = bat.id === eqId;
+  
+  // スワイプで選択されたバットを自動装備
+  if (!isCurrentlyEquipped) {
+    setEquippedBatId(bat.id);
+    applyEquippedBat(bat);
+    if (craftBat) rebuildBatMesh(craftBat);
+    updateCraftStats();
+  }
+  
+  const matLabels = {
+    wood: '木製', carbon: 'カーボン', metal: '金属',
+    gold: 'ゴールド', diamond: 'ダイヤ', obsidian: '黒曜石'
+  };
+  
+  detailContainer.innerHTML = `
+    <div style="text-align:center; padding:5px 0;">
+      <h2 style="font-size:16px; margin:0 0 4px 0; color:#fff; font-weight:bold;">${escapeHTML(bat.name)}</h2>
+      <p style="font-size:11px; color:#cbd5e1; margin:0 0 10px 0;">
+        素材: ${matLabels[bat.material] || bat.material} &nbsp;|&nbsp; 作成日: ${bat.date}
+      </p>
+      
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; background:rgba(255,255,255,0.02); padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); margin-bottom:12px; font-size:11px; text-align:left;">
+        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">質量:</span><b>${(bat.stats.M * 1000).toFixed(0)}g</b></div>
+        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">重心:</span><b>${(bat.stats.cop * 100).toFixed(0)}cm</b></div>
+        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">スイング時間:</span><b>${bat.stats.swingT.toFixed(2)}秒</b></div>
+        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">芯の太さ:</span><b>${(bat.stats.barrel * 200).toFixed(1)}cm</b></div>
+        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">ミート:</span><b>${bat.stats.meet !== undefined ? Math.round(bat.stats.meet) : '–'}</b></div>
+      </div>
+      
+      <button style="background:rgba(239,68,68,0.12); color:#f87171; border:1px solid rgba(239,68,68,0.22); padding:6px 12px; font-size:11px; border-radius:6px; cursor:pointer; font-weight:bold; transition:all 0.2s;" 
+              onclick="warehouseAction('delete', '${bat.id}')">
+        このバットを廃棄する
+      </button>
+    </div>
+  `;
+}
+
+function loadWarehouse() {
+  const bats = getSavedBats();
+  const eqId = getEquippedBatId();
+  const container = $('warehouseList');
+  const detailContainer = $('warehouseDetail');
+  if (!container || !detailContainer) return;
+  
+  $('warehouseCount').textContent = `${bats.length} / ${MAX_BATS} 本`;
+  
+  if (bats.length === 0) {
+    container.innerHTML = `<div class="swiper-slide" style="width:100%;"><div style="text-align:center; padding:30px; color:#94a3b8; font-size:12px; width:100%;">倉庫は空っぽです。<br>バット工房で作ってみましょう！</div></div>`;
+    detailContainer.innerHTML = '';
+    if (warehouseSwiper) {
+      warehouseSwiper.destroy(true, true);
+      warehouseSwiper = null;
+    }
+    return;
+  }
+  
+  // スライドの組み立て
+  container.innerHTML = bats.map(bat => {
+    return `
+      <div class="swiper-slide" data-bat-id="${bat.id}" style="width:240px;">
+        <div style="position:relative; width:220px; height:110px; display:flex; justify-content:center; align-items:center; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.06); overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+          <canvas id="canvas_${bat.id}" width="200" height="80" style="display:block;"></canvas>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // DOMの反映を待ってからCanvas描画を実行
+  setTimeout(() => {
+    bats.forEach(bat => {
+      const cv = document.getElementById(`canvas_${bat.id}`);
+      if (cv) {
+        drawBatSilhouette(cv, bat.radii, bat.material);
+      }
+    });
+  }, 30);
+  
+  // Swiperの初期化
+  setTimeout(() => {
+    if (warehouseSwiper) {
+      warehouseSwiper.destroy(true, true);
+    }
+    
+    // 現在装備中のスライドを選択状態の初期インデックスにする
+    let initialIndex = bats.findIndex(b => b.id === eqId);
+    if (initialIndex === -1) initialIndex = 0;
+    
+    warehouseSwiper = new Swiper('#warehouseSwiper', {
+      centeredSlides: true,
+      slidesPerView: 'auto',
+      spaceBetween: 10,
+      initialSlide: initialIndex,
+      grabCursor: true,
+      on: {
+        slideChange: function () {
+          const activeIndex = this.activeIndex;
+          const activeSlide = this.slides[activeIndex];
+          if (activeSlide) {
+            const batId = activeSlide.getAttribute('data-bat-id');
+            updateWarehouseDetail(batId);
+          }
+        }
+      }
+    });
+    
+    // 初回詳細表示の反映
+    const firstBat = bats[initialIndex];
+    if (firstBat) {
+      updateWarehouseDetail(firstBat.id);
+    }
+  }, 50);
+}
+
+function escapeHTML(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag)
+  );
+}
+
+window.warehouseAction = function(action, id) {
   snd.ui();
-  toGame();
-};
-$('backBtn').onclick = toCraft;
-$('retryBtn').onclick = () => { resetScore(); gameTimeout(startPitch, 600); };
-$('resetBtn').onclick = () => { radii.fill(LOG_R); buildCraft(); };
-$('materialSelect').onchange = () => {
-  updateWoodMaterial();
-  updateCraftStats();
+  const bats = getSavedBats();
+  if (action === 'equip') {
+    setEquippedBatId(id);
+    const bat = bats.find(b => b.id === id);
+    applyEquippedBat(bat);
+    loadWarehouse();
+    if (craftBat) rebuildBatMesh(craftBat);
+    updateCraftStats();
+  } else if (action === 'delete') {
+    if (confirm('このバットを廃棄しますか？')) {
+      const filtered = bats.filter(b => b.id !== id);
+      saveWarehouseBats(filtered);
+      if (getEquippedBatId() === id) {
+        setEquippedBatId(filtered.length > 0 ? filtered[0].id : null);
+        if (filtered.length > 0) {
+          applyEquippedBat(filtered[0]);
+        }
+      }
+      loadWarehouse();
+      if (craftBat) rebuildBatMesh(craftBat);
+      updateCraftStats();
+    }
+  }
 };
 
-// Debug Mode events
-$('debugModeCheckbox').onchange = (e) => {
+function setupStadiumLighting(lightMode) {
+  const isNight = lightMode === 'night';
+  
+  // Toggle Directional Light
+  sun.color.setHex(isNight ? 0xfff2dd : 0xffffff);
+  sun.intensity = isNight ? 0.5 : 1.1; // 控えめに調整 (1.6 -> 1.1)
+  sun.position.set(isNight ? -30 : -50, isNight ? 50 : 80, isNight ? -10 : -30);
+  
+  // Toggle Ambient
+  amb.color.setHex(0xffffff);
+  amb.intensity = isNight ? 0.35 : 0.4; // 控えめに調整 (0.7 -> 0.4)
+  
+  // Toggle Hemisphere
+  hemi.color.setHex(isNight ? 0xbdd8ff : 0xdef0ff);
+  hemi.groundColor.setHex(isNight ? 0x57713f : 0x5a7840);
+  hemi.intensity = isNight ? 0.55 : 0.45; // 控えめに調整 (0.7 -> 0.45)
+  
+  // Toggle Fog & Background
+  scene.background = new THREE.Color(isNight ? 0x0d1830 : 0x7ec0ee);
+  if (scene.fog) {
+    scene.fog.color.setHex(isNight ? 0x141f38 : 0xbfe0ff);
+    scene.fog.near = isNight ? 160 : 200;
+    scene.fog.far = isNight ? 520 : 600;
+  } else {
+    scene.fog = new THREE.Fog(isNight ? 0x141f38 : 0xbfe0ff, isNight ? 160 : 200, isNight ? 520 : 600);
+  }
+
+  // Adjust specific night elements
+  for (const sl of searchlights) {
+    if (sl.mesh) sl.mesh.visible = isNight;
+  }
+  
+  gameGroup.traverse(child => {
+    if (child.name === "stars" || child.name === "moon") {
+      child.visible = isNight;
+    }
+    if (child.isMesh && child.material) {
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      for (const m of mats) {
+        if (m.emissiveMap) {
+          m.emissiveIntensity = isNight ? 1.0 : 0.0;
+        }
+      }
+    }
+  });
+}
+
+function showScreen(screenId) {
+  // Hide all screens
+  const screens = ['menuUI', 'craftUI', 'gamePanel', 'warehouseUI', 'settingsUI', 'rankingUI', 'endPanel', 'batNameModal'];
+  for (const s of screens) {
+    const el = $(s);
+    if (el) el.style.display = 'none';
+  }
+  
+  // Clean play state when navigating away from game
+  if (screenId !== 'gamePanel' && screenId !== 'endPanel') {
+    clearPlayState();
+    camHome = null;
+  }
+  
+  if (screenId === 'menuUI') {
+    mode = 'menu';
+    $(screenId).style.display = 'block';
+    craftGroup.visible = false;
+    gameGroup.visible = true;
+    
+    // Day/Night preview based on current mode
+    setupStadiumLighting(battingMode === 'challenge' ? 'night' : 'day');
+    
+    camera.position.set(0, 15, 60);
+    camera.lookAt(0, 10, -50);
+    if (gameGroup.children.length === 0) {
+      buildField();
+    }
+  } else if (screenId === 'craftUI') {
+    mode = 'craft';
+    $(screenId).style.display = 'block';
+    craftGroup.visible = true;
+    gameGroup.visible = false;
+    scene.background = new THREE.Color(0x1b1510); scene.fog = null;
+    sun.intensity = .25; hemi.intensity = .15; amb.intensity = .3; spot.intensity = 1.8;
+    sun.position.set(3, 5, 4);
+    
+    const aspect = camera.aspect || (innerWidth / innerHeight) || 1.0;
+    const craftZ = aspect < 0.75 ? 0.95 : 1.7;
+    camera.position.set(0, .20, 1.05*Math.max(0.9, craftZ/aspect));
+    camera.lookAt(0, .05, 0);
+    buildCraft();
+  } else if (screenId === 'warehouseUI') {
+    mode = 'warehouse';
+    $(screenId).style.display = 'block';
+    craftGroup.visible = true;
+    gameGroup.visible = false;
+    scene.background = new THREE.Color(0x1b1510); scene.fog = null;
+    sun.intensity = .25; hemi.intensity = .15; amb.intensity = .3; spot.intensity = 1.8;
+    sun.position.set(3, 5, 4);
+    
+    loadWarehouse();
+    const aspectW = camera.aspect || (innerWidth / innerHeight) || 1.0;
+    const craftZW = aspectW < 0.75 ? 0.95 : 1.7;
+    camera.position.set(0.4, .25, 1.15*Math.max(0.9, craftZW/aspectW));
+    camera.lookAt(0, .05, 0);
+  } else if (screenId === 'settingsUI') {
+    mode = 'settings';
+    $(screenId).style.display = 'block';
+  } else if (screenId === 'rankingUI') {
+    mode = 'ranking';
+    $(screenId).style.display = 'block';
+    // Sync rankings list
+    const rankList = $('rankList');
+    const rankingOl = $('rankingOl');
+    if (rankList && rankingOl) {
+      rankingOl.innerHTML = rankList.innerHTML;
+    }
+  } else if (screenId === 'gamePanel') {
+    mode = 'game';
+    $('gamePanel').style.display = 'flex';
+    craftGroup.visible = false;
+    gameGroup.visible = true;
+    sun.intensity = battingMode === 'challenge' ? 0.5 : 1.1;
+    
+    // Load equipped bat radii
+    initEquippedBat();
+    
+    BS = batStats();
+    if (debugMode) {
+      BS.meff *= debugBatMult;
+      BS.flex *= debugBatMult;
+      BS.swingT /= debugBatMult;
+    }
+    
+    const batInfoEl = $('batInfo');
+    if (batInfoEl) {
+      batInfoEl.innerHTML =
+        `装備中のバット: ${(BS.M*1000).toFixed(0)}g ／ 芯はグリップから ${(BS.cop*100).toFixed(0)}cm<br>` +
+        `スイング ${BS.swingT.toFixed(2)}秒 — ${BS.swingT > .45 ? '重い！早めに振ろう' : BS.swingT < .26 ? '鋭く振れる！' : 'バランス型'}`;
+    }
+    
+    const isMobile = camera.aspect < 0.75;
+    const back = Math.max(1, (isMobile ? 1.0 : 1.6)/camera.aspect);
+    camHome = {pos:new THREE.Vector3(1.45, 2.1, 4.3*back), look:new THREE.Vector3(-.25, 1.25, isMobile ? -5 : -9)};
+    camera.position.copy(camHome.pos);
+    camera.lookAt(camHome.look);
+    
+    resetScore();
+    buildField();
+    gameTimeout(startPitch, 1000);
+  }
+}
+
+// Backward compatible helper functions
+function toCraft() {
+  showScreen('craftUI');
+}
+function toGame() {
+  showScreen('gamePanel');
+}
+
+// Bind menu actions
+$('menuCraftBtn').onclick = () => { snd.ui(); showScreen('craftUI'); };
+$('menuNormalBtn').onclick = () => { snd.ui(); battingMode = 'normal'; showScreen('gamePanel'); };
+$('menuChallengeBtn').onclick = () => { snd.ui(); battingMode = 'challenge'; showScreen('gamePanel'); };
+$('menuSettingsBtn').onclick = () => { snd.ui(); showScreen('settingsUI'); };
+$('menuRankingBtn').onclick = () => { snd.ui(); showScreen('rankingUI'); };
+
+// Bind warehouse actions
+$('warehouseBackBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
+$('warehouseCraftBtn').onclick = () => { snd.ui(); showScreen('craftUI'); };
+$('craftWarehouseBtn').onclick = () => { snd.ui(); showScreen('warehouseUI'); };
+$('craftMenuBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
+
+// Done saving bat
+$('doneBtn').onclick = () => {
+  snd.ui();
+  $('batNameInput').value = generateAutoName();
+  $('batNameModal').style.display = 'block';
+};
+
+$('batNameCancelBtn').onclick = () => {
+  snd.ui();
+  $('batNameModal').style.display = 'none';
+};
+
+$('batNameSaveBtn').onclick = () => {
+  snd.ui();
+  const name = $('batNameInput').value;
+  if (saveCurrentBat(name)) {
+    $('batNameModal').style.display = 'none';
+    showScreen('warehouseUI');
+  }
+};
+
+// Settings screen binds
+$('settingsBackBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
+$('settingsVolumeSlider').oninput = (e) => {
+  masterVolume = parseFloat(e.target.value);
+  $('settingsVolumeVal').textContent = Math.round(masterVolume * 100) + '%';
+};
+$('settingsBloomCheckbox').onchange = (e) => {
+  useBloom = e.target.checked;
+};
+$('settingsDebugCheckbox').onchange = (e) => {
   debugMode = e.target.checked;
   $('debugPanel').style.display = debugMode ? 'block' : 'none';
+  $('debugModeCheckbox').checked = debugMode;
   if (debugMode && mode === 'game') {
     usedDebugThisGame = true;
   }
@@ -2744,6 +3948,34 @@ $('debugModeCheckbox').onchange = (e) => {
   updateRankingBtnState();
 };
 
+// Rankings screen binds
+$('rankingBackBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
+
+// Game buttons override
+$('backBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
+$('craftBtn2').onclick = () => { snd.ui(); showScreen('menuUI'); };
+
+// Reset logs
+$('resetBtn').onclick = () => { radii.fill(LOG_R); buildCraft(); };
+$('materialSelect').onchange = () => {
+  updateWoodMaterial();
+  updateCraftStats();
+};
+
+// Debug Mode slider overrides
+$('debugModeCheckbox').onchange = (e) => {
+  debugMode = e.target.checked;
+  $('debugPanel').style.display = debugMode ? 'block' : 'none';
+  $('settingsDebugCheckbox').checked = debugMode;
+  if (debugMode && mode === 'game') {
+    usedDebugThisGame = true;
+  }
+  updateDebugStats();
+  if (mode === 'craft') {
+    updateCraftStats();
+  }
+  updateRankingBtnState();
+};
 $('debugBatMultSlider').oninput = (e) => {
   debugBatMult = parseFloat(e.target.value);
   $('debugBatMultVal').textContent = debugBatMult.toFixed(1) + 'x';
@@ -2752,14 +3984,10 @@ $('debugBatMultSlider').oninput = (e) => {
     updateCraftStats();
   }
 };
-
 $('debugPitchSlider').oninput = (e) => {
   debugPitchSpeedMult = parseFloat(e.target.value);
   $('debugPitchMultVal').textContent = debugPitchSpeedMult.toFixed(1) + 'x';
 };
-
-$('againBtn').onclick = () => { resetScore(); gameTimeout(startPitch, 600); };
-$('craftBtn2').onclick = toCraft;
 
 // 検証ハーネス（docs/smoke-test.md が依存）— 削除禁止
 window.__bat = {
@@ -2787,7 +4015,7 @@ function loop(now) {
   if (useBloom) composer.render(); else renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
-toCraft();
+showScreen('menuUI');
 requestAnimationFrame(loop);
 </script>
 </body>
