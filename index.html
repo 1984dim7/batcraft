@@ -75,7 +75,7 @@
   #craftPanel {
     pointer-events:auto;
     position:absolute;
-    bottom:calc(12px + var(--sab));
+    bottom:calc(55px + var(--sab));
     left:50%;
     transform:translateX(-50%);
     width:min(380px, calc(100vw - 24px));
@@ -84,10 +84,12 @@
   #craftStats {
     pointer-events:auto;
     position:absolute;
-    top:calc(12px + var(--sat));
-    right:calc(12px + var(--sar));
-    max-width:min(260px, 50vw);
+    top:calc(20px + var(--sat));
+    left:calc(12px + var(--sal));
+    right:auto;
+    width:260px;
     box-sizing:border-box;
+    padding:8px 10px;
   }
   #craftStats td { font-size:11px; padding:2px 5px; white-space:nowrap; color:#94a3b8; }
   #craftStats td:last-child { color:#ffd23a; font-weight:bold; font-variant-numeric:tabular-nums; }
@@ -150,11 +152,7 @@
       transform: none !important;
     }
     #craftStats {
-      max-width: min(170px, 46vw) !important;
-    }
-    #craftStats > div {
-      flex-direction: column !important;
-      align-items: center !important;
+      width: calc(100vw - 24px) !important;
     }
     #radar {
       width: 120px !important;
@@ -401,7 +399,7 @@
           <tr><td>スイング</td><td id="stSwing">–</td></tr>
           <tr><td>芯の径</td><td id="stBarrel">–</td></tr>
         </table>
-        <canvas id="radar" width="220" height="220" style="flex-shrink:0;display:block;width:110px;height:110px;"></canvas>
+        <canvas id="radar" width="240" height="240" style="flex-shrink:0;display:block;width:120px;height:120px;"></canvas>
       </div>
     </div>
 
@@ -978,27 +976,17 @@ function drawRadar(vals5) {
   labels.forEach((label, i) => {
     const [x, y] = pt(angles[i], labelR);
     const ox = labelOffsets[i][0], oy = labelOffsets[i][1];
-    // ???マスク: 80超のステータスはラベルを???にする
-    let displayLabel = label;
-    let displayNum = '';
-    if (!debugMode && vals5[i] > 80) {
-      displayLabel = '???';
-      g.fillStyle = '#ffd23a';
-    } else if (i === 3 && !debugMode) {
-      // 耐久性は通常モードでもラベルだけ表示（値は隠す）
-      displayLabel = label;
-      g.fillStyle = '#8a96ad';
-    } else {
-      g.fillStyle = '#dce8ff';
-    }
-    g.fillText(displayLabel, x + ox, y + oy);
-    // デバッグモード: 数値を小さく表示
-    if (debugMode) {
-      g.font = '9px monospace';
-      g.fillStyle = '#ffd479';
-      g.fillText(vals5[i], x + ox, y + oy + 14);
-      g.font = 'bold 13px sans-serif';
-    }
+    // ラベルテキスト（80超は???, 耐久性は常時グレー）
+    const labelMasked = !debugMode && vals5[i] > 80;
+    const numMasked   = !debugMode && (vals5[i] > 80 || i === 3);
+    g.fillStyle = labelMasked ? '#ffd23a' : (i === 3 && !debugMode) ? '#8a96ad' : '#dce8ff';
+    g.fillText(labelMasked ? '???' : label, x + ox, y + oy);
+    // 数値（常時表示: 0-100 整数、マスク対象は???）
+    const numStr = debugMode ? String(Math.round(vals5[i])) : (numMasked ? '???' : String(Math.round(vals5[i])));
+    g.font = '10px monospace';
+    g.fillStyle = debugMode ? '#ffd479' : (numMasked ? '#5a6270' : '#7a9ab8');
+    g.fillText(numStr, x + ox, y + oy + 13);
+    g.font = 'bold 13px sans-serif';
   });
 }
 // ================= 効果音（WebAudio合成） =================
@@ -3833,7 +3821,7 @@ function showScreen(screenId) {
     const aspect = camera.aspect || (innerWidth / innerHeight) || 1.0;
     const craftZ = aspect < 0.75 ? 0.95 : 1.7;
     camera.position.set(0, .20, 1.05*Math.max(0.9, craftZ/aspect));
-    camera.lookAt(0, .05, 0);
+    camera.lookAt(0, -0.20, 0);
     buildCraft();
   } else if (screenId === 'warehouseUI') {
     mode = 'warehouse';
