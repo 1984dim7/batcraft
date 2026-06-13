@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "3D野球ミニゲーム「バット工房 ⚾ Bat Craft Baseball」",
   "scripts": {
-    "build": "rm -rf www && mkdir -p www/vendor && cp index.html www/ && cp vendor/three.min.js www/vendor/",
+    "build": "rm -rf www && mkdir -p www/vendor && cp index.html www/ && cp -R vendor/. www/vendor/",
     "ios": "npm run build && npx cap sync ios && npx cap open ios"
   },
   "repository": {

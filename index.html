@@ -277,6 +277,18 @@
 </div>
 
 <script src="vendor/three.min.js"></script>
+<!-- ポストプロセス（r128 examples/js 非モジュール版・依存順）
+     注意: EffectComposer.js が基底クラス THREE.Pass を定義するため、
+     Pass を継承する各パスより必ず先に読み込む。 -->
+<script src="vendor/shaders/CopyShader.js"></script>
+<script src="vendor/postprocessing/EffectComposer.js"></script>
+<script src="vendor/postprocessing/ShaderPass.js"></script>
+<script src="vendor/postprocessing/MaskPass.js"></script>
+<script src="vendor/postprocessing/RenderPass.js"></script>
+<script src="vendor/shaders/LuminosityHighPassShader.js"></script>
+<script src="vendor/postprocessing/UnrealBloomPass.js"></script>
+<script src="vendor/shaders/SMAAShader.js"></script>
+<script src="vendor/postprocessing/SMAAPass.js"></script>
 <script>
 // ================= 基本 =================
 const renderer = new THREE.WebGLRenderer({antialias:true});
@@ -289,9 +301,22 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, .05, 600);
+
+// ================= ポストプロセス（Bloom） =================
+// 夜景を光らせる。物理・座標・カメラには一切触れない純粋な描画後処理。
+let useBloom = true; // §5 品質トグルの土台。false で従来の直接描画にフォールバック
+const composer = new THREE.EffectComposer(renderer);
+composer.setPixelRatio(Math.min(devicePixelRatio, 2));
+composer.addPass(new THREE.RenderPass(scene, camera));
+const bloomPass = new THREE.UnrealBloomPass(
+  new THREE.Vector2(innerWidth, innerHeight), 0.8, 0.4, 0.85); // strength/radius/threshold = spec §3-1
+composer.addPass(bloomPass);
+composer.addPass(new THREE.SMAAPass(innerWidth, innerHeight)); // EffectComposer経由でMSAAが効かない分の補完（最終パス）
+
 addEventListener('resize', () => {
   camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
 });
 const $ = id => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp;
@@ -1001,10 +1026,10 @@ function addOutfieldStructures() {
     scoreboardTex = new THREE.CanvasTexture(scoreboardCanvas); scoreboardTex.encoding = THREE.sRGBEncoding;
     const sb = new THREE.Mesh(new THREE.BoxGeometry(18, 8, .8),
       [poleMat, poleMat, poleMat, poleMat, new THREE.MeshStandardMaterial({map:scoreboardTex, roughness:0.2, metalness:0.3}), poleMat]);
-    sb.position.set(0, 12.5, -109);
+    sb.position.set(0, 12.5, -100); // 観客(radius103〜)の手前へ前進させ、埋もれを解消
     gameGroup.add(sb);
-    // Scoreboard Collider (x: [-9, 9], y: [8.5, 16.5], z: [-109.4, -108.6])
-    fieldColliders.push({ type: 'box', min: new THREE.Vector3(-9, 8.5, -109.4), max: new THREE.Vector3(9, 16.5, -108.6), landing: true, isScoreboard: true });
+    // Scoreboard Collider (x: [-9, 9], y: [8.5, 16.5], z: [-100.4, -99.6]) — メッシュと同期して前進
+    fieldColliders.push({ type: 'box', min: new THREE.Vector3(-9, 8.5, -100.4), max: new THREE.Vector3(9, 16.5, -99.6), landing: true, isScoreboard: true });
     scoreboardBroken = false;
   }
 
@@ -1253,7 +1278,7 @@ function addPlayersAndGuides() {
     const g2 = cv.getContext('2d');
     const grad = g2.createRadialGradient(128, 128, 70, 128, 128, 124);
     grad.addColorStop(0, 'rgba(120,210,255,0)');
-    grad.addColorStop(.55, 'rgba(140,220,255,.85)');
+    grad.addColorStop(.55, 'rgba(140,220,255,.45)');
     grad.addColorStop(1, 'rgba(120,210,255,0)');
     g2.fillStyle = grad; g2.beginPath(); g2.arc(128, 128, 126, 0, Math.PI*2); g2.fill();
     const tex = new THREE.CanvasTexture(cv);
@@ -2592,6 +2617,7 @@ $('craftBtn2').onclick = toCraft;
 window.__bat = {
   radii, batStats, toGame, toCraft, startSwing,
   info: () => renderer.info.memory,
+  setBloom: v => useBloom = !!v,
   setAim: (x, y) => aim = {x, y},
   rebuild: () => { if (craftBat) rebuildBatMesh(craftBat); updateCraftStats(); },
   state: () => ({mode, score: {...score}, pitching: !!pitch, flying: !!fly,
@@ -2610,7 +2636,7 @@ function loop(now) {
     updateDebugPanel();
   }
   
-  renderer.render(scene, camera);
+  if (useBloom) composer.render(); else renderer.render(scene, camera);
   requestAnimationFrame(loop);
 }
 toCraft();
