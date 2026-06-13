@@ -1,5 +1,5 @@
 {
-  "name": "bat",
+  "name": "batcraft",
   "version": "1.0.0",
   "description": "3D野球ミニゲーム「バット工房 ⚾ Bat Craft Baseball」",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/1984dim7/bat.git"
+    "url": "git+https://github.com/1984dim7/batcraft.git"
   },
   "license": "ISC",
   "devDependencies": {
