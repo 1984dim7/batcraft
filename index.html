@@ -6,123 +6,508 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <style>
-  body { margin:0; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; background:#060810; touch-action:none; -webkit-user-select:none; user-select:none; }
-  :root { --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
-          --sal:env(safe-area-inset-left,0px); --sar:env(safe-area-inset-right,0px); }
-  #ui { position:absolute; inset:0; pointer-events:none; color:#fff; }
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;900&family=M+PLUS+Rounded+1c:wght@700;800;900&display=swap');
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Fredoka', 'M PLUS Rounded 1c', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    background: #060810;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  :root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+  }
+  #ui {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    max-width: 440px;
+    max-height: calc(min(100vw, 440px) * 16 / 9);
+    pointer-events: none;
+    color: #fff;
+    z-index: 10;
+  }
+  #debugToggleContainer, #debugPanel {
+    display: none !important;
+  }
+  
+  /* ── 漫画風・カジュアルゲームパネル ── */
   .panel {
     pointer-events: auto;
-    background: rgba(10, 15, 30, 0.42);
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    background-color: #3f256c;
+    background-image: repeating-linear-gradient(
+      45deg,
+      #3f256c,
+      #3f256c 15px,
+      #381f61 15px,
+      #381f61 30px
+    );
+    border: 4px solid #1c1130;
+    border-radius: 24px;
     padding: 16px 20px;
     margin: 12px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    box-shadow: 0 8px 0 #1c1130;
+    transition: all 0.2s ease;
   }
-  h1 { font-size:16px; margin:0 0 8px; letter-spacing:.5px; font-weight: 700; color: #fff; }
-  p { font-size:12px; margin:2px 0; line-height:1.6; color: #cbd5e1; }
-  b { color:#ffd23a; }
+  
+  h1 {
+    font-size: 18px;
+    margin: 0 0 12px;
+    letter-spacing: .5px;
+    font-weight: 900;
+    color: #ffd23a;
+    text-shadow: -2.5px -2.5px 0 #1c1130, 2.5px -2.5px 0 #1c1130, -2.5px 2.5px 0 #1c1130, 2.5px 2.5px 0 #1c1130, 0 4px 0 #1c1130;
+    text-align: center;
+  }
+  p {
+    font-size: 13px;
+    margin: 4px 0;
+    line-height: 1.5;
+    color: #f1f5f9;
+    font-weight: 700;
+  }
+  b {
+    color: #ffd23a;
+    font-weight: 900;
+  }
+  
+  /* ── ポップ・バウンシーボタン ── */
   button {
-    font-size:14px;
-    padding: 11px 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    font-weight: bold;
-    background: rgba(255, 255, 255, 0.07);
+    font-size: 15px;
+    font-family: inherit;
+    padding: 10px 18px;
+    border: 3.5px solid #1c1130;
+    border-radius: 16px;
+    font-weight: 900;
+    background: linear-gradient(180deg, #3bc6ff 0%, #007acd 100%); /* Blue default */
     color: #fff;
     cursor: pointer;
     margin: 0;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    -webkit-tap-highlight-color:transparent;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    box-shadow: 0 6px 0 #1c1130;
+    text-shadow: 0 2px 0 #1c1130;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
   button:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 7px 0 #1c1130;
   }
   button:active {
-    transform: translateY(1px);
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #1c1130;
   }
-  button.sub {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    box-shadow: none;
-    font-size: 12px;
-    padding: 9px 16px;
-    color: #94a3b8;
+  
+  /* ボタンカラーバリエーション */
+  button.btn-green {
+    background: linear-gradient(180deg, #7be118 0%, #4da500 100%);
   }
-  button.sub:hover {
-    background: rgba(255, 255, 255, 0.08);
+  button.btn-orange {
+    background: linear-gradient(180deg, #ff8c42 0%, #d13d00 100%);
+  }
+  button.btn-yellow {
+    background: linear-gradient(180deg, #ffd23a 0%, #ff8c42 100%);
+  }
+  button.btn-red {
+    background: linear-gradient(180deg, #ff5e5e 0%, #c71e1e 100%);
+  }
+  button.sub, button.btn-sub {
+    background: linear-gradient(180deg, #9bb0db 0%, #6478a3 100%);
+    box-shadow: 0 4px 0 #1c1130;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-width: 3px;
+  }
+  button.sub:active, button.btn-sub:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #1c1130;
+  }
+  
+  /* ── 装備中のバットバー ── */
+  .menu-equipped-bar {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: #f0f4fb;
+    border-radius: 16px;
+    border: 3.5px solid #1c1130;
+    box-shadow: 0 4px 0 #1c1130;
+    color: #1c1130;
+  }
+  .menu-equipped-bar .lbl {
+    font-size: 10px;
+    color: #5d6b82;
+    margin-bottom: 2px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  #menuEquippedName {
+    font-size: 14px;
+    font-weight: 900;
+    color: #007acd;
+  }
+  #menuBatCanvas {
+    width: 100%;
+    height: 44px;
+    display: block;
+    border-radius: 10px;
+    border: 3px solid #1c1130;
+    background: #fff;
+    box-sizing: border-box;
+  }
+  
+  /* ── コミック倉庫カード ── */
+  .warehouse-slide-card {
+    position: relative;
+    width: 220px;
+    height: 110px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f0f4fb;
+    border-radius: 16px;
+    border: 3px solid #1c1130;
+    overflow: hidden;
+    box-shadow: 0 4px 0 #1c1130;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .swiper-slide-active .warehouse-slide-card {
+    border-color: #ffd23a;
+    box-shadow: 0 4px 0 #1c1130, 0 0 10px rgba(255, 210, 58, 0.6);
+  }
+  
+  /* 動的倉庫詳細 */
+  .warehouse-detail-card {
+    text-align: center;
+    padding: 4px 0;
+  }
+  .warehouse-detail-card h2 {
+    font-size: 18px;
+    margin: 0 0 4px 0;
     color: #fff;
-    border-color: rgba(255, 255, 255, 0.1);
+    font-weight: 900;
+    text-shadow: -2px -2px 0 #1c1130, 2px -2px 0 #1c1130, -2px 2px 0 #1c1130, 2px 2px 0 #1c1130, 0 3px 0 #1c1130;
   }
-  .help { display:none; }
-  .panel.open .help { display:block; margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 8px; }
-  .hbtn { background:none; box-shadow:none; border:1px solid rgba(255,255,255,0.15); color:#94a3b8;
-          font-size:11px; padding:4px 12px; margin:0 0 6px; border-radius:999px; font-weight:normal; }
-  .hbtn:hover { color:#fff; border-color: rgba(255,255,255,0.3); }
-  #craftUI {
-    position:absolute;
-    inset:0;
-    pointer-events:none;
+  .warehouse-detail-card p {
+    font-size: 11px;
+    color: #cbd5e1;
+    margin: 0 0 10px 0;
   }
-  #craftPanel {
-    pointer-events:auto;
-    position:absolute;
-    bottom:calc(130px + var(--sab));
-    left:50%;
-    transform:translateX(-50%);
-    width:min(380px, calc(100vw - 24px));
-    box-sizing:border-box;
+  .warehouse-spec-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    background: #f0f4fb;
+    padding: 12px 16px;
+    border-radius: 16px;
+    border: 3px solid #1c1130;
+    margin-bottom: 12px;
+    font-size: 11.5px;
+    text-align: left;
+    color: #1c1130;
+    box-shadow: 0 4px 0 #1c1130;
   }
-  #craftStats {
-    pointer-events:auto;
-    position:absolute;
-    top:calc(20px + var(--sat));
-    left:calc(12px + var(--sal));
-    right:auto;
-    width:300px;
-    box-sizing:border-box;
-    padding:8px 10px;
+  .warehouse-spec-grid > div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1.5px dashed #cbd5e1;
+    padding-bottom: 2px;
   }
-  #craftStats td { font-size:11px; padding:2px 5px; white-space:nowrap; color:#94a3b8; }
-  #craftStats td:last-child { color:#ffd23a; font-weight:bold; font-variant-numeric:tabular-nums; }
-  .hbtn, .help { display:none !important; }
-  #gamePanel {
+  .warehouse-spec-grid span {
+    color: #5d6b82;
+    font-weight: 800;
+  }
+  .warehouse-spec-grid b {
+    color: #007acd;
+    font-weight: 900;
+  }
+
+  /* ── カスタムフォーム入力 ── */
+  input[type="text"] {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 14px;
+    border: 3.5px solid #1c1130;
+    border-radius: 14px;
+    background: #f0f4fb;
+    color: #1c1130;
+    text-align: center;
+    font-weight: 900;
+    outline: none;
+    box-shadow: inset 0 3px 0 rgba(0,0,0,0.08);
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus {
+    border-color: #ffd23a;
+  }
+  
+  /* スライダー */
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: #1c1130;
+    height: 12px;
+    border-radius: 6px;
+    border: 2px solid #1c1130;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #ffd23a;
+    border: 3px solid #1c1130;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #1c1130;
+    transition: transform 0.1s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+  }
+  
+  /* チェックボックス */
+  input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: #1c1130;
+    border: 3.5px solid #1c1130;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.1s;
+  }
+  input[type="checkbox"]:checked {
+    background: #7be118;
+  }
+  input[type="checkbox"]:checked::after {
+    content: "✓";
     position: absolute;
-    top: calc(12px + var(--sat));
-    left: calc(12px + var(--sal));
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 900;
+  }
+
+  /* ── ランキングカード ── */
+  .rk-card {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 6px 12px;
-    border-radius: 12px;
-    width: auto;
-    max-width: none;
-    z-index: 100;
+    padding: 10px 12px;
+    border-radius: 16px;
+    margin-bottom: 8px;
+    background: #f0f4fb;
+    border: 3px solid #1c1130;
+    box-shadow: 0 4px 0 #1c1130;
+    color: #1c1130;
+    transition: transform 0.2s;
   }
-  #msg { position:absolute; top:28%; width:100%; text-align:center; font-size:clamp(26px,8vw,44px); font-weight:bold;
-         text-shadow:0 2px 24px rgba(0,0,0,.8); opacity:0; transition:opacity .15s; pointer-events:none; }
-  #pitchSpeed { position:absolute; top:44%; width:100%; text-align:center; font-size:clamp(14px,4vw,20px); color:#cfe3ff;
-                text-shadow:0 1px 8px #000; opacity:0; transition:opacity .2s; pointer-events:none; }
-  #hitData { display:none !important; }
-  #hitData .big { font-size:clamp(18px,5vw,26px); font-weight:bold; color:#ffd23a; font-variant-numeric:tabular-nums; }
-  #hitData .lbl { font-size:10px; color:#94a3b8; }
-  #hitData .col { display:inline-block; margin:0 8px; }
-  #meter { width:100%; height:6px; background:rgba(255,255,255,0.06); border-radius:3px; margin-top:8px; overflow:hidden; }
-  #meterFill { height:100%; width:100%; background:linear-gradient(90deg,#ff9d6b,#e9314f); border-radius:3px; }
+  .rk-card.rk-1 {
+    background: linear-gradient(135deg, #fff9db 0%, #fff0b3 100%);
+    border-color: #ff9f00;
+    box-shadow: 0 4px 0 #ff9f00;
+  }
+  .rk-card.rk-2 {
+    background: linear-gradient(135deg, #f1f3f5 0%, #e2e8f0 100%);
+    border-color: #8a9da8;
+    box-shadow: 0 4px 0 #8a9da8;
+  }
+  .rk-card.rk-3 {
+    background: linear-gradient(135deg, #fdf4eb 0%, #fae0cd 100%);
+    border-color: #d97706;
+    box-shadow: 0 4px 0 #d97706;
+  }
+  .rk-card.rk-me {
+    border-color: #ffd23a;
+    box-shadow: 0 4px 0 #ffd23a, 0 0 8px rgba(255, 210, 58, 0.4);
+  }
+  .rk-medal {
+    font-size: 22px;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .rk-num {
+    font-size: 14px;
+    font-weight: 900;
+    color: #5d6b82;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .rk-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .rk-name {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #1c1130;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .rk-sub {
+    font-size: 11px;
+    color: #5d6b82;
+    margin-top: 2px;
+    font-weight: 700;
+  }
+  .rk-dist {
+    font-size: 20px;
+    font-weight: 900;
+    color: #d13d00;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .rk-you {
+    font-size: 9px;
+    font-weight: 900;
+    color: #fff;
+    background: #ff9f00;
+    border: 2px solid #1c1130;
+    border-radius: 6px;
+    padding: 1px 5px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .rk-skel {
+    height: 48px;
+    border-radius: 12px;
+    margin-bottom: 6px;
+    background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: rk-shimmer 1.4s infinite;
+    border: 2.5px solid #1c1130;
+  }
+  @keyframes rk-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── ゲーム中HUD ── */
+  #msg {
+    position: absolute;
+    top: 28%;
+    width: 100%;
+    text-align: center;
+    font-size: clamp(28px, 9vw, 48px);
+    font-weight: 900;
+    opacity: 0;
+    transition: opacity .15s;
+    pointer-events: none;
+    text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000, 0 8px 0 rgba(0,0,0,0.5);
+  }
+  #pitchSpeed {
+    position: absolute;
+    top: 44%;
+    width: 100%;
+    text-align: center;
+    font-size: clamp(16px, 4.5vw, 22px);
+    color: #ffd23a;
+    opacity: 0;
+    transition: opacity .2s;
+    pointer-events: none;
+    text-shadow: -2.5px -2.5px 0 #000, 2.5px -2.5px 0 #000, -2.5px 2.5px 0 #000, 2.5px 2.5px 0 #000, 0 4px 0 rgba(0,0,0,0.5);
+    font-weight: 900;
+  }
+  #hitData {
+    position: absolute;
+    bottom: calc(14px + var(--sab));
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    background-color: #3f256c;
+    background-image: repeating-linear-gradient(45deg, #3f256c, #3f256c 10px, #381f61 10px, #381f61 20px);
+    border: 3.5px solid #1c1130;
+    border-radius: 20px;
+    box-shadow: 0 6px 0 #1c1130;
+    padding: 10px 14px;
+    z-index: 40;
+    text-align: center;
+    width: auto;
+    white-space: nowrap;
+  }
+  #hitData .col {
+    display: inline-block;
+    margin: 0 10px;
+    vertical-align: top;
+  }
+  #hitData .big {
+    font-size: clamp(18px, 5vw, 26px);
+    font-weight: 900;
+    color: #ffd23a;
+    text-shadow: -2px -2px 0 #1c1130, 2px -2px 0 #1c1130, -2px 2px 0 #1c1130, 2px 2px 0 #1c1130, 0 3px 0 #1c1130;
+    font-variant-numeric: tabular-nums;
+  }
+  #hitData .lbl {
+    font-size: 10px;
+    color: #cbd5e1;
+    font-weight: 800;
+    margin-top: 2px;
+  }
+  
+  #meter {
+    flex: 1;
+    height: 12px;
+    background: #1c1130;
+    border: 2.5px solid #1c1130;
+    border-radius: 6px;
+    margin-top: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    min-width: 60px;
+  }
+  #meterFill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #ffc83b, #ff5c42);
+  }
+  .craft-stats-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+  }
+  .craft-material-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    width: 100%;
+  }
+  #craftMatLabel {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 
   /* Swiper カルーセルスタイル */
   .swiper {
     width: 100%;
     padding-top: 5px;
-    padding-bottom: 10px;
+    padding-bottom: 15px;
   }
   .swiper-slide {
     width: 240px;
@@ -131,7 +516,7 @@
     justify-content: center;
     align-items: center;
     transition: all 0.3s ease;
-    filter: blur(1px) opacity(0.5);
+    filter: blur(1.5px) opacity(0.5);
     transform: scale(0.9);
   }
   .swiper-slide-active {
@@ -139,66 +524,93 @@
     transform: scale(1.05);
   }
 
-  /* スマホ縦長レイアウト */
-  @media (max-width: 580px) {
-    .panel { padding:10px 14px; margin:6px; border-radius:12px; }
-    h1 { font-size:14px; margin-bottom:4px; }
-    p, .panel p { font-size:11px; }
-    button { font-size:13px; padding:9px 16px; }
-    button.sub { font-size:11px; padding:7px 11px; }
-    #craftPanel {
-      width: calc(100vw - 24px) !important;
-      left: 12px !important;
-      transform: none !important;
-    }
-    #craftStats {
-      width: calc(100vw - 24px) !important;
-    }
-    #radar {
-      width: 150px !important;
-      height: 150px !important;
-    }
-    #gamePanel {
-      position: absolute !important;
-      top: calc(12px + var(--sat)) !important;
-      left: 12px !important;
-      margin: 0 !important;
-      max-width: calc(100vw - 24px) !important;
-      width: auto !important;
-      display: flex;
-      flex-direction: row !important;
-      align-items: center !important;
-      gap: 8px !important;
-      padding: 5px 8px !important;
-    }
-    #debugToggleContainer { bottom:6px; left:6px; font-size:10px; }
-    #debugPanel { right:6px; bottom:6px; width:calc(100vw - 12px); box-sizing:border-box; }
-    #hitData .col { margin:0 5px; }
-    .pitch-dot { width:18px; height:18px; font-size:8px; }
-    .pitch-grid { gap:3px; }
-    #endPanel { min-width:min(320px, 96vw) !important; }
+  /* ── コミック木目・クラフト素材カード ── */
+  .mat-slide-card {
+    border: 4px solid #1c1130;
+    border-radius: 20px;
+    padding: 20px 16px;
+    text-align: center;
+    box-shadow: 0 6px 0 #1c1130;
+    transition: transform 0.2s;
+    color: #fff;
+    box-sizing: border-box;
+  }
+  .mat-slide-card.mat-wood {
+    background: linear-gradient(135deg, #d29d63 0%, #8b5527 100%);
+  }
+  .mat-slide-card.mat-carbon {
+    background: linear-gradient(135deg, #444958 0%, #1c1e24 100%);
+  }
+  .mat-slide-card.mat-metal {
+    background: linear-gradient(135deg, #a4b7c9 0%, #617385 100%);
+  }
+  .mat-slide-card.mat-gold {
+    background: linear-gradient(135deg, #ffe066 0%, #b88a00 100%);
+  }
+  .mat-slide-card.mat-diamond {
+    background: linear-gradient(135deg, #b0e0ff 0%, #296bbd 100%);
+  }
+  .mat-slide-card.mat-obsidian {
+    background: linear-gradient(135deg, #a85cf5 0%, #310d5c 100%);
   }
   
-  /* Pitch History grid & dots (Wii Fit inspired) */
+  .mat-title {
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 4px;
+    color: #fff;
+    text-shadow: -2px -2px 0 #1c1130, 2px -2px 0 #1c1130, -2px 2px 0 #1c1130, 2px 2px 0 #1c1130, 0 3px 0 #1c1130;
+  }
+  .mat-subtitle {
+    font-size: 12px;
+    color: #cbd5e1;
+    margin-bottom: 14px;
+    font-weight: 800;
+  }
+  .mat-stats-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 8px;
+    font-size: 11px;
+    text-align: left;
+    max-width: 180px;
+    margin: 0 auto;
+    font-weight: 800;
+  }
+  .mat-bar {
+    background: #1c1130;
+    border: 2px solid #1c1130;
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+    align-self: center;
+    box-sizing: border-box;
+  }
+  .mat-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd23a, #ff8c42);
+  }
+
+  /* ── 投球履歴ドット ── */
   .pitch-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 4px;
-    margin-top: 0;
-    margin-bottom: 0;
+    margin: 0;
   }
   .pitch-dot {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    background: #1a2233;
-    border: 1.5px solid #3d4c66;
+    background: #eef2f7;
+    border: 3px solid #1c1130;
+    box-shadow: 0 3px 0 #1c1130;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 9px;
-    font-weight: bold;
-    color: #889ec2;
+    font-size: 10px;
+    font-weight: 900;
+    color: #1c1130;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .pitch-dot svg {
@@ -207,32 +619,34 @@
   }
   .pitch-dot.current {
     border-color: #ffd23a;
-    box-shadow: 0 0 10px #ffd23a;
-    background: #1a2233;
-    color: #fff;
+    box-shadow: 0 3px 0 #1c1130, 0 0 10px #ffd23a;
+    background: #fff;
+    color: #1c1130;
     animation: pitchPulse 1.0s infinite alternate;
   }
   .pitch-dot.hr {
     background: #ffd23a;
-    border-color: #e6a100;
-    color: #000;
-    box-shadow: 0 0 12px rgba(255, 210, 58, 0.6);
+    border-color: #ff8c02;
+    color: #fff;
+    text-shadow: -1px -1px 0 #ff8c02, 1px -1px 0 #ff8c02, -1px 1px 0 #ff8c02, 1px 1px 0 #ff8c02;
   }
   .pitch-dot.hit {
-    background: #389e0d;
-    border-color: #237804;
+    background: #7be118;
+    border-color: #4da500;
     color: #fff;
-    box-shadow: 0 0 10px rgba(56, 158, 13, 0.5);
+    text-shadow: -1px -1px 0 #4da500, 1px -1px 0 #4da500, -1px 1px 0 #4da500, 1px 1px 0 #4da500;
   }
   .pitch-dot.foul {
     background: #fa8c16;
     border-color: #ad4e00;
     color: #fff;
+    text-shadow: -1px -1px 0 #ad4e00, 1px -1px 0 #ad4e00, -1px 1px 0 #ad4e00, 1px 1px 0 #ad4e00;
   }
   .pitch-dot.miss {
-    background: #cf1322;
-    border-color: #820008;
+    background: #ff5e5e;
+    border-color: #c71e1e;
     color: #fff;
+    text-shadow: -1px -1px 0 #c71e1e, 1px -1px 0 #c71e1e, -1px 1px 0 #c71e1e, 1px 1px 0 #c71e1e;
   }
   .pitch-dot.unplayed {
     opacity: 0.55;
@@ -242,67 +656,110 @@
     100% { transform: scale(1.18); }
   }
 
-  /* Bat Warehouse Cards & Custom UI */
-  .bat-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 8px;
-    padding: 10px;
+  /* ── エンドパネルのカード ── */
+  .score-card {
+    background: #f0f4fb;
+    border: 3.5px solid #1c1130;
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 16px;
+    color: #1c1130;
+    box-shadow: 0 6px 0 #1c1130;
+  }
+  .score-card p {
+    color: #5d6b82;
+    margin: 0 0 6px;
+  }
+  .register-container {
+    background: #f0f4fb;
+    border: 3.5px solid #1c1130;
+    border-radius: 20px;
+    padding: 14px;
+    margin-bottom: 16px;
+    color: #1c1130;
+    box-shadow: 0 4px 0 #1c1130;
+  }
+  .register-container .lbl {
+    font-size: 10px;
+    color: #5d6b82;
     margin-bottom: 8px;
-    transition: all 0.2s ease;
+    letter-spacing: .5px;
+    font-weight: 800;
+  }
+
+  /* ── レトロクラフト画面テーブル ── */
+  #craftStats {
+    position: absolute;
+    top: calc(12px + var(--sat));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 340px;
     box-sizing: border-box;
-  }
-  .bat-card.equipped {
-    border-color: #ffd23a;
-    box-shadow: 0 0 10px rgba(255, 210, 58, 0.22);
-    background: rgba(255, 210, 58, 0.04);
-  }
-  .bat-card h3 {
-    margin: 0 0 6px 0;
-    font-size: 13px;
-    color: #fff;
+    z-index: 15;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
   }
-  .bat-card-details {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 12px;
-    font-size: 10px;
-    color: #aab6cc;
-    margin-bottom: 8px;
+  #craftPanel {
+    position: absolute;
+    bottom: calc(12px + var(--sab));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 340px;
+    box-sizing: border-box;
+    z-index: 15;
   }
-  .bat-card-actions {
-    display: flex;
-    gap: 6px;
-  }
-  .bat-card-actions button {
-    font-size: 10.5px;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-weight: bold;
-    flex: 1;
-    margin: 0;
-    cursor: pointer;
+  #radar {
+    width: 240px;
+    height: 240px;
   }
 
-  /* ── ランキングカード ── */
-  .rk-card { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; margin-bottom:6px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); transition:opacity .3s; }
-  .rk-card.rk-1 { background:linear-gradient(135deg,rgba(255,210,0,0.18),rgba(255,150,30,0.10)); border-color:rgba(255,210,50,0.40); }
-  .rk-card.rk-2 { background:linear-gradient(135deg,rgba(200,210,230,0.14),rgba(160,175,200,0.08)); border-color:rgba(200,210,230,0.30); }
-  .rk-card.rk-3 { background:linear-gradient(135deg,rgba(210,130,50,0.14),rgba(165,90,20,0.08)); border-color:rgba(210,140,70,0.30); }
-  .rk-card.rk-me { background:rgba(255,210,58,0.07); border-color:rgba(255,210,58,0.40); box-shadow:0 0 0 1px rgba(255,210,58,0.15); }
-  .rk-medal { font-size:20px; width:28px; text-align:center; flex-shrink:0; line-height:1; }
-  .rk-num { font-size:12px; font-weight:700; color:#475569; width:20px; text-align:center; flex-shrink:0; }
-  .rk-info { flex:1; min-width:0; }
-  .rk-name { font-size:13px; font-weight:700; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .rk-sub { font-size:10px; color:#475569; margin-top:1px; }
-  .rk-dist { font-size:20px; font-weight:900; color:#ffd23a; font-variant-numeric:tabular-nums; flex-shrink:0; line-height:1; }
-  .rk-you { font-size:9px; font-weight:700; color:#ffd23a; background:rgba(255,210,58,0.15); border:1px solid rgba(255,210,58,0.3); border-radius:4px; padding:1px 5px; margin-left:6px; vertical-align:middle; letter-spacing:.5px; }
-  .rk-skel { height:48px; border-radius:12px; margin-bottom:6px; background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.07) 50%,rgba(255,255,255,0.03) 75%); background-size:200% 100%; animation:rk-shimmer 1.4s infinite; }
-  @keyframes rk-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
+  /* ── レスポンシブ調整 ── */
+  @media (max-width: 580px) {
+    .panel { padding: 12px 16px; margin: 6px; border-radius: 20px; }
+    h1 { font-size: 16px; margin-bottom: 8px; }
+    p { font-size: 12px; }
+    button { font-size: 14px; padding: 8px 14px; }
+    button.sub, button.btn-sub { font-size: 11px; padding: 6px 11px; }
+    #craftPanel {
+      position: absolute !important;
+      bottom: calc(10px + var(--sab)) !important;
+      width: calc(100vw - 20px) !important;
+      left: 10px !important;
+      transform: none !important;
+    }
+    #craftStats {
+      position: absolute !important;
+      top: calc(10px + var(--sat)) !important;
+      width: calc(100vw - 20px) !important;
+      left: 10px !important;
+      transform: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+    }
+    .craft-stats-layout {
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    #radar {
+      width: 210px !important;
+      height: 210px !important;
+    }
+    #gamePanel {
+      position: absolute !important;
+      top: calc(12px + var(--sat)) !important;
+      left: 10px !important;
+      margin: 0 !important;
+      max-width: calc(100vw - 20px) !important;
+      width: auto !important;
+      padding: 6px 10px !important;
+    }
+    #debugToggleContainer { bottom: 6px; left: 6px; font-size: 10px; }
+    #debugPanel { right: 6px; bottom: 6px; width: calc(100vw - 12px); box-sizing: border-box; }
+    #endPanel { min-width: min(320px, 96vw) !important; }
+  }
 </style>
 </head>
 <body>
@@ -322,25 +779,25 @@
             <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-        <text x="120" y="44" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-weight="900" font-size="42" fill="url(#lgBat)" filter="url(#fglow)" letter-spacing="-2">BatCraft</text>
+        <text x="120" y="44" text-anchor="middle" font-family="'Fredoka', sans-serif" font-weight="900" font-size="44" fill="url(#lgBat)" stroke="#1c1130" stroke-width="8" stroke-linejoin="round" paint-order="stroke fill" filter="url(#fglow)" letter-spacing="-1">BatCraft 3.0</text>
       </svg>
       <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,200,100,0.4),rgba(190,100,255,0.4),transparent);margin:5px auto 0;width:68%;"></div>
     </div>
-    <div id="menuEquippedBar" style="margin-bottom:12px;padding:10px 12px;background:rgba(255,255,255,0.05);border-radius:10px;border:1px solid rgba(255,255,255,0.08);">
+    <div class="menu-equipped-bar" id="menuEquippedBar">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <div style="flex:1;text-align:left;">
-          <div style="font-size:10px;color:#aab6cc;margin-bottom:2px;">装備中のバット</div>
-          <div id="menuEquippedName" style="font-size:13px;font-weight:bold;color:#ffd23a;">バット未装備</div>
+          <div class="lbl">装備中のバット</div>
+          <div id="menuEquippedName">バット未装備</div>
         </div>
-        <button id="menuWarehouseBtn" class="sub" style="margin:0;font-size:11px;padding:6px 12px;flex-shrink:0;">倉庫</button>
+        <button id="menuWarehouseBtn" class="sub" style="margin:0;font-size:11.5px;padding:5px 10px;flex-shrink:0;">倉庫</button>
       </div>
-      <canvas id="menuBatCanvas" width="400" height="56" style="width:100%;height:44px;display:block;border-radius:6px;background:rgba(0,0,0,0.18);"></canvas>
+      <canvas id="menuBatCanvas" width="400" height="56"></canvas>
     </div>
-    <div style="display:flex; flex-direction:column; gap:10px;">
-      <button id="menuCraftBtn" style="font-size:15px; padding:11px; margin:0; width:100%;">バットを作る</button>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <button id="menuCraftBtn" class="btn-green" style="font-size:16px; padding:12px; margin:0; width:100%;">バットを作る</button>
       <div style="display:flex;gap:8px;">
-        <button id="menuNormalBtn" style="flex:1;font-size:16px;font-weight:700;padding:13px 0;margin:0;background:linear-gradient(135deg,rgba(255,157,107,0.85),rgba(255,107,74,0.85));border:1px solid rgba(255,255,255,0.1);box-shadow:0 6px 18px rgba(255,107,74,.25);">Normal</button>
-        <button id="menuChallengeBtn" style="flex:1;font-size:16px;font-weight:700;padding:13px 0;margin:0;background:linear-gradient(135deg,rgba(126,94,255,0.85),rgba(160,74,255,0.85));border:1px solid rgba(255,255,255,0.1);box-shadow:0 6px 18px rgba(160,74,255,.25);">Hard</button>
+        <button id="menuNormalBtn" class="btn-green" style="flex:1;font-size:16px;font-weight:900;padding:12px 0;">Normal</button>
+        <button id="menuChallengeBtn" class="btn-orange" style="flex:1;font-size:16px;font-weight:900;padding:12px 0;">Hard</button>
       </div>
       <button id="menuSettingsBtn" class="sub" style="font-size:13px; padding:9px; margin:0; width:100%;">ゲーム設定</button>
       <button id="menuRankingBtn" class="sub" style="font-size:13px; padding:9px; margin:0; width:100%;">オンラインランキング</button>
@@ -349,9 +806,9 @@
 
   <!-- バット倉庫画面 -->
   <div class="panel" id="warehouseUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:90vw; max-width:420px; max-height:92vh; display:flex; flex-direction:column; box-sizing:border-box; z-index:20;">
-    <h1 style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:8px; margin:0 0 8px 0; font-size:16px;">
+    <h1 style="display:flex; justify-content:space-between; align-items:center; border-bottom:3.5px solid #1c1130; padding-bottom:8px; margin:0 0 10px 0;">
       <span>バット倉庫</span>
-      <span id="warehouseCount" style="font-size:12px; color:#ffd23a;">0 / 20 本</span>
+      <span id="warehouseCount" style="font-size:13px; color:#ffd23a; text-shadow:none;">0 / 20 本</span>
     </h1>
     
     <!-- Swiper スワイパーコンテナ -->
@@ -368,27 +825,27 @@
     
     <div style="display:flex; gap:8px; width:100%;">
       <button id="warehouseBackBtn" class="sub" style="flex:1; margin:0; padding:10px;">メニューに戻る</button>
-      <button id="warehouseCraftBtn" style="flex:1; margin:0; font-size:12px; padding:10px; background:linear-gradient(135deg,rgba(76,175,80,0.85),rgba(46,125,50,0.85)); border:1px solid rgba(255,255,255,0.1); box-shadow:0 6px 18px rgba(76,175,80,.25);">新しく削る</button>
+      <button id="warehouseCraftBtn" class="btn-green" style="flex:1; margin:0; font-size:13px; padding:10px;">新しく削る</button>
     </div>
   </div>
 
   <!-- ゲーム設定画面 -->
   <div class="panel" id="settingsUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:300px; max-width:90vw; z-index:20;">
-    <h1 style="border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:8px; margin:0 0 15px 0; font-size:16px;">ゲーム設定</h1>
+    <h1 style="border-bottom:3.5px solid #1c1130; padding-bottom:8px; margin:0 0 15px 0;">ゲーム設定</h1>
     <div style="margin-bottom:18px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:bold; font-size:12px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:bold; font-size:13px;">
         <span>効果音音量:</span>
         <b id="settingsVolumeVal" style="color:#ffd23a;">100%</b>
       </div>
       <input type="range" id="settingsVolumeSlider" min="0" max="1" step="0.05" value="1.0" style="width:100%; cursor:pointer; margin:8px 0;">
     </div>
     <div style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
-      <span style="font-weight:bold; font-size:12px;">高画質エフェクト (Bloom):</span>
-      <input type="checkbox" id="settingsBloomCheckbox" checked style="cursor:pointer; width:18px; height:18px;">
+      <span style="font-weight:bold; font-size:13px;">高画質エフェクト (Bloom):</span>
+      <input type="checkbox" id="settingsBloomCheckbox" checked style="cursor:pointer;">
     </div>
-    <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; border-top:1px dashed rgba(255,255,255,0.15); padding-top:12px;">
-      <span style="font-weight:bold; font-size:12px; color:#94a3b8;">デバッグ表示:</span>
-      <input type="checkbox" id="settingsDebugCheckbox" style="cursor:pointer; width:18px; height:18px;">
+    <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; border-top:1.5px dashed #1c1130; padding-top:12px;">
+      <span style="font-weight:bold; font-size:13px; color:#cbd5e1;">デバッグ表示:</span>
+      <input type="checkbox" id="settingsDebugCheckbox" style="cursor:pointer;">
     </div>
     <button id="settingsBackBtn" class="sub" style="width:100%; margin:0; padding:10px;">メニューに戻る</button>
   </div>
@@ -398,8 +855,8 @@
     <!-- ヘッダー -->
     <div style="text-align:center; margin-bottom:18px;">
       <div style="font-size:36px; margin-bottom:6px;">🏆</div>
-      <div style="font-size:20px; font-weight:900; background:linear-gradient(135deg,#ffe566,#ff8c42,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.5px;">世界ランキング</div>
-      <div style="font-size:11px; color:#64748b; margin-top:4px;">10球の総飛距離 · グローバル</div>
+      <div style="font-size:22px; font-weight:900; color:#ffd23a; text-shadow: -2px -2px 0 #1c1130, 2px -2px 0 #1c1130, -2px 2px 0 #1c1130, 2px 2px 0 #1c1130, 0 3px 0 #1c1130; letter-spacing:-0.5px;">世界ランキング</div>
+      <div style="font-size:12px; color:#cbd5e1; margin-top:4px; font-weight:700;">10球の総飛距離 · グローバル</div>
     </div>
     <!-- リスト -->
     <div id="rankingListContainer" style="margin-bottom:14px;">
@@ -413,28 +870,28 @@
   </div>
 
   <!-- バット名入力モーダル -->
-  <div class="panel" id="batNameModal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:300px; max-width:90vw; z-index:100; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
-    <h1 style="color:#ffd23a; margin:0 0 8px 0; font-size:16px;">バットが完成！</h1>
-    <p style="font-size:11px; color:#cfe3ff; margin:0 0 15px 0;">名前をつけてバット倉庫に保存します。</p>
-    <input type="text" id="batNameInput" placeholder="バットの名前" maxlength="16" style="font-size:14px; padding:8px 12px; border-radius:8px; border:1px solid #555; background:#1d2230; color:#fff; text-align:center; width:90%; box-sizing:border-box; margin-bottom:15px; font-weight:bold;">
+  <div class="panel" id="batNameModal" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:300px; max-width:90vw; z-index:100; text-align:center;">
+    <h1 style="color:#ffd23a; margin:0 0 8px 0;">バットが完成！</h1>
+    <p style="font-size:12px; color:#cbd5e1; margin:0 0 15px 0; font-weight:700;">名前をつけてバット倉庫に保存します。</p>
+    <input type="text" id="batNameInput" placeholder="バットの名前" maxlength="16" style="width:90%; box-sizing:border-box; margin-bottom:15px;">
     <div style="display:flex; gap:8px; width:100%;">
       <button id="batNameCancelBtn" class="sub" style="flex:1; margin:0; padding:8px;">キャンセル</button>
-      <button id="batNameSaveBtn" style="flex:1; margin:0; padding:8px; background:linear-gradient(135deg,rgba(255,107,74,0.85),rgba(233,49,79,0.85)); border:1px solid rgba(255,255,255,0.1);">倉庫に保存</button>
+      <button id="batNameSaveBtn" class="btn-green" style="flex:1; margin:0; padding:8px;">倉庫に保存</button>
     </div>
   </div>
 
   <!-- 素材選択画面 -->
   <div class="panel" id="materialSelectUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(340px,92vw); box-sizing:border-box; z-index:30; overflow:hidden;">
-    <h1 style="text-align:center; margin:0 0 4px 0; font-size:16px;">バットの素材を選ぼう</h1>
-    <p style="text-align:center; font-size:11px; color:#94a3b8; margin:0 0 14px 0;">← スワイプで切替 →</p>
+    <h1 style="text-align:center; margin:0 0 4px 0;">バットの素材を選ぼう</h1>
+    <p style="text-align:center; font-size:12px; color:#cbd5e1; margin:0 0 14px 0; font-weight:700;">← スワイプで切替 →</p>
     <!-- Carousel wrapper -->
     <div style="position:relative; overflow:hidden; margin:0 -4px 12px;">
       <div id="matTrack" style="display:flex; transition:transform 0.35s cubic-bezier(.4,0,.2,1); will-change:transform;">
         <!-- wood -->
         <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
-          <div style="background:rgba(139,90,43,0.22);border:1px solid rgba(200,150,80,0.35);border-radius:14px;padding:20px 16px;text-align:center;">
+          <div class="mat-slide-card mat-wood">
             <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 3px 6px rgba(139,90,43,0.4));">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));">
                 <defs>
                   <linearGradient id="woodTop" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#ffdfa9" />
@@ -445,29 +902,29 @@
                     <stop offset="100%" stop-color="#804c1b" />
                   </linearGradient>
                 </defs>
-                <!-- アイソメトリック木材（2本の木材ブロックが交差して重なっているデザイン） -->
-                <path d="M2 14l6-3 12 4-6 3-12-4z" fill="url(#woodSide)" stroke="#603010" stroke-width="0.8" />
-                <path d="M2 14v3l6 3v-3l-6-3z" fill="#804c1b" stroke="#603010" stroke-width="0.8" />
-                <path d="M8 17v3l12-4v-3l-12 4z" fill="#502808" stroke="#603010" stroke-width="0.8" />
-                <path d="M5 8l7-3.5 9 3-7 3.5-9-3z" fill="url(#woodTop)" stroke="#9a622a" stroke-width="0.8" />
-                <path d="M5 8v3l9 3v-3l-9-3z" fill="url(#woodSide)" stroke="#603010" stroke-width="0.8" />
-                <path d="M14 11v3l7-3v-3l-7 3z" fill="#603010" stroke="#603010" stroke-width="0.8" />
-                <path d="M8 7.5l6-3M11 9l5-2.5" stroke="#804c1b" stroke-width="0.8" stroke-linecap="round" />
+                <!-- アイソメトリック木材 -->
+                <path d="M2 14l6-3 12 4-6 3-12-4z" fill="url(#woodSide)" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M2 14v3l6 3v-3l-6-3z" fill="#804c1b" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M8 17v3l12-4v-3l-12 4z" fill="#502808" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M5 8l7-3.5 9 3-7 3.5-9-3z" fill="url(#woodTop)" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M5 8v3l9 3v-3l-9-3z" fill="url(#woodSide)" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M14 11v3l7-3v-3l-7 3z" fill="#603010" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M8 7.5l6-3M11 9l5-2.5" stroke="#1c1130" stroke-width="1" stroke-linecap="round" />
               </svg>
             </div>
-            <div style="font-size:20px;font-weight:800;color:#e8c07a;margin-bottom:4px;">木製</div>
-            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">バランス型 · 初心者向け</div>
-            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
-              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:45%;height:100%;background:linear-gradient(90deg,#ff8c42,#ffd23a);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:65%;height:100%;background:linear-gradient(90deg,#ff8c42,#ffd23a);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:50%;height:100%;background:linear-gradient(90deg,#ff8c42,#ffd23a);border-radius:4px;"></div></div>
+            <div class="mat-title">木製</div>
+            <div class="mat-subtitle">バランス型 · 初心者向け</div>
+            <div class="mat-stats-grid">
+              <span>パワー</span><div class="mat-bar"><div class="mat-bar-fill" style="width:45%;"></div></div>
+              <span>スピード</span><div class="mat-bar"><div class="mat-bar-fill" style="width:65%;"></div></div>
+              <span>耐久</span><div class="mat-bar"><div class="mat-bar-fill" style="width:50%;"></div></div>
             </div>
-            <button onclick="selectMaterial('wood')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(200,140,60,0.8),rgba(160,90,30,0.8));border-color:rgba(200,150,80,0.5);">この素材で作る</button>
+            <button class="btn-green" onclick="selectMaterial('wood')" style="margin:16px 0 0;width:100%;">この素材で作る</button>
           </div>
         </div>
         <!-- carbon -->
         <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
-          <div style="background:rgba(50,50,80,0.40);border:1px solid rgba(160,160,220,0.30);border-radius:14px;padding:20px 16px;text-align:center;">
+          <div class="mat-slide-card mat-carbon">
             <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
               <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 10px rgba(96,160,255,0.7));">
                 <defs>
@@ -479,37 +936,37 @@
                 </defs>
                 <circle cx="12" cy="12" r="10" stroke="rgba(96,160,255,0.15)" stroke-width="0.8" />
                 <!-- フラーレン（C60）格子構造球体 -->
-                <polygon points="12,7.5 16,10.5 14.5,15 9.5,15 8,10.5" stroke="url(#carbonGrad)" stroke-width="1.2" stroke-linejoin="round" />
+                <polygon points="12,7.5 16,10.5 14.5,15 9.5,15 8,10.5" stroke="url(#carbonGrad)" stroke-width="1.5" stroke-linejoin="round" />
                 <circle cx="12" cy="7.5" r="1" fill="#ffffff" />
                 <circle cx="16" cy="10.5" r="1" fill="#ffffff" />
                 <circle cx="14.5" cy="15" r="1" fill="#ffffff" />
                 <circle cx="9.5" cy="15" r="1" fill="#ffffff" />
                 <circle cx="8" cy="10.5" r="1" fill="#ffffff" />
-                <path d="M12,7.5 L12,4.5 M16,10.5 L19.5,10 M14.5,15 L17,18.5 M9.5,15 L7,18.5 M8,10.5 L4.5,10" stroke="url(#carbonGrad)" stroke-width="1" />
+                <path d="M12,7.5 L12,4.5 M16,10.5 L19.5,10 M14.5,15 L17,18.5 M9.5,15 L7,18.5 M8,10.5 L4.5,10" stroke="url(#carbonGrad)" stroke-width="1.2" />
                 <circle cx="12" cy="4.5" r="1.1" fill="#ffffff" />
                 <circle cx="19.5" cy="10" r="1.1" fill="#ffffff" />
                 <circle cx="17" cy="18.5" r="1.1" fill="#ffffff" />
                 <circle cx="7" cy="18.5" r="1.1" fill="#ffffff" />
                 <circle cx="4.5" cy="10" r="1.1" fill="#ffffff" />
                 <path d="M12,4.5 L19.5,10 L17,18.5 L7,18.5 L4.5,10 Z" stroke="url(#carbonGrad)" stroke-width="0.8" stroke-dasharray="2 1" />
-                <path d="M12,4.5 L16,10.5 M19.5,10 L14.5,15 M17,18.5 L9.5,15 M7,18.5 L8,10.5 M4.5,10 L12,7.5" stroke="rgba(255,255,255,0.3)" stroke-width="0.8" />
+                <path d="M12,4.5 L16,10.5 M19.5,10 L14.5,15 M17,18.5 L9.5,15 M7,18.5 L8,10.5 M4.5,10 L12,7.5" stroke="rgba(255,255,255,0.4)" stroke-width="1" />
               </svg>
             </div>
-            <div style="font-size:20px;font-weight:800;color:#a0b8f8;margin-bottom:4px;">カーボン</div>
-            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">超軽量・高速スイング</div>
-            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
-              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:35%;height:100%;background:linear-gradient(90deg,#6080ff,#a0c0ff);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:98%;height:100%;background:linear-gradient(90deg,#6080ff,#a0c0ff);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:30%;height:100%;background:linear-gradient(90deg,#6080ff,#a0c0ff);border-radius:4px;"></div></div>
+            <div class="mat-title">カーボン</div>
+            <div class="mat-subtitle">超軽量・高速スイング</div>
+            <div class="mat-stats-grid">
+              <span>パワー</span><div class="mat-bar"><div class="mat-bar-fill" style="width:35%;"></div></div>
+              <span>スピード</span><div class="mat-bar"><div class="mat-bar-fill" style="width:98%;"></div></div>
+              <span>耐久</span><div class="mat-bar"><div class="mat-bar-fill" style="width:30%;"></div></div>
             </div>
-            <button onclick="selectMaterial('carbon')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(80,80,160,0.8),rgba(50,50,120,0.8));border-color:rgba(160,160,220,0.4);">この素材で作る</button>
+            <button class="btn-green" onclick="selectMaterial('carbon')" style="margin:16px 0 0;width:100%;">この素材で作る</button>
           </div>
         </div>
         <!-- metal -->
         <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
-          <div style="background:rgba(100,120,150,0.28);border:1px solid rgba(180,210,240,0.28);border-radius:14px;padding:20px 16px;text-align:center;">
+          <div class="mat-slide-card mat-metal">
             <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 8px rgba(200,220,240,0.45));">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));">
                 <defs>
                   <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stop-color="#ffffff" />
@@ -517,26 +974,26 @@
                     <stop offset="100%" stop-color="#506878" />
                   </linearGradient>
                 </defs>
-                <polygon points="12,3 20,7 20,17 12,21 4,17 4,7" fill="url(#metalGrad)" stroke="#c8d8e8" stroke-width="1.5" />
-                <polygon points="12,6 17,9 17,15 12,18 7,15 7,9" fill="#1e2538" stroke="url(#metalGrad)" stroke-width="1.5" />
-                <circle cx="12" cy="12" r="2.5" fill="url(#metalGrad)" />
+                <polygon points="12,3 20,7 20,17 12,21 4,17 4,7" fill="url(#metalGrad)" stroke="#1c1130" stroke-width="1.5" />
+                <polygon points="12,6 17,9 17,15 12,18 7,15 7,9" fill="#1e2538" stroke="#1c1130" stroke-width="1.5" />
+                <circle cx="12" cy="12" r="2.5" fill="url(#metalGrad)" stroke="#1c1130" stroke-width="1" />
               </svg>
             </div>
-            <div style="font-size:20px;font-weight:800;color:#c8ddf0;margin-bottom:4px;">アルミ</div>
-            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">強反発・高耐久</div>
-            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
-              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:65%;height:100%;background:linear-gradient(90deg,#80a0c0,#c0d8f0);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:75%;height:100%;background:linear-gradient(90deg,#80a0c0,#c0d8f0);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:85%;height:100%;background:linear-gradient(90deg,#80a0c0,#c0d8f0);border-radius:4px;"></div></div>
+            <div class="mat-title">アルミ</div>
+            <div class="mat-subtitle">強反発・高耐久</div>
+            <div class="mat-stats-grid">
+              <span>パワー</span><div class="mat-bar"><div class="mat-bar-fill" style="width:65%;"></div></div>
+              <span>スピード</span><div class="mat-bar"><div class="mat-bar-fill" style="width:75%;"></div></div>
+              <span>耐久</span><div class="mat-bar"><div class="mat-bar-fill" style="width:85%;"></div></div>
             </div>
-            <button onclick="selectMaterial('metal')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(120,150,180,0.8),rgba(80,110,140,0.8));border-color:rgba(180,210,240,0.4);">この素材で作る</button>
+            <button class="btn-green" onclick="selectMaterial('metal')" style="margin:16px 0 0;width:100%;">この素材で作る</button>
           </div>
         </div>
         <!-- gold -->
         <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
-          <div style="background:rgba(160,110,0,0.28);border:1px solid rgba(255,210,50,0.35);border-radius:14px;padding:20px 16px;text-align:center;">
+          <div class="mat-slide-card mat-gold">
             <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 10px rgba(255,210,50,0.55));">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 10px rgba(0,0,0,0.35));">
                 <defs>
                   <linearGradient id="goldTop" x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stop-color="#fffbeb" />
@@ -548,30 +1005,27 @@
                     <stop offset="100%" stop-color="#854d0e" />
                   </linearGradient>
                 </defs>
-                <!-- 後ろのインゴット（手前広がりの正しいアイソメトリック） -->
-                <path d="M8 9 L14 9 L15.5 11.5 L6.5 11.5 Z" fill="url(#goldTop)" stroke="#854d0e" stroke-width="0.5" />
-                <path d="M6.5 11.5 L15.5 11.5 L17 15 L5 15 Z" fill="#ca8a04" stroke="#854d0e" stroke-width="0.5" />
-                <!-- 手前のインゴット -->
-                <path d="M4 14 L10 14 L11 16.5 L3 16.5 Z" fill="url(#goldTop)" stroke="#854d0e" stroke-width="0.5" />
-                <path d="M3 16.5 L11 16.5 L12.5 20 L1.5 20 Z" fill="#ca8a04" stroke="#854d0e" stroke-width="0.5" />
-                <!-- キラキラエフェクト -->
-                <path d="M6,5 L6,3 M6,5 L6,7 M6,5 L4,5 M6,5 L8,5" stroke="#ffffff" stroke-width="0.8" stroke-linecap="round" />
-                <path d="M19,13 L19,11 M19,13 L19,15 M19,13 L17,13 M19,13 L21,13" stroke="#ffffff" stroke-width="0.8" stroke-linecap="round" />
+                <path d="M8 9 L14 9 L15.5 11.5 L6.5 11.5 Z" fill="url(#goldTop)" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M6.5 11.5 L15.5 11.5 L17 15 L5 15 Z" fill="#ca8a04" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M4 14 L10 14 L11 16.5 L3 16.5 Z" fill="url(#goldTop)" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M3 16.5 L11 16.5 L12.5 20 L1.5 20 Z" fill="#ca8a04" stroke="#1c1130" stroke-width="1.2" />
+                <path d="M6,5 L6,3 M6,5 L6,7 M6,5 L4,5 M6,5 L8,5" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
+                <path d="M19,13 L19,11 M19,13 L19,15 M19,13 L17,13 M19,13 L21,13" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" />
               </svg>
             </div>
-            <div style="font-size:20px;font-weight:800;color:#ffd23a;margin-bottom:4px;">ゴールド</div>
-            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">重量級パワー型</div>
-            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
-              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:95%;height:100%;background:linear-gradient(90deg,#c8a000,#ffe566);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:15%;height:100%;background:linear-gradient(90deg,#c8a000,#ffe566);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:40%;height:100%;background:linear-gradient(90deg,#c8a000,#ffe566);border-radius:4px;"></div></div>
+            <div class="mat-title">ゴールド</div>
+            <div class="mat-subtitle">重量級パワー型</div>
+            <div class="mat-stats-grid">
+              <span>パワー</span><div class="mat-bar"><div class="mat-bar-fill" style="width:95%;"></div></div>
+              <span>スピード</span><div class="mat-bar"><div class="mat-bar-fill" style="width:15%;"></div></div>
+              <span>耐久</span><div class="mat-bar"><div class="mat-bar-fill" style="width:40%;"></div></div>
             </div>
-            <button onclick="selectMaterial('gold')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(180,130,0,0.85),rgba(120,80,0,0.85));border-color:rgba(255,210,50,0.5);">この素材で作る</button>
+            <button class="btn-green" onclick="selectMaterial('gold')" style="margin:16px 0 0;width:100%;">この素材で作る</button>
           </div>
         </div>
         <!-- diamond -->
         <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
-          <div style="background:rgba(30,60,140,0.28);border:1px solid rgba(96,170,255,0.35);border-radius:14px;padding:20px 16px;text-align:center;">
+          <div class="mat-slide-card mat-diamond">
             <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
               <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 12px rgba(128,192,255,0.65));">
                 <defs>
@@ -581,25 +1035,25 @@
                     <stop offset="100%" stop-color="#2050a0" />
                   </linearGradient>
                 </defs>
-                <path d="M6 3h12l4 5-10 13L2 8l4-5z" fill="url(#diaGrad)" stroke="#b0e0ff" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M6 3h12l4 5-10 13L2 8l4-5z" fill="url(#diaGrad)" stroke="#1c1130" stroke-width="1.5" stroke-linejoin="round" />
                 <path d="M6 3l4 5 2-5 2 5 4-5" stroke="#ffffff" stroke-width="1" />
                 <path d="M2 8h20" stroke="#ffffff" stroke-width="1" />
                 <path d="M10 8l2 13 2-13" stroke="#ffffff" stroke-width="1" />
               </svg>
             </div>
-            <div style="font-size:20px;font-weight:800;color:#90c8ff;margin-bottom:4px;">ダイヤ</div>
-            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">究極の硬度・超高反発</div>
-            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
-              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:100%;height:100%;background:linear-gradient(90deg,#4090e0,#90d0ff);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:30%;height:100%;background:linear-gradient(90deg,#4090e0,#90d0ff);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:100%;height:100%;background:linear-gradient(90deg,#4090e0,#90d0ff);border-radius:4px;"></div></div>
+            <div class="mat-title">ダイヤ</div>
+            <div class="mat-subtitle">究極の硬度・超高反発</div>
+            <div class="mat-stats-grid">
+              <span>パワー</span><div class="mat-bar"><div class="mat-bar-fill" style="width:100%;"></div></div>
+              <span>スピード</span><div class="mat-bar"><div class="mat-bar-fill" style="width:30%;"></div></div>
+              <span>耐久</span><div class="mat-bar"><div class="mat-bar-fill" style="width:100%;"></div></div>
             </div>
-            <button onclick="selectMaterial('diamond')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(40,90,200,0.85),rgba(20,60,150,0.85));border-color:rgba(96,170,255,0.4);">この素材で作る</button>
+            <button class="btn-green" onclick="selectMaterial('diamond')" style="margin:16px 0 0;width:100%;">この素材で作る</button>
           </div>
         </div>
         <!-- obsidian -->
         <div class="mat-slide" style="min-width:100%;padding:0 4px;box-sizing:border-box;">
-          <div style="background:rgba(20,5,40,0.50);border:1px solid rgba(140,80,220,0.35);border-radius:14px;padding:20px 16px;text-align:center;">
+          <div class="mat-slide-card mat-obsidian">
             <div style="height:48px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;">
               <svg viewBox="0 0 24 24" width="48" height="48" fill="none" style="filter: drop-shadow(0 0 12px rgba(180,96,255,0.6));">
                 <defs>
@@ -609,110 +1063,104 @@
                     <stop offset="100%" stop-color="#15002a" />
                   </linearGradient>
                 </defs>
-                <path d="M12 2L3 9v6l9 7 9-7V9l-9-7z" fill="url(#obsGrad)" stroke="#c080ff" stroke-width="1.5" stroke-linejoin="round" />
-                <path d="M12 2v20M3 9h18M3 15h18" stroke="rgba(255,255,255,0.25)" stroke-width="1" />
+                <path d="M12 2L3 9v6l9 7 9-7V9l-9-7z" fill="url(#obsGrad)" stroke="#1c1130" stroke-width="1.5" stroke-linejoin="round" />
+                <path d="M12 2v20M3 9h18M3 15h18" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" />
                 <polygon points="12,5 17,9 12,13 7,9" stroke="#e0a0ff" stroke-width="1" fill="none" />
                 <polygon points="12,13 17,15 12,19 7,15" stroke="#e0a0ff" stroke-width="1" fill="none" />
               </svg>
             </div>
-            <div style="font-size:20px;font-weight:800;color:#c084fc;margin-bottom:4px;">黒曜石</div>
-            <div style="font-size:12px;color:#94a3b8;margin-bottom:14px;">漆黒の魔器・呪われし力</div>
-            <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:11px;text-align:left;max-width:180px;margin:0 auto;">
-              <span style="color:#aab6cc;">パワー</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:85%;height:100%;background:linear-gradient(90deg,#8020c0,#e060ff);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">スピード</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:40%;height:100%;background:linear-gradient(90deg,#8020c0,#e060ff);border-radius:4px;"></div></div>
-              <span style="color:#aab6cc;">耐久</span><div style="background:rgba(255,255,255,0.08);border-radius:4px;height:8px;overflow:hidden;align-self:center;"><div style="width:75%;height:100%;background:linear-gradient(90deg,#8020c0,#e060ff);border-radius:4px;"></div></div>
+            <div class="mat-title">黒曜石</div>
+            <div class="mat-subtitle">漆黒の魔器・呪われし力</div>
+            <div class="mat-stats-grid">
+              <span>パワー</span><div class="mat-bar"><div class="mat-bar-fill" style="width:85%;"></div></div>
+              <span>スピード</span><div class="mat-bar"><div class="mat-bar-fill" style="width:40%;"></div></div>
+              <span>耐久</span><div class="mat-bar"><div class="mat-bar-fill" style="width:75%;"></div></div>
             </div>
-            <button onclick="selectMaterial('obsidian')" style="margin:16px 0 0;width:100%;font-size:14px;font-weight:700;padding:11px;background:linear-gradient(135deg,rgba(80,10,140,0.85),rgba(40,5,80,0.85));border-color:rgba(140,80,220,0.4);">この素材で作る</button>
+            <button class="btn-green" onclick="selectMaterial('obsidian')" style="margin:16px 0 0;width:100%;">この素材で作る</button>
           </div>
         </div>
       </div>
       <!-- nav arrows -->
-      <button id="matPrev" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;margin:0;padding:0;font-size:18px;line-height:1;background:rgba(0,0,0,0.45);border-color:rgba(255,255,255,0.15);opacity:0.8;">‹</button>
-      <button id="matNext" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;margin:0;padding:0;font-size:18px;line-height:1;background:rgba(0,0,0,0.45);border-color:rgba(255,255,255,0.15);opacity:0.8;">›</button>
+      <button id="matPrev" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;margin:0;padding:0;font-size:18px;line-height:1;background:rgba(0,0,0,0.6);border:2.5px solid #1c1130;opacity:0.85;box-shadow:none;">‹</button>
+      <button id="matNext" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;margin:0;padding:0;font-size:18px;line-height:1;background:rgba(0,0,0,0.6);border:2.5px solid #1c1130;opacity:0.85;box-shadow:none;">›</button>
     </div>
     <!-- dots -->
     <div id="matDots" style="display:flex;justify-content:center;gap:6px;margin-bottom:12px;">
-      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:#ffd23a;transition:background .2s;"></span>
-      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
-      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
-      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
-      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
-      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);transition:background .2s;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:#ffd23a;transition:background .2s;border:1px solid #1c1130;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);transition:background .2s;border:1px solid #1c1130;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);transition:background .2s;border:1px solid #1c1130;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);transition:background .2s;border:1px solid #1c1130;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);transition:background .2s;border:1px solid #1c1130;"></span>
+      <span class="mat-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.4);transition:background .2s;border:1px solid #1c1130;"></span>
     </div>
     <button id="matSelectBackBtn" class="sub" style="width:100%;margin:0;padding:10px;">メニューに戻る</button>
   </div>
 
   <div id="craftUI" style="display:none;">
-    <!-- バット計測（右上） -->
+    <!-- 能力値（上部中央） -->
     <div class="panel" id="craftStats">
-      <div style="font-size:10px;font-weight:bold;color:#aab6cc;margin-bottom:4px;letter-spacing:0.3px;">バット計測</div>
-      <div style="display:flex;align-items:flex-start;gap:6px;">
-        <table>
-          <tr><td>質量</td><td id="stMass">–</td></tr>
-          <tr><td>重心</td><td id="stCom">–</td></tr>
-          <tr><td>スイング</td><td id="stSwing">–</td></tr>
-          <tr><td>芯の径</td><td id="stBarrel">–</td></tr>
-        </table>
-        <canvas id="radar" width="340" height="340" style="flex-shrink:0;display:block;width:150px;height:150px;"></canvas>
+      <div style="font-size:14px;font-weight:900;color:#ffd23a;margin-bottom:10px;letter-spacing:0.5px;text-align:center;text-shadow: -1.5px -1.5px 0 #1c1130, 1.5px -1.5px 0 #1c1130, -1.5px 1.5px 0 #1c1130, 1.5px 1.5px 0 #1c1130;">能力値</div>
+      <div class="craft-stats-layout" style="display:flex; justify-content:center; align-items:center; width:100%;">
+        <canvas id="radar" width="340" height="340" style="flex-shrink:0;display:block;border:4.5px solid #1c1130;border-radius:18px;background:rgba(0,0,0,0.35);box-sizing:border-box;box-shadow: inset 0 4px 8px rgba(0,0,0,0.45);"></canvas>
       </div>
     </div>
 
     <!-- 素材ラベル＋ボタン群（下部中央） -->
     <div class="panel" id="craftPanel">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <span style="font-size:11px;color:#aab6cc;flex-shrink:0;">素材：</span>
-        <span id="craftMatLabel" style="font-size:13px;font-weight:bold;color:#ffd23a;flex:1;">木製</span>
-        <div id="meter" style="width:72px;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;flex-shrink:0;"><div id="meterFill" style="height:100%;width:100%;background:linear-gradient(90deg,#ff9d6b,#e9314f);border-radius:3px;"></div></div>
+      <div class="craft-material-row">
+        <span style="font-size:12px;color:#cbd5e1;flex-shrink:0;font-weight:800;">素材：</span>
+        <span id="craftMatLabel" style="font-size:14px;font-weight:900;color:#ffd23a;text-shadow: -1.5px -1.5px 0 #1c1130, 1.5px -1.5px 0 #1c1130, -1.5px 1.5px 0 #1c1130, 1.5px 1.5px 0 #1c1130;">木製</span>
+        <div id="meter"><div id="meterFill" style="width:100%;"></div></div>
       </div>
       <select id="materialSelect" style="display:none;">
         <option value="wood">木製バット (Wood) - バランス型</option>
         <option value="carbon">カーボン (Carbon) - 超軽量・高速</option>
         <option value="metal">アルミ金属 (Aluminum) - 芯超広・強反発</option>
         <option value="gold">金バット (Gold) - 重量級パワー</option>
-        <option value="diamond">ダイヤモンド (Diamond) - 究極の硬度</option>
+        <option value="diamond">ダイヤモンド (Diamond) - 究極 of 硬度</option>
         <option value="obsidian">黒曜石 (Obsidian) - 漆黒 of 魔器</option>
       </select>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
-        <button id="resetBtn" style="margin:0;background:linear-gradient(135deg,rgba(200,40,40,0.88),rgba(140,10,10,0.88));border:1px solid rgba(255,100,100,0.22);box-shadow:0 4px 14px rgba(200,40,40,0.28);">削り直す</button>
-        <button id="doneBtn" style="margin:0;background:linear-gradient(135deg,rgba(34,160,74,0.90),rgba(16,110,44,0.90));border:1px solid rgba(80,220,120,0.22);box-shadow:0 4px 14px rgba(34,160,74,0.28);">完成！</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button id="resetBtn" class="btn-red" style="margin:0;font-size:14px;">削り直す</button>
+        <button id="doneBtn" class="btn-green" style="margin:0;font-size:14px;">完成！</button>
         <button id="craftMenuBtn" class="sub" style="margin:0;">メニュー</button>
-        <button id="craftWarehouseBtn" style="margin:0;padding:9px 12px;background:rgba(60,120,220,0.15);border:1px solid rgba(96,165,250,0.28);color:#93c5fd;box-shadow:none;font-size:14px;">倉庫を見る</button>
+        <button id="craftWarehouseBtn" class="btn-orange" style="margin:0;padding:9px 12px;font-size:14px;">倉庫を見る</button>
       </div>
     </div>
   </div><!-- /#craftUI -->
 
   <div class="panel" id="gamePanel" style="display:none">
-    <div id="pitchHistory">
+    <div id="pitchHistory" style="margin-right:8px;">
       <div class="pitch-grid"></div>
     </div>
-    <button id="backBtn" class="sub">メニューに戻る</button>
+    <button id="backBtn" class="sub" style="padding:6px 12px;font-size:12px;">戻る</button>
   </div>
   <div id="msg"></div>
   <div id="pitchSpeed"></div>
-  <div class="panel" id="endPanel" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:min(360px,92vw); max-height:88vh; overflow-y:auto; text-align:center; z-index:50; box-sizing:border-box; padding:20px 18px;">
-    <!-- タイトル（JSがlastChildを書き換える） -->
-    <h1 style="font-size:15px; margin:0 0 14px; color:#94a3b8; letter-spacing:1px; font-weight:500;">試合終了！</h1>
+  <div class="panel" id="endPanel" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(380px,94vw); max-height:88vh; overflow-y:auto; text-align:center; z-index:50; box-sizing:border-box; padding:20px 18px;">
+    <!-- タイトル -->
+    <h1 style="font-size:22px; margin:0 0 16px;">試合終了！</h1>
     <!-- スコアカード -->
-    <div style="background:linear-gradient(135deg,rgba(255,200,60,0.10),rgba(255,100,40,0.08)); border:1px solid rgba(255,200,80,0.20); border-radius:16px; padding:20px 16px 16px; margin-bottom:16px;">
-      <p style="font-size:11px; color:#94a3b8; margin:0 0 6px;">10球の総飛距離</p>
+    <div class="score-card">
+      <p style="font-size:12px; font-weight:800; text-transform:uppercase;">10球の総飛距離</p>
       <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; margin-bottom:4px;">
-        <b id="totalDist" style="font-size:52px; background:linear-gradient(135deg,#ffe566,#ff8c42); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-variant-numeric:tabular-nums; line-height:1;">0</b>
-        <span style="font-size:20px; color:#94a3b8; font-weight:bold;">m</span>
+        <b id="totalDist" style="font-size:56px; color:#ff9f00; font-weight:900; text-shadow: -2.5px -2.5px 0 #1c1130, 2.5px -2.5px 0 #1c1130, -2.5px 2.5px 0 #1c1130, 2.5px 2.5px 0 #1c1130, 0 4px 0 #1c1130; font-variant-numeric:tabular-nums; line-height:1;">0</b>
+        <span style="font-size:22px; color:#1c1130; font-weight:900;">m</span>
       </div>
     </div>
     <!-- 名前入力＋登録 -->
-    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; margin-bottom:14px;">
-      <div style="font-size:10px; color:#64748b; margin-bottom:8px; letter-spacing:.5px;">名前を入力してグローバルランキングに登録</div>
+    <div class="register-container">
+      <div class="lbl">名前を入力してグローバルランキングに登録</div>
       <div style="display:flex; gap:8px;">
-        <input id="playerName" maxlength="10" placeholder="なまえ" style="flex:1; font-size:14px; padding:9px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#fff; text-align:center; min-width:0; box-sizing:border-box; font-weight:bold;">
-        <button id="regBtn" style="flex-shrink:0; margin:0; padding:9px 18px; font-size:14px; font-weight:700; background:linear-gradient(135deg,rgba(255,180,60,0.9),rgba(255,100,40,0.9)); border-color:rgba(255,200,80,0.4); box-shadow:0 4px 16px rgba(255,140,50,0.3);">登録</button>
+        <input id="playerName" maxlength="10" placeholder="なまえ" style="flex:1; min-width:0;">
+        <button id="regBtn" class="btn-yellow" style="flex-shrink:0; margin:0; padding:10px 16px; font-size:14px;">登録</button>
       </div>
     </div>
     <!-- ランキングリスト -->
     <div style="margin-bottom:12px; text-align:left;">
-      <div style="font-size:11px; color:#64748b; margin-bottom:8px; display:flex; align-items:center; gap:6px; padding:0 2px;">
-        <span>🏆</span><span style="font-weight:600; color:#94a3b8;">ランキング</span>
-        <span id="rankLoadingBadge" style="display:none; font-size:10px; color:#64748b; margin-left:auto;">読込中…</span>
+      <div style="font-size:12px; color:#cbd5e1; font-weight:800; margin-bottom:8px; display:flex; align-items:center; gap:6px; padding:0 2px;">
+        <span>🏆</span><span style="font-weight:900;">ランキング</span>
+        <span id="rankLoadingBadge" style="display:none; font-size:11px; color:#aab6cc; margin-left:auto;">読込中…</span>
       </div>
       <div id="rankList"></div>
     </div>
@@ -726,36 +1174,41 @@
   </div>
   <!-- リアルタイム飛距離HUD -->
   <div id="liveDistHUD" style="display:none; position:absolute; bottom:calc(90px + var(--sab)); left:50%; transform:translateX(-50%); text-align:center; pointer-events:none; z-index:50; white-space:nowrap;">
-    <div id="liveDistNum" style="font-size:clamp(28px,9vw,48px); font-weight:900; color:#ffd23a; text-shadow:0 0 20px rgba(255,210,60,0.9), 0 2px 10px rgba(0,0,0,0.9); font-variant-numeric:tabular-nums; line-height:1;">0</div>
-    <div style="font-size:12px; color:#94a3b8; letter-spacing:2px; margin-top:2px;">m</div>
-    <div id="liveDistSpeed" style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:1px; display:none;">⏩ 4×</div>
+    <div id="liveDistNum" style="font-size:clamp(32px,10vw,52px); font-weight:900; color:#ffd23a; text-shadow: -3px -3px 0 #1c1130, 3px -3px 0 #1c1130, -3px 3px 0 #1c1130, 3px 3px 0 #1c1130, 0 6px 0 #1c1130; font-variant-numeric:tabular-nums; line-height:1;">0</div>
+    <div style="font-size:14px; color:#fff; font-weight:900; letter-spacing:2px; margin-top:2px; text-shadow: -1.5px -1.5px 0 #1c1130, 1.5px -1.5px 0 #1c1130, -1.5px 1.5px 0 #1c1130, 1.5px 1.5px 0 #1c1130;">m</div>
+    <div id="liveDistSpeed" style="font-size:12px; color:#ffd23a; font-weight:900; margin-top:3px; display:none; text-shadow: -1.5px -1.5px 0 #1c1130, 1.5px -1.5px 0 #1c1130, -1.5px 1.5px 0 #1c1130, 1.5px 1.5px 0 #1c1130;">⏩ 4×</div>
+  </div>
+  <!-- 黒曜石ジャンプ残数HUD -->
+  <div id="obsJumpHUD" style="display:none; position:absolute; bottom:calc(158px + var(--sab)); right:calc(14px + var(--sar)); pointer-events:none; z-index:51; text-align:right;">
+    <div id="obsJumpIcons" style="font-size:24px; line-height:1; letter-spacing:2px; text-shadow: 0 0 10px rgba(0,0,0,0.8);">🌑🌑</div>
+    <div style="font-size:10px; color:#c084fc; font-weight:900; letter-spacing:1.5px; margin-top:4px; text-shadow:0 0 8px rgba(192,132,252,0.8), -1px -1px 0 #1c1130, 1px -1px 0 #1c1130, -1px 1px 0 #1c1130, 1px 1px 0 #1c1130;">TAP TO JUMP</div>
   </div>
   <!-- 耐久ゲージ（プレイ中・ホームベース右上） -->
-  <div id="batHPGauge" style="display:none; position:absolute; bottom:calc(110px + var(--sab)); right:calc(14px + var(--sar)); pointer-events:none; z-index:50; text-align:right; min-width:72px;">
-    <div style="font-size:9px; color:#94a3b8; letter-spacing:1.5px; margin-bottom:3px; text-transform:uppercase;">耐久</div>
-    <div style="background:rgba(255,255,255,0.08); border-radius:4px; height:6px; overflow:hidden; margin-bottom:3px; width:72px;">
+  <div id="batHPGauge" style="display:none; position:absolute; bottom:calc(110px + var(--sab)); right:calc(14px + var(--sar)); pointer-events:none; z-index:50; text-align:right; min-width:76px;">
+    <div style="font-size:10px; color:#cbd5e1; font-weight:900; letter-spacing:1.5px; margin-bottom:3px; text-transform:uppercase; text-shadow: -1px -1px 0 #1c1130, 1px -1px 0 #1c1130, -1px 1px 0 #1c1130, 1px 1px 0 #1c1130;">耐久</div>
+    <div style="background:#1c1130; border:2px solid #1c1130; border-radius:6px; height:10px; overflow:hidden; margin-bottom:3px; width:72px; box-sizing:border-box;">
       <div id="batHPBar" style="height:100%; width:100%; border-radius:4px; background:linear-gradient(90deg,#ff6060,#ffd23a); transition:width 0.3s,background 0.3s;"></div>
     </div>
-    <div id="batHPNum" style="font-size:10px; font-weight:700; color:#ffd23a; font-variant-numeric:tabular-nums;"></div>
+    <div id="batHPNum" style="font-size:11px; font-weight:900; color:#ffd23a; font-variant-numeric:tabular-nums; text-shadow: -1px -1px 0 #1c1130, 1px -1px 0 #1c1130, -1px 1px 0 #1c1130, 1px 1px 0 #1c1130;"></div>
   </div>
   <!-- Debug Mode toggle & panel -->
   <div id="debugToggleContainer" style="position:absolute; bottom:calc(14px + var(--sab)); left:calc(14px + var(--sal)); pointer-events:auto; font-size:11px; z-index:100;">
-    <label style="cursor:pointer; background:rgba(15,18,28,0.78); border:1px solid rgba(255,255,255,0.18); border-radius:8px; padding:6px 12px; display:flex; align-items:center; gap:6px; backdrop-filter:blur(6px); box-shadow:0 4px 12px rgba(0,0,0,0.3);">
-      <input type="checkbox" id="debugModeCheckbox" style="cursor:pointer; width:14px; height:14px;">
-      <span style="font-weight:bold; color:#aab6cc; letter-spacing:0.3px; display:flex; align-items:center;"><svg class="ui-icon" viewBox="0 0 24 24" width="13" height="13" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>デバッグモード選択</span>
+    <label style="cursor:pointer; background:#3f256c; border:3px solid #1c1130; border-radius:12px; padding:6px 12px; display:flex; align-items:center; gap:6px; box-shadow:0 4px 0 #1c1130;">
+      <input type="checkbox" id="debugModeCheckbox" style="cursor:pointer; width:16px; height:16px;">
+      <span style="font-weight:900; color:#ffd23a; letter-spacing:0.3px; display:flex; align-items:center; text-shadow: -1px -1px 0 #1c1130, 1px -1px 0 #1c1130, -1px 1px 0 #1c1130, 1px 1px 0 #1c1130;"><svg class="ui-icon" viewBox="0 0 24 24" width="13" height="13" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>デバッグモード選択</span>
     </label>
   </div>
 
-  <div id="debugPanel" style="display:none; position:absolute; bottom:calc(14px + var(--sab)); right:calc(14px + var(--sar)); width:270px; background:rgba(10,12,18,0.88); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.15); border-radius:12px; padding:12px 14px; pointer-events:auto; font-size:11px; font-family:monospace; line-height:1.45; color:#cfe3ff; box-shadow:0 6px 24px rgba(0,0,0,0.6); z-index:90;">
-    <div style="font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.15); padding-bottom:4px; margin-bottom:8px; color:#ffd23a; display:flex; justify-content:space-between; font-size:12px; align-items:center;">
-      <span style="display:flex; align-items:center;"><svg class="ui-icon" viewBox="0 0 24 24" width="13" height="13" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>デバッグモード</span>
+  <div id="debugPanel" style="display:none; position:absolute; bottom:calc(14px + var(--sab)); right:calc(14px + var(--sar)); width:270px; background:#3f256c; border:3.5px solid #1c1130; border-radius:18px; padding:12px 14px; pointer-events:auto; font-size:11px; font-family:monospace; line-height:1.45; color:#cfe3ff; box-shadow:0 6px 0 #1c1130; z-index:90;">
+    <div style="font-weight:900; border-bottom:2px solid #1c1130; padding-bottom:6px; margin-bottom:8px; color:#ffd23a; display:flex; justify-content:space-between; font-size:12px; align-items:center; text-shadow: -1px -1px 0 #1c1130, 1px -1px 0 #1c1130, -1px 1px 0 #1c1130, 1px 1px 0 #1c1130;">
+      <span style="display:flex; align-items:center;"><svg class="ui-icon" viewBox="0 0 24 24" width="13" height="13" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>デバッグモード</span>
       <span id="debugModeStatus" style="color:#7dffa0;">ACTIVE</span>
     </div>
     
-    <!-- Presets (only shown in craft mode) -->
+    <!-- Presets -->
     <div id="debugPresets" style="margin-bottom:10px;">
-      <div style="color:#8a96ad; margin-bottom:4px; font-weight:bold;">バット形状プリセット:</div>
-      <div style="display:flex; flex-wrap:wrap; gap:4px;">
+      <div style="color:#cbd5e1; margin-bottom:6px; font-weight:bold;">バット形状プリセット:</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px;">
         <button class="sub" onclick="applyPreset('power')" style="font-size:10px; padding:4px 8px; margin:0; font-weight:bold; background:#243654; color:#6cb5ff;">パワー型</button>
         <button class="sub" onclick="applyPreset('balanced')" style="font-size:10px; padding:4px 8px; margin:0; font-weight:bold; background:#243654; color:#6cb5ff;">バランス型</button>
         <button class="sub" onclick="applyPreset('extreme')" style="font-size:10px; padding:4px 8px; margin:0; font-weight:bold; background:#4a2424; color:#ff7d7d;">極端型</button>
@@ -780,7 +1233,7 @@
     </div>
     
     <!-- Parameter Display -->
-    <div style="border-top:1px solid rgba(255,255,255,0.12); padding-top:8px; font-size:10px; color:#aab6cc;">
+    <div style="border-top:2px solid #1c1130; padding-top:8px; font-size:10px; color:#cbd5e1;">
       <div style="font-weight:bold; margin-bottom:4px; color:#fff;">物理パラメータ:</div>
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px 8px;">
         <div>Mass: <span id="dbgMass" style="color:#ffd479;">-</span></div>
@@ -794,7 +1247,7 @@
         <div>Flex: <span id="dbgFlex" style="color:#ffd479;">-</span></div>
         <div>ShapeScr: <span id="dbgShapeScore" style="color:#ffd479;">-</span></div>
       </div>
-      <div id="dbgGameInfo" style="margin-top:6px; border-top:1px dashed rgba(255,255,255,0.15); padding-top:6px; display:none;">
+      <div id="dbgGameInfo" style="margin-top:6px; border-top:1.5px dashed #1c1130; padding-top:6px; display:none;">
         <div style="font-weight:bold; margin-bottom:4px; color:#fff;">ゲームステータス:</div>
         <div>球速: <span id="dbgBallSpeed" style="color:#ffd479;">-</span></div>
         <div>投球時間(T): <span id="dbgT" style="color:#ffd479;">-</span></div>
@@ -803,8 +1256,6 @@
       </div>
     </div>
   </div>
-  
-
 </div>
 
 <script src="vendor/three.min.js"></script>
@@ -1021,10 +1472,7 @@ function updateWoodMaterial() {
   updateCraftMatLabel();
 }
 function updateCraftMatLabel() {
-  const labels = {wood:'木製',carbon:'カーボン',metal:'アルミ',gold:'ゴールド',diamond:'ダイヤ',obsidian:'黒曜石'};
-  const mat = $('materialSelect') ? $('materialSelect').value : 'wood';
-  const el = $('craftMatLabel');
-  if (el) el.textContent = labels[mat] || mat;
+  updateCraftStats();
 }
 
 // ================= バット形状 =================
@@ -1094,13 +1542,14 @@ function getBatShapeScore() {
 function batStats() {
   const dx = BAT_LEN/SEG;
   let M = 0, Mx = 0, I = 0, barrel = 0, handleR = 1;
-  let minRadius = 1; // Track thinnest point for durability
+  let minRadius = 1, maxRadius = 0; // Track thinnest/thickest for durability
   for (let i = 0; i <= SEG; i++) {
     const x = i*dx, dm = RHO*Math.PI*radii[i]*radii[i]*dx;
     M += dm; Mx += dm*x; I += dm*x*x;
     if (i > SEG*0.6) barrel = Math.max(barrel, radii[i]);
     if (i >= SEG*0.05 && i <= SEG*0.4) handleR = Math.min(handleR, radii[i]);
     if (radii[i] < minRadius) minRadius = radii[i];
+    if (radii[i] > maxRadius) maxRadius = radii[i];
   }
   const com = Mx/M;
   const cop = I/(M*com);                                // 芯（打撃の中心）
@@ -1163,6 +1612,9 @@ function batStats() {
   // === 耐久性 (Durability) の計算 ===
   // 最薄部のペナルティ: 極端に細い部分があると耐久性が激減
   const thinnestPenalty = Math.max(0, 0.018 - minRadius) * 80;
+  // スプレッドペナルティ: 最大半径と最小半径の差が大きいほど脆くなる
+  const spread = maxRadius - minRadius;
+  const spreadPenalty = clamp(spread * 6, 0, 0.45); // spread 0.025→0.15, 0.05→0.30, 0.075→0.45
   // 形状の均整度: セグメント間の半径変化の標準偏差
   let sumDiff = 0, sumDiffSq = 0;
   for (let i = 0; i < SEG; i++) {
@@ -1173,7 +1625,7 @@ function batStats() {
   const avgDiff = sumDiff / SEG;
   const stdDiff = Math.sqrt(sumDiffSq / SEG - avgDiff * avgDiff);
   const uniformity = clamp(1.0 - stdDiff * 15, 0, 1);
-  const baseDurability = clamp((uniformity - thinnestPenalty) * 100 * durMult * shapeScore, 5, 100);
+  const baseDurability = Math.max(5, (uniformity - thinnestPenalty - spreadPenalty) * 100 * durMult * shapeScore);
   const durability = Math.round(baseDurability);
 
   // === ミート (Meet) の計算 ===
@@ -1187,30 +1639,43 @@ function batStats() {
     if (radii[i] >= maxBarrelR * 0.80) barrelCount++;
   }
   const barrelWidth = barrelCount / (barrelEnd - barrelStart + 1);
-  const baseMeet = clamp(barrelWidth * barrel * 2500 * meetMult * shapeScore, 5, 100);
+  const baseMeet = Math.max(5, barrelWidth * barrel * 2500 * meetMult * shapeScore);
   const meet = Math.round(baseMeet);
 
   return {M, com, I, cop, barrel, swingT, meff, flex, handleR, shapeScore, durability, meet, minRadius};
 }
 function updateCraftStats() {
   const s = batStats();
-  $('stMass').textContent = (s.M*1000).toFixed(0) + ' g';
-  $('stCom').textContent = (s.com*100).toFixed(1) + ' cm';
-  $('stSwing').textContent = s.swingT.toFixed(2) + ' 秒';
-  $('stBarrel').textContent = (s.barrel*200).toFixed(1) + ' cm';
+  
+  // 素材と質量表示の更新
+  const labels = {wood:'木製',carbon:'カーボン',metal:'アルミ',gold:'ゴールド',diamond:'ダイヤ',obsidian:'黒曜石'};
+  const mat = $('materialSelect') ? $('materialSelect').value : 'wood';
+  const matName = labels[mat] || mat;
+  const el = $('craftMatLabel');
+  if (el) {
+    el.textContent = `${matName} (${(s.M * 1000).toFixed(0)}g)`;
+  }
+
+  // 重心インジケーターの更新
+  if (comGlow) {
+    comGlow.position.x = s.com - BAT_LEN/2;
+    const scaleVal = radiusAt(s.com) + 0.005;
+    comGlow.scale.set(scaleVal, scaleVal, scaleVal);
+  }
+
   $('meterFill').style.width = clamp(s.M/8.0, 0, 1)*100 + '%';
-  // 5項目の正規化 (0〜100)
-  const power = Math.round(clamp(s.meff/3.5, .06, 1) * 100);
-  const handling = Math.round(clamp((0.8-s.swingT)/0.55, .06, 1) * 100);
-  const flexVal = Math.round(clamp(s.flex/3, .06, 1) * 100);
-  const durVal = s.durability; // already 0-100
-  const meetVal = s.meet;      // already 0-100
+  // 5項目（上限撤廃: 100超の限界突破あり）
+  const power = Math.round(Math.max(.06, s.meff/3.5) * 100);
+  const handling = Math.round(Math.max(.06, (0.8-s.swingT)/0.55) * 100);
+  const flexVal = Math.round(Math.max(.06, s.flex/3) * 100);
+  const durVal = s.durability;
+  const meetVal = s.meet;
   drawRadar([power, handling, flexVal, durVal, meetVal]);
 }
 // パワー / 操作性 / しなり / 耐久性 / ミート の五角形レーダーチャート
 function drawRadar(vals5) {
   const cv = $('radar'), g = cv.getContext('2d');
-  const cx = cv.width / 2, cy = cv.height / 2, R = Math.min(cx, cy) * 0.48;
+  const cx = cv.width / 2, cy = cv.height / 2, R = Math.min(cx, cy) * 0.38;
   const N = 5;
   const labels = ['パワー', '操作性', 'しなり', '耐久性', 'ミート'];
   // 角度: 上から時計回り (上, 右上, 右下, 左下, 左上)
@@ -1245,8 +1710,7 @@ function drawRadar(vals5) {
   g.shadowBlur = 0;
 
   // ラベル描画
-  const labelR = R + 36;
-  g.font = 'bold 24px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.textAlign = 'center'; g.textBaseline = 'middle';
   const labelOffsets = [
     [0, -14],   // パワー (top)
     [16, 0],    // 操作性 (right-top)
@@ -1255,36 +1719,70 @@ function drawRadar(vals5) {
     [-16, 0],   // ミート (left-top)
   ];
   labels.forEach((label, i) => {
-    const [x, y] = pt(angles[i], labelR);
+    const isOver90  = !debugMode && vals5[i] > 90;
+    const isOver150 = !debugMode && vals5[i] > 150;
+    // 限界突破時はラベルをさらに外へ押し出す
+    const thisLabelR = isOver150 ? R + 54 : R + 36;
+    const [x, y] = pt(angles[i], thisLabelR);
     const ox = labelOffsets[i][0], oy = labelOffsets[i][1];
-    const numMasked = !debugMode && vals5[i] > 90;
-    const isOver90 = !debugMode && vals5[i] > 90;
-    // ラベル
-    g.fillStyle = isOver90 ? '#ffd23a' : '#dce8ff';
+
+    // ラベル（限界突破時は大きく縁取り）
+    const labelFont = isOver150 ? 'bold 28px sans-serif' : 'bold 24px sans-serif';
+    g.font = labelFont;
+    if (isOver150) {
+      g.strokeStyle = 'rgba(0,0,0,0.85)'; g.lineWidth = 4; g.lineJoin = 'round';
+      g.strokeText(label, x + ox, y + oy);
+    }
+    g.fillStyle = isOver150 ? '#ff8c00' : isOver90 ? '#ffd23a' : '#dce8ff';
     g.fillText(label, x + ox, y + oy);
-    // 数値
-    const numStr = debugMode ? String(Math.round(vals5[i])) : (numMasked ? '???' : String(Math.round(vals5[i])));
-    g.font = 'bold 20px monospace';
-    g.fillStyle = debugMode ? '#ffd479' : (numMasked ? '#6a7280' : '#c8e8ff');
-    g.fillText(numStr, x + ox, y + oy + 26);
-    g.font = 'bold 24px sans-serif';
-    // ???頂点グロー（ネオンマルチレイヤー強発光）
+
+    // 数値（限界突破時は大きく縁取り）
+    let numStr;
+    if (debugMode) numStr = String(Math.round(vals5[i]));
+    else if (isOver150) numStr = '!!!';
+    else if (isOver90)  numStr = '???';
+    else numStr = String(Math.round(vals5[i]));
+    const numFont = isOver150 ? 'bold 26px monospace' : 'bold 20px monospace';
+    g.font = numFont;
+    if (isOver150) {
+      g.strokeStyle = 'rgba(0,0,0,0.85)'; g.lineWidth = 4; g.lineJoin = 'round';
+      g.strokeText(numStr, x + ox, y + oy + 30);
+    }
+    if (debugMode)        g.fillStyle = '#ffd479';
+    else if (isOver150)   g.fillStyle = '#ffb347';
+    else if (isOver90)    g.fillStyle = '#6a7280';
+    else                  g.fillStyle = '#c8e8ff';
+    g.fillText(numStr, x + ox, y + oy + 30);
+
+    // 頂点グロー — 実際のデータ頂点位置に配置
     if (isOver90) {
-      const [vx, vy] = pt(angles[i], R);
+      const dataR = R * Math.min(vals5[i] / 100, 1.5);
+      const [vx, vy] = pt(angles[i], dataR);
       g.save();
       g.globalCompositeOperation = 'screen';
-      // 1. 広範囲の柔らかな光
-      g.shadowColor = '#ffd23a'; g.shadowBlur = 32;
-      g.beginPath(); g.arc(vx, vy, 16, 0, Math.PI*2);
-      g.fillStyle = 'rgba(255, 210, 58, 0.18)'; g.fill();
-      // 2. 中範囲のコア光
-      g.shadowBlur = 16;
-      g.beginPath(); g.arc(vx, vy, 10, 0, Math.PI*2);
-      g.fillStyle = 'rgba(255, 220, 80, 0.45)'; g.fill();
-      // 3. 中心コア（白熱光）
-      g.shadowBlur = 6;
-      g.beginPath(); g.arc(vx, vy, 5, 0, Math.PI*2);
-      g.fillStyle = '#ffffff'; g.fill();
+      if (isOver150) {
+        // !!!：オレンジ強発光
+        g.shadowColor = '#ff6a00'; g.shadowBlur = 56;
+        g.beginPath(); g.arc(vx, vy, 24, 0, Math.PI*2);
+        g.fillStyle = 'rgba(255, 106, 0, 0.28)'; g.fill();
+        g.shadowBlur = 28;
+        g.beginPath(); g.arc(vx, vy, 14, 0, Math.PI*2);
+        g.fillStyle = 'rgba(255, 150, 0, 0.60)'; g.fill();
+        g.shadowBlur = 10;
+        g.beginPath(); g.arc(vx, vy, 6, 0, Math.PI*2);
+        g.fillStyle = '#fff5e0'; g.fill();
+      } else {
+        // ???：黄色グロー
+        g.shadowColor = '#ffd23a'; g.shadowBlur = 32;
+        g.beginPath(); g.arc(vx, vy, 16, 0, Math.PI*2);
+        g.fillStyle = 'rgba(255, 210, 58, 0.18)'; g.fill();
+        g.shadowBlur = 16;
+        g.beginPath(); g.arc(vx, vy, 10, 0, Math.PI*2);
+        g.fillStyle = 'rgba(255, 220, 80, 0.45)'; g.fill();
+        g.shadowBlur = 6;
+        g.beginPath(); g.arc(vx, vy, 5, 0, Math.PI*2);
+        g.fillStyle = '#ffffff'; g.fill();
+      }
       g.restore();
     }
   });
@@ -1476,7 +1974,7 @@ function showMsg(text, color='#fff', ms=1100) {
 }
 
 // ================= 工房（旋盤） =================
-let craftBat, kanna, shavings = [], brushW = 4, carving = false, cursorX = 0, overLog = false;
+let craftBat, kanna, shavings = [], brushW = 4, carving = false, cursorX = 0, overLog = false, comGlow;
 function buildCraft() {
   disposeGroup(craftGroup); shavings = [];
   updateWoodMaterial();
@@ -1517,6 +2015,20 @@ function buildCraft() {
   kanna.add(body, blade);
   kanna.rotation.x = -.18;
   craftGroup.add(kanna);
+
+  // 重心インジケーター (Glow torus ring)
+  const glowGeo = new THREE.TorusGeometry(1, 0.06, 8, 32);
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0xffd23a,
+    transparent: true,
+    opacity: 0.6,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+  comGlow = new THREE.Mesh(glowGeo, glowMat);
+  comGlow.rotation.y = Math.PI/2;
+  craftGroup.add(comGlow);
+
   updateCraftStats();
 }
 function rebuildBatMesh(mesh) { mesh.geometry.dispose(); mesh.geometry = batGeometry(); }
@@ -1561,6 +2073,9 @@ function updateCraft(dt) {
     const surf = radiusAt(cursorX + BAT_LEN/2);
     kanna.position.lerp(new THREE.Vector3(cursorX, surf + .032, .03), .35);
     kanna.visible = overLog;
+  }
+  if (comGlow && comGlow.material) {
+    comGlow.material.opacity = 0.45 + 0.25 * Math.sin(performance.now() * 0.005);
   }
   for (let i = shavings.length-1; i >= 0; i--) {
     const s = shavings[i];
@@ -1749,7 +2264,7 @@ function addOutfieldStructures() {
   {
     scoreboardCanvas = document.createElement('canvas'); scoreboardCanvas.width = 512; scoreboardCanvas.height = 224;
     scoreboardCtx = scoreboardCanvas.getContext('2d');
-    drawScoreboardText('BAT CRAFT', '★ NIGHT GAME ★');
+    drawScoreboardText('BAT CRAFT', battingMode === 'challenge' ? '★ NIGHT GAME ★' : '☀ DAY GAME ☀');
     scoreboardTex = new THREE.CanvasTexture(scoreboardCanvas); scoreboardTex.encoding = THREE.sRGBEncoding;
     const sb = new THREE.Mesh(new THREE.BoxGeometry(18, 8, .8),
       [poleMat, poleMat, poleMat, poleMat, new THREE.MeshStandardMaterial({map:scoreboardTex, roughness:0.2, metalness:0.3}), poleMat]);
@@ -2123,7 +2638,7 @@ function addCyberLandmarks() {
   const fujiGroup = new THREE.Group();
   fujiGroup.position.set(40, -5, -650);
   
-  const baseGeo = new THREE.ConeGeometry(180, 160, 16, 1, true);
+  const baseGeo = new THREE.CylinderGeometry(12, 180, 160, 16, 1, true);
   const baseMat = new THREE.MeshStandardMaterial({
     color: 0x07112b,
     roughness: 0.8,
@@ -2149,7 +2664,7 @@ function addCyberLandmarks() {
   fujiWireMesh.position.copy(baseMesh.position);
   fujiGroup.add(fujiWireMesh);
   
-  const snowGeo = new THREE.ConeGeometry(75, 60, 16, 1, true);
+  const snowGeo = new THREE.CylinderGeometry(12, 75, 60, 16, 1, false);
   const snowMat = new THREE.MeshStandardMaterial({
     color: 0xffffff,
     roughness: 0.9,
@@ -2510,6 +3025,7 @@ let debugBatMult = 1.0;
 let debugPitchSpeedMult = 1.0;
 let batHP = 100, batMaxHP = 100;
 let batBroken = false;
+let obsidianJumpsLeft = 0;
 let score = {pitch:0, hits:0, hrs:0, best:0, total:0};
 let camOff = {x:0, y:0}, dragStart = null;
 const SWEEP0 = -1.40, SWEEP1 = 2.10;   // バットのヨー角範囲(rad)
@@ -2985,13 +3501,31 @@ function checkUfoHit() {
 
 function hitUfo(i) {
   const p = ufos[i].position.clone();
-  // 上方向ジャンプ＋水平を少し伸ばす（新規ブースト機構・既存の打撃物理には不介入）
-  fly.v.y = Math.max(fly.v.y, 0) + UFO_BOOST_UP;
-  fly.v.x *= UFO_BOOST_H; fly.v.z *= UFO_BOOST_H;
-  createSparks(p, true); addShake(0.12);
+  // 速度ベクトルを10倍に
+  fly.v.x *= 10; fly.v.y *= 10; fly.v.z *= 10;
+  createSparks(p, true); addShake(0.18);
   if (snd.ringChime) snd.ringChime();
-  showMsg('🛸 UFO BOOST!', '#9fefff', 1600);
+  showMsg('🛸 UFO BOOST x10!!', '#9fefff', 1600);
   despawnUfo(i);
+}
+
+// 富士山当たり判定（錐台衝突チェック）
+// fujiGroup world pos: (40, -5, -650), frustum bottom r=180 top r=12 height=160
+function checkFujiHit() {
+  if (!fly || fly.landed) return;
+  const by = ball.position.y;
+  const hy = by + 5; // group local y (group.position.y = -5)
+  if (hy < 0 || hy > 160) return;
+  const hd = Math.hypot(ball.position.x - 40, ball.position.z + 650);
+  const fujiR = 180 - 168 * (hy / 160); // 底180 → 頂12
+  if (hd < fujiR + BALL_R) {
+    const hitPos = ball.position.clone();
+    createSparks(hitPos, true);
+    addShake(0.15);
+    showMsg('⛰️ 富士山激突！', '#00d2ff', 2000);
+    try { [220, 330, 440].forEach((f,i) => setTimeout(() => tone(f, 0.2, 'triangle', 0.12), i*80)); } catch(_) {}
+    landBall(false);
+  }
 }
 
 function sprayLabel(deg) {
@@ -3003,6 +3537,7 @@ function sprayLabel(deg) {
 function landBall(isGround = true) {
   fly.landed = true;
   const _lhud = $('liveDistHUD'); if (_lhud) _lhud.style.display = 'none';
+  const _ojh = $('obsJumpHUD'); if (_ojh) _ojh.style.display = 'none';
   snd.stopCheer();
   const lx = ball.position.x, lz = ball.position.z;
   const dist = Math.round(Math.hypot(lx, lz));
@@ -3062,6 +3597,8 @@ let camHome = null;
 function nextPitch() {
   ball.visible = false; ballShadow.visible = false; fly = null;
   const _nh = $('liveDistHUD'); if (_nh) _nh.style.display = 'none';
+  const _oh = $('obsJumpHUD'); if (_oh) _oh.style.display = 'none';
+  obsidianJumpsLeft = 0;
   if (camHome) { camera.position.copy(camHome.pos); camera.lookAt(camHome.look); }
   if (score.pitch >= 10) showEnd();
   else gameTimeout(startPitch, 400);   // ＋ワインドアップ2秒で次の球まで間が空く
@@ -3098,7 +3635,7 @@ function rankCardHTML(r, rank, highlightDate) {
     </div>
     <div style="text-align:right;">
       <div class="rk-dist">${Number(r.total).toLocaleString()}</div>
-      <div style="font-size:10px;color:#475569;">m</div>
+      <div style="font-size:10px;color:#5d6b82;font-weight:900;margin-top:2px;">m</div>
     </div>
   </div>`;
 }
@@ -3188,7 +3725,26 @@ function showEnd() {
 }
 
 $('regBtn').onclick = async () => {
-  const name = ($('playerName').value.trim() || '名無しの強打者').slice(0, 10);
+  const rawName = $('playerName').value.trim();
+  const name = (rawName || '名無しの強打者').slice(0, 10);
+
+  // フロントエンドNGワードチェック
+  const NG_WORDS = [
+    'shit','fuck','ass','dick','bitch','cunt','pussy','bastard','faggot','nigger','nigga',
+    'ちんこ','まんこ','うんこ','きんたま','ちくび','おちんちん','おまんこ','ちんぽ',
+    'クソ','くそ','クズ','死ね','しね','殺す','ころす','レイプ','強姦',
+  ];
+  const ALLOWED_CHARS = /^[a-zA-Z0-9ぁ-んァ-ヴーａ-ｚＡ-Ｚ０-９一-龯々〆〇！？＿\-\.\s_]+$/;
+
+  if (rawName && !ALLOWED_CHARS.test(rawName)) {
+    showMsg('使用できない文字が含まれています', '#ff4444', 2000);
+    return;
+  }
+  if (NG_WORDS.some(w => name.toLowerCase().includes(w.toLowerCase()))) {
+    showMsg('その名前は使用できません', '#ff4444', 2000);
+    return;
+  }
+
   const mat = $('materialSelect') ? $('materialSelect').value : 'wood';
   const rec = {name, total: score.total, mat, date: Date.now()};
   _lastSubmittedDate = rec.date;
@@ -3502,6 +4058,10 @@ function updateGame(dt) {
     if (impact.t >= impact.duration) {
       fly = {v:impact.vOut, t:0, landed:false, follow:true, super:impact.superHit, dragK:impact.dragK,
              trailT:0, ti:0, peak:impact.peak, scoreboardHit:false, q:impact.q};
+      // 黒曜石: 飛行中ジャンプ回数をリセット
+      { const mt = $('materialSelect') ? $('materialSelect').value : 'wood';
+        obsidianJumpsLeft = (mt === 'obsidian') ? 2 : 0;
+        updateObsidianHUD(); }
       $('hitData').style.display = 'block';
       $('hdSpeed').textContent = impact.exitKmh.toFixed(0);
       $('hdAngle').textContent = impact.launch.toFixed(0) + '°';
@@ -3566,8 +4126,8 @@ function updateGame(dt) {
       const wNow = (easeS(Math.min(swing.s,1)) - easeS(Math.min(swing.sPrev,1)))/h * (SWEEP1-SWEEP0);
       const acc = (wNow - swing.w)/h; swing.w = wNow;
       swing.phiPrev = swing.phi;
-      swing.phiV += (acc*0.0045*BS.flex - 110*swing.phi - 9*swing.phiV)*h;
-      swing.phi = clamp(swing.phi + swing.phiV*h, -0.25, 0.25);
+      swing.phiV += (acc*0.013*BS.flex - 110*swing.phi - 9*swing.phiV)*h;
+      swing.phi = clamp(swing.phi + swing.phiV*h, -0.40, 0.40);
       tryContact(h);
       if (swing.s >= 1.45) swing = null;
     }
@@ -3592,6 +4152,7 @@ function updateGame(dt) {
         resolveBallCollisions();
       }
       if (!fly.exploded && !fly.landed) checkUfoHit();
+      if (!fly.exploded && !fly.landed) checkFujiHit();
       if (ball.position.y <= BALL_R && !fly.landed) landBall();
       if (fly.landed && ball.position.y < BALL_R && !fly.exploded) ball.position.y = BALL_R;
     }
@@ -3777,8 +4338,8 @@ function toCraft() {
   
   const aspect = camera.aspect || (innerWidth / innerHeight) || 1.0;
   const craftZ = aspect < 0.75 ? 0.95 : 1.7;
-  camera.position.set(0, .20, 1.05*Math.max(0.9, craftZ/aspect));
-  camera.lookAt(0, .05, 0);
+  camera.position.set(0, 0.12, 1.05*Math.max(0.9, craftZ/aspect));
+  camera.lookAt(0, -0.02, 0);
   buildCraft();
 }
 function updatePitchHistoryUI() {
@@ -3870,6 +4431,44 @@ function updateRankingBtnState() {
       $('regBtn').textContent = '登録';
     }
   }
+}
+
+function updateObsidianHUD() {
+  const hud = $('obsJumpHUD');
+  if (!hud) return;
+  const matType = $('materialSelect') ? $('materialSelect').value : 'wood';
+  const visible = (matType === 'obsidian') && fly && !fly.landed && obsidianJumpsLeft > 0;
+  hud.style.display = visible ? 'block' : 'none';
+  if (visible) $('obsJumpIcons').textContent = '🌑'.repeat(obsidianJumpsLeft);
+}
+
+function obsidianMagicJump() {
+  if (!fly || fly.landed || obsidianJumpsLeft <= 0) return;
+  obsidianJumpsLeft--;
+
+  // 上方向に弾く（下向き速度は8割キャンセル→上ジャンプ）
+  fly.v.y = Math.max(fly.v.y * 0.2, 0) + 22;
+  // 水平方向も少し伸ばす
+  fly.v.x *= 1.10;
+  fly.v.z *= 1.10;
+
+  // 球を一瞬紫に光らせる
+  const origHex = ball.material.color.getHex();
+  ball.material.color.setHex(0xc084fc);
+  setTimeout(() => { if (ball && ball.material) ball.material.color.setHex(origHex); }, 350);
+
+  // エフェクト
+  createSparks(ball.position.clone(), true);
+  addShake(0.07);
+  const leftMsg = obsidianJumpsLeft > 0 ? ` (残り${obsidianJumpsLeft})` : '';
+  showMsg('🌑 魔力跳躍！' + leftMsg, '#c084fc', 1200);
+
+  // 魔法音: 上昇アルペジオ
+  try {
+    [330, 495, 660, 990].forEach((f, i) => setTimeout(() => tone(f, 0.18, 'sine', 0.11), i * 55));
+  } catch(e) {}
+
+  updateObsidianHUD();
 }
 
 function updateBatHPGauge() {
@@ -4174,22 +4773,21 @@ function updateWarehouseDetail(batId) {
   };
   
   detailContainer.innerHTML = `
-    <div style="text-align:center; padding:5px 0;">
-      <h2 style="font-size:16px; margin:0 0 4px 0; color:#fff; font-weight:bold;">${escapeHTML(bat.name)}</h2>
-      <p style="font-size:11px; color:#cbd5e1; margin:0 0 10px 0;">
+    <div class="warehouse-detail-card">
+      <h2>${escapeHTML(bat.name)}</h2>
+      <p>
         素材: ${matLabels[bat.material] || bat.material} &nbsp;|&nbsp; 作成日: ${bat.date}
       </p>
       
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; background:rgba(255,255,255,0.02); padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); margin-bottom:12px; font-size:11px; text-align:left;">
-        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">質量:</span><b>${(bat.stats.M * 1000).toFixed(0)}g</b></div>
-        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">重心:</span><b>${(bat.stats.cop * 100).toFixed(0)}cm</b></div>
-        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">スイング時間:</span><b>${bat.stats.swingT.toFixed(2)}秒</b></div>
-        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">芯の太さ:</span><b>${(bat.stats.barrel * 200).toFixed(1)}cm</b></div>
-        <div style="display:flex; justify-content:space-between;"><span style="color:#94a3b8;">ミート:</span><b>${bat.stats.meet !== undefined ? Math.round(bat.stats.meet) : '–'}</b></div>
+      <div class="warehouse-spec-grid">
+        <div><span>質量:</span><b>${(bat.stats.M * 1000).toFixed(0)}g</b></div>
+        <div><span>重心:</span><b>${(bat.stats.cop * 100).toFixed(0)}cm</b></div>
+        <div><span>スイング時間:</span><b>${bat.stats.swingT.toFixed(2)}秒</b></div>
+        <div><span>芯の太さ:</span><b>${(bat.stats.barrel * 200).toFixed(1)}cm</b></div>
+        <div><span>ミート:</span><b>${bat.stats.meet !== undefined ? Math.round(bat.stats.meet) : '–'}</b></div>
       </div>
       
-      <button style="background:rgba(239,68,68,0.12); color:#f87171; border:1px solid rgba(239,68,68,0.22); padding:6px 12px; font-size:11px; border-radius:6px; cursor:pointer; font-weight:bold; transition:all 0.2s;" 
-              onclick="warehouseAction('delete', '${bat.id}')">
+      <button class="btn-red" style="width:100%;font-size:13px;" onclick="warehouseAction('delete', '${bat.id}')">
         このバットを廃棄する
       </button>
     </div>
@@ -4206,7 +4804,7 @@ function loadWarehouse() {
   $('warehouseCount').textContent = `${bats.length} / ${MAX_BATS} 本`;
   
   if (bats.length === 0) {
-    container.innerHTML = `<div class="swiper-slide" style="width:100%;"><div style="text-align:center; padding:30px; color:#94a3b8; font-size:12px; width:100%;">倉庫は空っぽです。<br>バット工房で作ってみましょう！</div></div>`;
+    container.innerHTML = `<div class="swiper-slide" style="width:100%;"><div style="text-align:center; padding:30px; color:#cbd5e1; font-weight:800; font-size:13px; width:100%;">倉庫は空っぽです。<br>バット工房で作ってみましょう！</div></div>`;
     detailContainer.innerHTML = '';
     if (warehouseSwiper) {
       warehouseSwiper.destroy(true, true);
@@ -4219,7 +4817,7 @@ function loadWarehouse() {
   container.innerHTML = bats.map(bat => {
     return `
       <div class="swiper-slide" data-bat-id="${bat.id}" style="width:240px;">
-        <div style="position:relative; width:220px; height:110px; display:flex; justify-content:center; align-items:center; background:rgba(255,255,255,0.03); border-radius:12px; border:1px solid rgba(255,255,255,0.06); overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,0.2);">
+        <div class="warehouse-slide-card">
           <canvas id="canvas_${bat.id}" width="200" height="80" style="display:block;"></canvas>
         </div>
       </div>
@@ -4367,6 +4965,16 @@ function showScreen(screenId) {
     if (el) el.style.display = 'none';
   }
   
+  // Hide debug toggle during active gameplay to prevent overlap with HUD on mobile
+  const dbgToggle = $('debugToggleContainer');
+  if (dbgToggle) {
+    if (screenId === 'gamePanel' || screenId === 'endPanel') {
+      dbgToggle.style.display = 'none';
+    } else {
+      dbgToggle.style.display = 'block';
+    }
+  }
+  
   // Clean play state when navigating away from game
   if (screenId !== 'gamePanel' && screenId !== 'endPanel') {
     clearPlayState();
@@ -4405,8 +5013,8 @@ function showScreen(screenId) {
     
     const aspect = camera.aspect || (innerWidth / innerHeight) || 1.0;
     const craftZ = aspect < 0.75 ? 0.95 : 1.7;
-    camera.position.set(0, .25, 1.05*Math.max(0.9, craftZ/aspect));
-    camera.lookAt(0, -0.05, 0);
+    camera.position.set(0, 0.12, 1.05*Math.max(0.9, craftZ/aspect));
+    camera.lookAt(0, -0.02, 0);
     buildCraft();
   } else if (screenId === 'warehouseUI') {
     mode = 'warehouse';
@@ -4505,7 +5113,12 @@ $('menuRankingBtn').onclick = () => { snd.ui(); showScreen('rankingUI'); };
 // ── 倍速長押しプレビュー ──
 window.addEventListener('pointerdown', (e) => {
   if (mode === 'game' && fly && !fly.landed) {
-    isLongPressing = true;
+    const mt = $('materialSelect') ? $('materialSelect').value : 'wood';
+    if (mt === 'obsidian' && obsidianJumpsLeft > 0) {
+      obsidianMagicJump();
+    } else {
+      isLongPressing = true;
+    }
   }
 });
 window.addEventListener('pointerup', () => { isLongPressing = false; });
