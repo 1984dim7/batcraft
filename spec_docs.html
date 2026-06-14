@@ -418,7 +418,19 @@ mult = min( exp( max(0, E − 0.82) × 3.2 ),  12.0 )</div>
           <label class="ctrl-label">ヘッド先端 <span class="ctrl-val" id="vTip">2.4 cm</span></label>
           <input type="range" id="sTip" min="1.1" max="5.0" step="0.1" value="2.4" oninput="recalc()">
         </div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">※ 実際のゲームは1点ずつ自由に削るが、<br>このシミュレは5点補間で近似。</div>
+        <div style="margin-top:8px; padding-top:10px; border-top:1px solid var(--border);">
+          <div class="ctrl-label" style="margin-bottom:6px;">モード</div>
+          <div style="display:flex;gap:6px;margin-bottom:14px;">
+            <button id="btnNormal" onclick="setMode('normal')"
+              style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(255,157,107,0.5);background:rgba(255,157,107,0.2);color:#ff9d6b;font-weight:700;font-size:12px;cursor:pointer;">Normal</button>
+            <button id="btnHard" onclick="setMode('hard')"
+              style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(100,80,255,0.3);background:rgba(100,80,255,0.08);color:#a0a0ff;font-weight:700;font-size:12px;cursor:pointer;">Hard</button>
+          </div>
+          <div class="ctrl-label">球速 <span class="ctrl-val" id="vKmh">80 km/h</span></div>
+          <input type="range" id="sKmh" min="60" max="200" step="1" value="80" oninput="recalc()">
+          <div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Normal: 60〜100 / Hard: 115〜200</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:10px;">※ 実際のゲームは1点ずつ自由に削るが、<br>このシミュレは5点補間で近似。</div>
       </div>
 
       <!-- 右: バット断面図 + レーダー -->
@@ -471,11 +483,12 @@ mult = min( exp( max(0, E − 0.82) × 3.2 ),  12.0 )</div>
             <div class="bar-fill" id="bDist" style="background:var(--accent-yellow);"></div>
           </div>
           <div style="font-size:11px;color:var(--text-muted);margin-top:6px;" id="oDistNote">—</div>
+          <div style="font-size:10px;color:#475569;margin-top:4px;" id="oDistDetail">—</div>
         </div>
         <div class="out-card" style="border-color:rgba(0,255,136,0.3);">
           <div class="out-label" style="color:var(--accent-green);">🎯 飛距離マルチ (mult)</div>
           <div><span class="out-val" id="oMult" style="color:var(--accent-green);">—</span><span class="out-unit">×</span></div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:6px;" id="oMultNote">q=1,vBat=22m/s での理論値</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px;" id="oMultNote">—</div>
         </div>
         <div class="out-card" style="border-color:rgba(255,140,66,0.3);">
           <div class="out-label" style="color:var(--accent-orange);">🛡 最大HP (耐久値)</div>
@@ -612,28 +625,52 @@ function batStats(r, matKey) {
            durability, meet, power, handling, flexVal };
 }
 
-// ── 飛距離シミュレート（オイラー積分）─────────────
-function estimateDist(meff) {
-  const E = 1.0 * clamp(meff/3, 0.5, 1.2); // q=1, vBat=22m/s
+// ── 飛距離シミュレート（index.html と同一物理）──────
+// kmh: 球速(km/h)、isHard: Hardモードか
+function estimateDist(meff, kmh, isHard) {
+  // E = q × clamp(vBat/22, 0, 1.3) × clamp(meff/3, 0.5, 1.2)
+  // 完璧ヒット想定: q=1, vBat=22m/s (normalized=1.0)
+  const E = 1.0 * 1.0 * clamp(meff / 3, 0.5, 1.2);
   const mult = Math.min(Math.exp(Math.max(0, E - 0.82) * 3.2), 12.0);
   const dragK = 0.0042 / mult;
-  // 初速: 打球速度の代表値 × mult。角度35°で打ち上げ
-  const v0 = 40 * mult; // 40m/s は代表的な接触後速度
-  const ang = 35 * Math.PI / 180;
-  let vx = v0 * Math.cos(ang);
-  let vy = v0 * Math.sin(ang);
-  let x = 0, y = 0;
-  const dt = 0.01;
-  for (let i = 0; i < 20000; i++) {
-    const spd = Math.sqrt(vx*vx + vy*vy);
-    const drag = dragK * spd;
-    vx -= vx * drag * dt;
-    vy -= vy * drag * dt + 9.8 * dt;
-    x += vx * dt;
-    y += vy * dt;
+
+  // ── 衝突前の打球速度（mult適用前）を推算 ──
+  // 衝突物理: vOut ≈ eA*(vBat+vBall_z) + vBat (簡略版)
+  // eA≈0.5とすると: vOut_raw ≈ 0.5*kmh/3.6 + 1.5*22 ≈ 0.5*kmh/3.6 + 33
+  // さらに球速ボーナス: ×(1 + (kmh-70)/250)  ← 実コードと同じ
+  const pitchMs = kmh / 3.6;
+  const vRaw = (0.5 * pitchMs + 33) * (1 + (kmh - 70) / 250);
+
+  // mult適用後、上限320m/s (index.html: const spd = Math.min(vOut.length(), 320))
+  const spd = Math.min(vRaw * mult, 320);
+
+  // superHit判定: Hardモード && mult > 2.5 のとき dir.y >= 0.55 に強制
+  // Normalモードは常に superHit=false → 低軌道
+  const isSuper = isHard && mult > 2.5;
+  // superHit時: arcsin(0.55) ≈ 33.4°。通常時: 約22°
+  const ang = isSuper ? Math.asin(0.55) : 22 * Math.PI / 180;
+
+  let vx = spd * Math.cos(ang);
+  let vy = spd * Math.sin(ang);
+  let x = 0, y = 1.0; // ボール初期高さ約1m
+  const dt = 0.02;
+  for (let i = 0; i < 60000; i++) {
+    const sp = Math.sqrt(vx * vx + vy * vy);
+    const dg = dragK * sp;
+    vx -= vx * dg * dt;
+    vy -= vy * dg * dt + 9.8 * dt;
+    x  += vx * dt;
+    y  += vy * dt;
     if (y < 0 && i > 10) break;
   }
-  return { dist: Math.round(x), mult: mult.toFixed(2) };
+  return {
+    dist: Math.round(x),
+    mult: mult.toFixed(2),
+    spd: Math.round(spd),
+    capped: vRaw * mult > 320,
+    isSuper,
+    E: E.toFixed(3),
+  };
 }
 
 // ── 描画: バット断面 ────────────────────────────
@@ -781,9 +818,13 @@ function recalc() {
   document.getElementById('vShoulder').textContent = shoulder.toFixed(1) + ' cm';
   document.getElementById('vTip').textContent      = tip.toFixed(1) + ' cm';
 
+  const kmh    = parseFloat(document.getElementById('sKmh').value);
+  const isHard = (window._simMode === 'hard');
+  document.getElementById('vKmh').textContent = kmh + ' km/h';
+
   const r  = buildRadii(grip, taper, barrel, shoulder, tip);
   const s  = batStats(r, matKey);
-  const fd = estimateDist(s.meff);
+  const fd = estimateDist(s.meff, kmh, isHard);
 
   // bat canvas
   drawBat(r, matKey);
@@ -810,21 +851,50 @@ function recalc() {
   document.getElementById('oSwingNote').innerHTML =
     `到着 <strong>${pressAhead} ms</strong> 前に押す必要あり<br>${swingNote}`;
 
-  const distPct = Math.min(fd.dist / 600 * 100, 100);
-  document.getElementById('oDist').textContent   = fd.dist;
-  document.getElementById('bDist').style.width   = distPct.toFixed(1) + '%';
+  const distPct = Math.min(fd.dist / 1500 * 100, 100);
+  document.getElementById('oDist').textContent = fd.dist;
+  document.getElementById('bDist').style.width = distPct.toFixed(1) + '%';
   document.getElementById('oDistNote').textContent =
-    fd.dist < 150 ? 'フェア付近（ゴロ系）' :
-    fd.dist < 300 ? '外野フライ〜スタンドインな圏' :
-    fd.dist < 450 ? '場外ホームラン圏' : '🚀 超場外！';
+    fd.dist < 120  ? 'フェア（ゴロ系）' :
+    fd.dist < 300  ? '外野フライ〜スタンドイン' :
+    fd.dist < 600  ? '🏟 場外ホームラン' :
+    fd.dist < 1000 ? '🚀 場外超飛距離' : '🌕 月面到達レベル';
+  const spdLabel = fd.capped ? `打球${fd.spd}m/s（上限320到達）` : `打球${fd.spd}m/s`;
+  const modeLabel = fd.isSuper ? 'Hard超ホームラン軌道' : isHard ? 'Hard低軌道（mult≤2.5）' : 'Normal低軌道';
+  document.getElementById('oDistDetail').textContent = `${spdLabel} / ${modeLabel} / E=${fd.E}`;
 
-  document.getElementById('oMult').textContent  = fd.mult;
+  document.getElementById('oMult').textContent = fd.mult;
+  document.getElementById('oMultNote').textContent =
+    `E=${fd.E}  →  ×${fd.mult}${fd.capped ? '（spd上限320m/s到達）' : ''}`;
   document.getElementById('oDur').textContent   = s.durability;
   const durNote = s.durability < 30 ? '⚠️ 壊れやすい（2〜3球で折れる可能性）' :
                   s.durability < 60 ? '中程度' : '✅ 頑丈';
   document.getElementById('oDurNote').textContent = durNote + `（shapeScore: ${s.ss.toFixed(2)}）`;
 
   renderRadarBars([s.power, s.handling, s.flexVal, s.durability, s.meet]);
+}
+
+// ── モード切替 ──────────────────────────────────────
+window._simMode = 'normal';
+function setMode(m) {
+  window._simMode = m;
+  const kmhSlider = document.getElementById('sKmh');
+  if (m === 'normal') {
+    kmhSlider.min = 60; kmhSlider.max = 100;
+    if (parseFloat(kmhSlider.value) > 100) kmhSlider.value = 80;
+    document.getElementById('btnNormal').style.background = 'rgba(255,157,107,0.35)';
+    document.getElementById('btnNormal').style.borderColor = 'rgba(255,157,107,0.8)';
+    document.getElementById('btnHard').style.background = 'rgba(100,80,255,0.08)';
+    document.getElementById('btnHard').style.borderColor = 'rgba(100,80,255,0.3)';
+  } else {
+    kmhSlider.min = 115; kmhSlider.max = 200;
+    if (parseFloat(kmhSlider.value) < 115) kmhSlider.value = 150;
+    document.getElementById('btnHard').style.background = 'rgba(100,80,255,0.35)';
+    document.getElementById('btnHard').style.borderColor = 'rgba(100,80,255,0.8)';
+    document.getElementById('btnNormal').style.background = 'rgba(255,157,107,0.08)';
+    document.getElementById('btnNormal').style.borderColor = 'rgba(255,157,107,0.3)';
+  }
+  recalc();
 }
 
 // 初期実行
