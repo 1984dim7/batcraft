@@ -287,6 +287,22 @@
     cursor: pointer;
   }
 
+  /* ── ランキングカード ── */
+  .rk-card { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; margin-bottom:6px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); transition:opacity .3s; }
+  .rk-card.rk-1 { background:linear-gradient(135deg,rgba(255,210,0,0.18),rgba(255,150,30,0.10)); border-color:rgba(255,210,50,0.40); }
+  .rk-card.rk-2 { background:linear-gradient(135deg,rgba(200,210,230,0.14),rgba(160,175,200,0.08)); border-color:rgba(200,210,230,0.30); }
+  .rk-card.rk-3 { background:linear-gradient(135deg,rgba(210,130,50,0.14),rgba(165,90,20,0.08)); border-color:rgba(210,140,70,0.30); }
+  .rk-card.rk-me { background:rgba(255,210,58,0.07); border-color:rgba(255,210,58,0.40); box-shadow:0 0 0 1px rgba(255,210,58,0.15); }
+  .rk-medal { font-size:20px; width:28px; text-align:center; flex-shrink:0; line-height:1; }
+  .rk-num { font-size:12px; font-weight:700; color:#475569; width:20px; text-align:center; flex-shrink:0; }
+  .rk-info { flex:1; min-width:0; }
+  .rk-name { font-size:13px; font-weight:700; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .rk-sub { font-size:10px; color:#475569; margin-top:1px; }
+  .rk-dist { font-size:20px; font-weight:900; color:#ffd23a; font-variant-numeric:tabular-nums; flex-shrink:0; line-height:1; }
+  .rk-you { font-size:9px; font-weight:700; color:#ffd23a; background:rgba(255,210,58,0.15); border:1px solid rgba(255,210,58,0.3); border-radius:4px; padding:1px 5px; margin-left:6px; vertical-align:middle; letter-spacing:.5px; }
+  .rk-skel { height:48px; border-radius:12px; margin-bottom:6px; background:linear-gradient(90deg,rgba(255,255,255,0.03) 25%,rgba(255,255,255,0.07) 50%,rgba(255,255,255,0.03) 75%); background-size:200% 100%; animation:rk-shimmer 1.4s infinite; }
+  @keyframes rk-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
 </style>
 </head>
 <body>
@@ -378,15 +394,22 @@
   </div>
 
   <!-- ランキング画面 -->
-  <div class="panel" id="rankingUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:320px; max-width:90vw; z-index:20;">
-    <h1 style="border-bottom:1px solid rgba(255,255,255,0.12); padding-bottom:8px; margin:0 0 12px 0; font-size:16px; display:flex; align-items:center; gap:6px;">オンラインランキング</h1>
-    <p style="font-size:11px; color:#cbd5e1; margin:0 0 12px 0;">10球の総飛距離ランキング</p>
-    <div id="rankingListContainer" style="max-height:260px; overflow-y:auto; margin-bottom:15px; padding-right:4px;">
-      <ol id="rankingOl" style="text-align:left; font-size:13px; line-height:2.0; margin:0; padding-left:24px; color:#fff;">
-        <!-- ランキングリストがコピーされます -->
-      </ol>
+  <div class="panel" id="rankingUI" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(380px,94vw); max-height:88vh; overflow-y:auto; z-index:20; box-sizing:border-box; padding:20px 18px;">
+    <!-- ヘッダー -->
+    <div style="text-align:center; margin-bottom:18px;">
+      <div style="font-size:36px; margin-bottom:6px;">🏆</div>
+      <div style="font-size:20px; font-weight:900; background:linear-gradient(135deg,#ffe566,#ff8c42,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:-0.5px;">世界ランキング</div>
+      <div style="font-size:11px; color:#64748b; margin-top:4px;">10球の総飛距離 · グローバル</div>
     </div>
-    <button id="rankingBackBtn" class="sub" style="width:100%; margin:0; padding:10px;">メニューに戻る</button>
+    <!-- リスト -->
+    <div id="rankingListContainer" style="margin-bottom:14px;">
+      <div id="rankingOl"></div>
+    </div>
+    <!-- ボタン -->
+    <div style="display:flex; gap:8px;">
+      <button id="rankingRefreshBtn" class="sub" style="margin:0; padding:10px 14px; font-size:12px; flex-shrink:0;">🔄</button>
+      <button id="rankingBackBtn" class="sub" style="flex:1; margin:0; padding:10px;">メニューに戻る</button>
+    </div>
   </div>
 
   <!-- バット名入力モーダル -->
@@ -666,15 +689,37 @@
   </div>
   <div id="msg"></div>
   <div id="pitchSpeed"></div>
-  <div class="panel" id="endPanel" style="display:none; position:absolute; top:50%; left:50%;
-       transform:translate(-50%,-50%); text-align:center; min-width:300px">
-    <h1><svg class="ui-icon" viewBox="0 0 24 24" width="22" height="22" style="vertical-align:middle; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; margin-right:4px;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-2.34"/><path d="M12 2a6 6 0 0 1 6 6v1c0 2.2-1.8 4-4 4h-4c-2.2 0-4-1.8-4-4V8a6 6 0 0 1 6-6z"/></svg>試合終了！</h1>
-    <p style="font-size:15px">10球の総飛距離 <b id="totalDist" style="font-size:24px">0</b> m</p>
-    <p><input id="playerName" maxlength="10" placeholder="なまえ" style="font-size:14px;padding:7px 10px;
-       border-radius:8px;border:1px solid #555;background:#1d2230;color:#fff;text-align:center"></p>
-    <button id="regBtn">ランキングに登録</button>
-    <ol id="rankList" style="text-align:left;font-size:13px;line-height:1.9;margin:10px 0 0;padding-left:26px"></ol>
-    <button id="craftBtn2" class="sub">メニューに戻る</button>
+  <div class="panel" id="endPanel" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); min-width:min(360px,92vw); max-height:88vh; overflow-y:auto; text-align:center; z-index:50; box-sizing:border-box; padding:20px 18px;">
+    <!-- タイトル（JSがlastChildを書き換える） -->
+    <h1 style="font-size:15px; margin:0 0 14px; color:#94a3b8; letter-spacing:1px; font-weight:500;">試合終了！</h1>
+    <!-- スコアカード -->
+    <div style="background:linear-gradient(135deg,rgba(255,200,60,0.10),rgba(255,100,40,0.08)); border:1px solid rgba(255,200,80,0.20); border-radius:16px; padding:20px 16px 16px; margin-bottom:16px;">
+      <div id="endGradeEmoji" style="font-size:44px; line-height:1; margin-bottom:8px;">🎯</div>
+      <!-- JSがfirstChildを書き換える -->
+      <p style="font-size:11px; color:#94a3b8; margin:0 0 6px;">10球の総飛距離</p>
+      <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; margin-bottom:4px;">
+        <b id="totalDist" style="font-size:52px; background:linear-gradient(135deg,#ffe566,#ff8c42); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-variant-numeric:tabular-nums; line-height:1;">0</b>
+        <span style="font-size:20px; color:#94a3b8; font-weight:bold;">m</span>
+      </div>
+      <div id="endGradeLabel" style="font-size:13px; color:#ffd23a; font-weight:700; letter-spacing:2px; min-height:18px;"></div>
+    </div>
+    <!-- 名前入力＋登録 -->
+    <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; margin-bottom:14px;">
+      <div style="font-size:10px; color:#64748b; margin-bottom:8px; letter-spacing:.5px;">名前を入力してグローバルランキングに登録</div>
+      <div style="display:flex; gap:8px;">
+        <input id="playerName" maxlength="10" placeholder="なまえ" style="flex:1; font-size:14px; padding:9px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#fff; text-align:center; min-width:0; box-sizing:border-box; font-weight:bold;">
+        <button id="regBtn" style="flex-shrink:0; margin:0; padding:9px 18px; font-size:14px; font-weight:700; background:linear-gradient(135deg,rgba(255,180,60,0.9),rgba(255,100,40,0.9)); border-color:rgba(255,200,80,0.4); box-shadow:0 4px 16px rgba(255,140,50,0.3);">登録</button>
+      </div>
+    </div>
+    <!-- ランキングリスト -->
+    <div style="margin-bottom:12px; text-align:left;">
+      <div style="font-size:11px; color:#64748b; margin-bottom:8px; display:flex; align-items:center; gap:6px; padding:0 2px;">
+        <span>🏆</span><span style="font-weight:600; color:#94a3b8;">ランキング</span>
+        <span id="rankLoadingBadge" style="display:none; font-size:10px; color:#64748b; margin-left:auto;">読込中…</span>
+      </div>
+      <div id="rankList"></div>
+    </div>
+    <button id="craftBtn2" class="sub" style="width:100%; margin:0; padding:11px;">メニューに戻る</button>
   </div>
   <div class="panel" id="hitData">
     <div class="col"><div class="big" id="hdSpeed">–</div><div class="lbl">打球速度 km/h</div></div>
@@ -3017,63 +3062,112 @@ function nextPitch() {
   else gameTimeout(startPitch, 400);   // ＋ワインドアップ2秒で次の球まで間が空く
 }
 
-// ================= ランキング（ローカル保存 → Game Center） =================
-// アプリ版のランキングはGame Centerで実装する（docs/spec.md §3 参照）。
-// Game Center連携が入るまではローカル保存のみ。Web版のGAS共有は使わない。
-const RANK_API = '';
+// ================= グローバルランキング（Supabase） =================
+// Supabase設定: supabase.com でプロジェクト作成後に以下を差し替え
+// SQL: CREATE TABLE batcraft_scores(id BIGSERIAL PRIMARY KEY, name TEXT, total INT, mat TEXT, created_at TIMESTAMPTZ DEFAULT NOW());
+//      ALTER TABLE batcraft_scores ENABLE ROW LEVEL SECURITY;
+//      CREATE POLICY "public read"   ON batcraft_scores FOR SELECT USING (true);
+//      CREATE POLICY "public insert" ON batcraft_scores FOR INSERT WITH CHECK (true);
+const SUPA_URL = 'https://tbbcccyfyddsnhzrmoqo.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiYmNjY3lmeWRkc25oenJtb3FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0MDk1MzMsImV4cCI6MjA5Njk4NTUzM30.SiKYeDl1yB3-l0wcnvPeECXH_mrlXS2NWSDkULuLfPU';
+const SUPA_ENABLED = !SUPA_URL.includes('YOUR_');
+
 const MAT_LABEL = {wood:'木製', carbon:'カーボン', metal:'アルミ', gold:'金', diamond:'ダイヤ', obsidian:'黒曜石'};
+const MAT_EMOJI = {wood:'🪵', carbon:'⚡', metal:'🔩', gold:'✨', diamond:'💎', obsidian:'🌑'};
+
 function loadRank() {
   try { return JSON.parse(localStorage.getItem('batcraft_rank') || '[]'); } catch(e) { return []; }
 }
-function renderRankList(list, highlight) {
-  const container = $('rankList');
-  container.innerHTML = '';
-  if (list.length === 0) {
-    const li = document.createElement('li');
-    li.style.color = '#8a96ad';
-    li.textContent = 'まだ記録がありません';
-    container.appendChild(li);
+
+function rankCardHTML(r, rank, highlightDate) {
+  const isMe = highlightDate && (r.date === highlightDate || r.created_at && new Date(r.created_at).getTime() === highlightDate);
+  const medals = ['🥇','🥈','🥉'];
+  const medal = rank <= 3 ? medals[rank-1] : null;
+  const matE = MAT_EMOJI[r.mat] || '⚾';
+  const matL = MAT_LABEL[r.mat] || r.mat || '';
+  return `<div class="rk-card${rank<=3?' rk-'+rank:''}${isMe?' rk-me':''}">
+    ${medal ? `<div class="rk-medal">${medal}</div>` : `<div class="rk-num">${rank}</div>`}
+    <div class="rk-info">
+      <div class="rk-name">${escHtml(String(r.name))}${isMe ? '<span class="rk-you">YOU</span>' : ''}</div>
+      <div class="rk-sub">${matE} ${matL}</div>
+    </div>
+    <div style="text-align:right;">
+      <div class="rk-dist">${Number(r.total).toLocaleString()}</div>
+      <div style="font-size:10px;color:#475569;">m</div>
+    </div>
+  </div>`;
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function skeletonHTML(n) {
+  return Array.from({length:n}, () => '<div class="rk-skel"></div>').join('');
+}
+
+function renderRankCards(list, containerId, highlightDate) {
+  const el = $(containerId);
+  if (!el) return;
+  if (!list || list.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:#475569;font-size:12px;padding:24px 0;">まだ記録がありません</div>';
     return;
   }
-  list.forEach(r => {
-    const li = document.createElement('li');
-    const hl = highlight && r.date === highlight.date;
-    if (hl) {
-      li.style.color = '#ffd23a';
-      li.style.fontWeight = 'bold';
-    }
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = String(r.name);
-    li.appendChild(nameSpan);
-    const matLabel = MAT_LABEL[r.mat];
-    if (matLabel) {
-      const matSpan = document.createElement('span');
-      matSpan.textContent = `（${matLabel}）`;
-      matSpan.style.color = hl ? '' : '#8a96ad';
-      matSpan.style.fontSize = '11px';
-      li.appendChild(matSpan);
-    }
-    const b = document.createElement('b');
-    b.textContent = r.total;
-    li.appendChild(document.createTextNode(' — '));
-    li.appendChild(b);
-    li.appendChild(document.createTextNode(' m'));
-    container.appendChild(li);
+  el.innerHTML = list.map((r, i) => rankCardHTML(r, i+1, highlightDate)).join('');
+}
+
+async function fetchGlobalRank() {
+  if (!SUPA_ENABLED) return null;
+  const res = await fetch(
+    `${SUPA_URL}/rest/v1/batcraft_scores?select=name,total,mat,created_at&order=total.desc&limit=30`,
+    { headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY } }
+  );
+  if (!res.ok) throw new Error(res.status);
+  return res.json();
+}
+
+async function submitGlobalRank(rec) {
+  if (!SUPA_ENABLED) return;
+  await fetch(`${SUPA_URL}/rest/v1/batcraft_scores`, {
+    method: 'POST',
+    headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY,
+               'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify({ name: rec.name, total: rec.total, mat: rec.mat })
   });
 }
-function renderRank(highlight) {
-  // ローカル記録を即表示し、共有APIがあれば取得後に置き換える
-  renderRankList(loadRank().sort((a, b) => b.total - a.total).slice(0, 10), highlight);
-  if (RANK_API) {
-    fetch(RANK_API).then(r => r.json())
-      .then(list => renderRankList(list.slice(0, 10), highlight))
-      .catch(() => {});
+
+function gradeInfo(total) {
+  if (total >= 2000) return {emoji:'🚀', label:'LEGENDARY'};
+  if (total >= 1500) return {emoji:'💎', label:'DIAMOND'};
+  if (total >= 1000) return {emoji:'🌟', label:'GOLD'};
+  if (total >=  600) return {emoji:'⚡', label:'SILVER'};
+  if (total >=  300) return {emoji:'🎯', label:'BRONZE'};
+  return {emoji:'⚾', label:'NORMAL'};
+}
+
+let _lastSubmittedDate = null;
+
+function renderRank(highlightDate) {
+  // ローカルを即表示
+  const local = loadRank().sort((a, b) => b.total - a.total).slice(0, 20);
+  renderRankCards(local, 'rankList', highlightDate);
+  // グローバル取得（あれば上書き）
+  const badge = $('rankLoadingBadge');
+  if (SUPA_ENABLED) {
+    if (badge) badge.style.display = 'inline';
+    fetchGlobalRank()
+      .then(list => { if (list) renderRankCards(list, 'rankList', highlightDate); })
+      .catch(() => {})
+      .finally(() => { if (badge) badge.style.display = 'none'; });
   }
 }
+
 function showEnd() {
   $('hitData').style.display = 'none';
   $('totalDist').textContent = score.total;
-  // バット破損時はパネルのタイトルと飛距離ラベルを書き換える
+  // グレード演出
+  const grade = gradeInfo(score.total);
+  const _emoji = $('endGradeEmoji'); if (_emoji) _emoji.textContent = grade.emoji;
+  const _label = $('endGradeLabel'); if (_label) _label.textContent = grade.label;
+  // バット破損時はh1とp（firstChild）を書き換える
   const _h1 = $('endPanel').querySelector('h1');
   if (_h1 && _h1.lastChild) _h1.lastChild.textContent = batBroken ? 'バット破損！' : '試合終了！';
   const _p = $('endPanel').querySelector('p');
@@ -3082,24 +3176,30 @@ function showEnd() {
   if (typeof updateRankingBtnState === 'function') {
     updateRankingBtnState();
   } else {
-    $('regBtn').disabled = false; $('regBtn').textContent = 'ランキングに登録';
+    $('regBtn').disabled = false; $('regBtn').textContent = '登録';
   }
-  renderRank();
+  renderRank(null);
   $('endPanel').style.display = 'block';
 }
-$('regBtn').onclick = () => {
+
+$('regBtn').onclick = async () => {
   const name = ($('playerName').value.trim() || '名無しの強打者').slice(0, 10);
   const mat = $('materialSelect') ? $('materialSelect').value : 'wood';
   const rec = {name, total: score.total, mat, date: Date.now()};
+  _lastSubmittedDate = rec.date;
+  // ローカル保存
   const list = loadRank(); list.push(rec);
-  localStorage.setItem('batcraft_rank', JSON.stringify(list.sort((a, b) => b.total - a.total).slice(0, 30)));
-  if (RANK_API) {
-    // Content-Typeを付けない(text/plain扱い)ことでGASへのプリフライトを回避
-    fetch(RANK_API, {method:'POST', body: JSON.stringify(rec)})
-      .then(() => renderRank(rec)).catch(() => {});
+  localStorage.setItem('batcraft_rank', JSON.stringify(list.sort((a,b)=>b.total-a.total).slice(0,30)));
+  snd.ui();
+  $('regBtn').disabled = true; $('regBtn').textContent = '送信中…';
+  // グローバル送信
+  try {
+    await submitGlobalRank(rec);
+    $('regBtn').textContent = '登録しました ✓';
+  } catch(_) {
+    $('regBtn').textContent = '登録済み（オフライン）';
   }
-  renderRank(rec); snd.ui();
-  $('regBtn').disabled = true; $('regBtn').textContent = '登録しました ✓';
+  renderRank(rec.date);
 };
 function checkCylinderShell(ballPos, col) {
   const r = Math.hypot(ballPos.x, ballPos.z);
@@ -3755,12 +3855,12 @@ function updateDebugStats() {
 function updateRankingBtnState() {
   if (usedDebugThisGame) {
     $('regBtn').disabled = true;
-    $('regBtn').textContent = 'デバッグ使用のため登録不可';
+    $('regBtn').textContent = 'Debug使用不可';
   } else {
-    const alreadyRegistered = $('regBtn').textContent.includes('登録しました');
+    const alreadyRegistered = $('regBtn').textContent.includes('登録しました') || $('regBtn').textContent.includes('登録済み');
     $('regBtn').disabled = alreadyRegistered;
     if (!alreadyRegistered) {
-      $('regBtn').textContent = 'ランキングに登録';
+      $('regBtn').textContent = '登録';
     }
   }
 }
@@ -4309,11 +4409,18 @@ function showScreen(screenId) {
   } else if (screenId === 'rankingUI') {
     mode = 'ranking';
     $(screenId).style.display = 'block';
-    // Sync rankings list
-    const rankList = $('rankList');
-    const rankingOl = $('rankingOl');
-    if (rankList && rankingOl) {
-      rankingOl.innerHTML = rankList.innerHTML;
+    // グローバルランキング取得して表示
+    const rkOl = $('rankingOl');
+    if (rkOl) {
+      rkOl.innerHTML = skeletonHTML(8);
+      // ローカル即表示 → グローバル上書き
+      const localList = loadRank().sort((a,b)=>b.total-a.total).slice(0,20);
+      renderRankCards(localList, 'rankingOl', _lastSubmittedDate);
+      if (SUPA_ENABLED) {
+        fetchGlobalRank()
+          .then(list => { if (list) renderRankCards(list, 'rankingOl', _lastSubmittedDate); })
+          .catch(() => {});
+      }
     }
   } else if (screenId === 'gamePanel') {
     mode = 'game';
@@ -4521,6 +4628,20 @@ $('settingsDebugCheckbox').onchange = (e) => {
 
 // Rankings screen binds
 $('rankingBackBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
+$('rankingRefreshBtn').onclick = () => {
+  snd.ui();
+  const rkOl = $('rankingOl');
+  if (rkOl) {
+    rkOl.innerHTML = skeletonHTML(8);
+    const localList = loadRank().sort((a,b)=>b.total-a.total).slice(0,20);
+    renderRankCards(localList, 'rankingOl', _lastSubmittedDate);
+    if (SUPA_ENABLED) {
+      fetchGlobalRank()
+        .then(list => { if (list) renderRankCards(list, 'rankingOl', _lastSubmittedDate); })
+        .catch(() => {});
+    }
+  }
+};
 
 // Game buttons override
 $('backBtn').onclick = () => { snd.ui(); showScreen('menuUI'); };
