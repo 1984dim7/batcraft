@@ -694,14 +694,11 @@
     <h1 style="font-size:15px; margin:0 0 14px; color:#94a3b8; letter-spacing:1px; font-weight:500;">試合終了！</h1>
     <!-- スコアカード -->
     <div style="background:linear-gradient(135deg,rgba(255,200,60,0.10),rgba(255,100,40,0.08)); border:1px solid rgba(255,200,80,0.20); border-radius:16px; padding:20px 16px 16px; margin-bottom:16px;">
-      <div id="endGradeEmoji" style="font-size:44px; line-height:1; margin-bottom:8px;">🎯</div>
-      <!-- JSがfirstChildを書き換える -->
       <p style="font-size:11px; color:#94a3b8; margin:0 0 6px;">10球の総飛距離</p>
       <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; margin-bottom:4px;">
         <b id="totalDist" style="font-size:52px; background:linear-gradient(135deg,#ffe566,#ff8c42); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-variant-numeric:tabular-nums; line-height:1;">0</b>
         <span style="font-size:20px; color:#94a3b8; font-weight:bold;">m</span>
       </div>
-      <div id="endGradeLabel" style="font-size:13px; color:#ffd23a; font-weight:700; letter-spacing:2px; min-height:18px;"></div>
     </div>
     <!-- 名前入力＋登録 -->
     <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px; margin-bottom:14px;">
@@ -732,6 +729,14 @@
     <div id="liveDistNum" style="font-size:clamp(28px,9vw,48px); font-weight:900; color:#ffd23a; text-shadow:0 0 20px rgba(255,210,60,0.9), 0 2px 10px rgba(0,0,0,0.9); font-variant-numeric:tabular-nums; line-height:1;">0</div>
     <div style="font-size:12px; color:#94a3b8; letter-spacing:2px; margin-top:2px;">m</div>
     <div id="liveDistSpeed" style="font-size:11px; color:rgba(255,255,255,0.35); margin-top:1px; display:none;">⏩ 4×</div>
+  </div>
+  <!-- 耐久ゲージ（プレイ中・ホームベース右上） -->
+  <div id="batHPGauge" style="display:none; position:absolute; bottom:calc(110px + var(--sab)); right:calc(14px + var(--sar)); pointer-events:none; z-index:50; text-align:right; min-width:72px;">
+    <div style="font-size:9px; color:#94a3b8; letter-spacing:1.5px; margin-bottom:3px; text-transform:uppercase;">耐久</div>
+    <div style="background:rgba(255,255,255,0.08); border-radius:4px; height:6px; overflow:hidden; margin-bottom:3px; width:72px;">
+      <div id="batHPBar" style="height:100%; width:100%; border-radius:4px; background:linear-gradient(90deg,#ff6060,#ffd23a); transition:width 0.3s,background 0.3s;"></div>
+    </div>
+    <div id="batHPNum" style="font-size:10px; font-weight:700; color:#ffd23a; font-variant-numeric:tabular-nums;"></div>
   </div>
   <!-- Debug Mode toggle & panel -->
   <div id="debugToggleContainer" style="position:absolute; bottom:calc(14px + var(--sab)); left:calc(14px + var(--sal)); pointer-events:auto; font-size:11px; z-index:100;">
@@ -1252,10 +1257,10 @@ function drawRadar(vals5) {
   labels.forEach((label, i) => {
     const [x, y] = pt(angles[i], labelR);
     const ox = labelOffsets[i][0], oy = labelOffsets[i][1];
-    const numMasked = !debugMode && (vals5[i] > 90 || i === 3);
+    const numMasked = !debugMode && vals5[i] > 90;
     const isOver90 = !debugMode && vals5[i] > 90;
     // ラベル
-    g.fillStyle = isOver90 ? '#ffd23a' : (i === 3 && !debugMode) ? '#8a96ad' : '#dce8ff';
+    g.fillStyle = isOver90 ? '#ffd23a' : '#dce8ff';
     g.fillText(label, x + ox, y + oy);
     // 数値
     const numStr = debugMode ? String(Math.round(vals5[i])) : (numMasked ? '???' : String(Math.round(vals5[i])));
@@ -3505,6 +3510,7 @@ function updateGame(dt) {
       if (!batBroken) {
         const dmg = 4 + (1 - impact.q) * 8;
         batHP = Math.max(0, batHP - dmg);
+        updateBatHPGauge();
         if (batHP <= 0) {
           batBroken = true;
           snd.batBreak();
@@ -3813,6 +3819,7 @@ function resetScore() {
   score = {pitch:0, hits:0, hrs:0, best:0, total:0, history:[]};
   usedDebugThisGame = debugMode;
   batHP = batStats().durability; batMaxHP = batHP; batBroken = false;
+  updateBatHPGauge();
   if ($('pitchNo')) $('pitchNo').textContent = 0;
   if ($('hits')) $('hits').textContent = 0;
   if ($('hrs')) $('hrs').textContent = 0;
@@ -3863,6 +3870,17 @@ function updateRankingBtnState() {
       $('regBtn').textContent = '登録';
     }
   }
+}
+
+function updateBatHPGauge() {
+  const gauge = $('batHPGauge');
+  if (!gauge) return;
+  const pct = batMaxHP > 0 ? batHP / batMaxHP : 0;
+  $('batHPBar').style.width = Math.max(0, pct * 100).toFixed(1) + '%';
+  const col = pct > 0.5 ? '#ffd23a' : pct > 0.25 ? '#ff8c42' : '#ff4444';
+  $('batHPBar').style.background = `linear-gradient(90deg,${col},${col}cc)`;
+  $('batHPNum').style.color = col;
+  $('batHPNum').textContent = Math.ceil(batHP) + ' / ' + Math.round(batMaxHP);
 }
 
 function updateDebugPanel() {
@@ -4343,6 +4361,7 @@ function setupStadiumLighting(lightMode) {
 function showScreen(screenId) {
   // Hide all screens
   const screens = ['menuUI', 'craftUI', 'gamePanel', 'warehouseUI', 'settingsUI', 'rankingUI', 'endPanel', 'batNameModal', 'materialSelectUI'];
+  if ($('batHPGauge')) $('batHPGauge').style.display = 'none';
   for (const s of screens) {
     const el = $(s);
     if (el) el.style.display = 'none';
@@ -4425,6 +4444,7 @@ function showScreen(screenId) {
   } else if (screenId === 'gamePanel') {
     mode = 'game';
     $('gamePanel').style.display = 'flex';
+    if ($('batHPGauge')) $('batHPGauge').style.display = 'block';
     craftGroup.visible = false;
     gameGroup.visible = true;
     sun.intensity = battingMode === 'challenge' ? 0.5 : 1.1;
