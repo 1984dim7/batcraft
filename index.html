@@ -779,7 +779,7 @@
             <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-        <text x="120" y="44" text-anchor="middle" font-family="'Fredoka', sans-serif" font-weight="900" font-size="44" fill="url(#lgBat)" stroke="#1c1130" stroke-width="8" stroke-linejoin="round" paint-order="stroke fill" filter="url(#fglow)" letter-spacing="-1">BatCraft 3.0</text>
+        <text x="120" y="44" text-anchor="middle" font-family="'Fredoka', sans-serif" font-weight="500" font-size="42" fill="url(#lgBat)" stroke="#1c1130" stroke-width="3" stroke-linejoin="round" paint-order="stroke fill" filter="url(#fglow)" letter-spacing="0.5">BatCraft 3.0</text>
       </svg>
       <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,200,100,0.4),rgba(190,100,255,0.4),transparent);margin:5px auto 0;width:68%;"></div>
     </div>
@@ -857,6 +857,11 @@
       <div style="font-size:36px; margin-bottom:6px;">🏆</div>
       <div style="font-size:22px; font-weight:900; color:#ffd23a; text-shadow: -2px -2px 0 #1c1130, 2px -2px 0 #1c1130, -2px 2px 0 #1c1130, 2px 2px 0 #1c1130, 0 3px 0 #1c1130; letter-spacing:-0.5px;">世界ランキング</div>
       <div style="font-size:12px; color:#cbd5e1; margin-top:4px; font-weight:700;">10球の総飛距離 · グローバル</div>
+    </div>
+    <!-- モード切替タブ -->
+    <div style="display:flex; gap:6px; margin-bottom:12px;">
+      <button id="rankTabNormalMain" onclick="setRankMode('normal')" style="flex:1; padding:8px 0; font-size:13px; font-weight:800; background:rgba(255,255,255,0.06); border:none; border-bottom:2px solid transparent; border-radius:8px 8px 0 0; color:#cbd5e1; cursor:pointer; opacity:0.45; transition:opacity .15s;">☀️ Normal</button>
+      <button id="rankTabHardMain" onclick="setRankMode('hard')" style="flex:1; padding:8px 0; font-size:13px; font-weight:800; background:rgba(255,255,255,0.06); border:none; border-bottom:2px solid transparent; border-radius:8px 8px 0 0; color:#cbd5e1; cursor:pointer; opacity:0.45; transition:opacity .15s;">🌙 Hard</button>
     </div>
     <!-- リスト -->
     <div id="rankingListContainer" style="margin-bottom:14px;">
@@ -1161,6 +1166,11 @@
       <div style="font-size:12px; color:#cbd5e1; font-weight:800; margin-bottom:8px; display:flex; align-items:center; gap:6px; padding:0 2px;">
         <span>🏆</span><span style="font-weight:900;">ランキング</span>
         <span id="rankLoadingBadge" style="display:none; font-size:11px; color:#aab6cc; margin-left:auto;">読込中…</span>
+      </div>
+      <!-- モード切替タブ -->
+      <div style="display:flex; gap:6px; margin-bottom:10px;">
+        <button id="rankTabNormalEnd" onclick="setRankMode('normal')" style="flex:1; padding:7px 0; font-size:12px; font-weight:800; background:rgba(255,255,255,0.06); border:none; border-bottom:2px solid transparent; border-radius:8px 8px 0 0; color:#cbd5e1; cursor:pointer; opacity:0.45; transition:opacity .15s;">☀️ Normal</button>
+        <button id="rankTabHardEnd" onclick="setRankMode('hard')" style="flex:1; padding:7px 0; font-size:12px; font-weight:800; background:rgba(255,255,255,0.06); border:none; border-bottom:2px solid transparent; border-radius:8px 8px 0 0; color:#cbd5e1; cursor:pointer; opacity:0.45; transition:opacity .15s;">🌙 Hard</button>
       </div>
       <div id="rankList"></div>
     </div>
@@ -1563,11 +1573,11 @@ function batStats() {
   let meetMult = 1.0;  // ミート倍率
   
   if (matType === 'carbon') {
-    powerMult = 0.90;
+    powerMult = 0.72;  // パワー大幅低下
     flexMult = 0.65;
-    swingTMult = 0.65; // さらに快速
-    durMult = 0.55;    // 折れやすい
-    meetMult = 1.25;   // 芯が非常に広い
+    swingTMult = 0.60; // 快速は維持
+    durMult = 0.20;    // 極脆（3〜4球で限界）
+    meetMult = 0.85;   // ミート縮小（独占防止）
   } else if (matType === 'metal') {
     powerMult = 1.15;  // パワー弱体化（一強防止）
     flexMult = 0.35;
@@ -3689,10 +3699,40 @@ function renderRankCards(list, containerId, highlightDate) {
   el.innerHTML = list.map((r, i) => rankCardHTML(r, i+1, highlightDate)).join('');
 }
 
-async function fetchGlobalRank() {
+let activeRankMode = 'hard'; // 'normal' | 'hard'
+
+function setRankMode(m) {
+  activeRankMode = m;
+  // タブのアクティブ状態を更新
+  ['End','Main'].forEach(sfx => {
+    const nb = $('rankTabNormal'+sfx), hb = $('rankTabHard'+sfx);
+    if (!nb || !hb) return;
+    [nb, hb].forEach(b => { b.style.opacity='0.45'; b.style.borderBottom='2px solid transparent'; });
+    (m === 'normal' ? nb : hb).style.opacity = '1';
+    (m === 'normal' ? nb : hb).style.borderBottom = '2px solid #ffd23a';
+  });
+  renderRank(_lastSubmittedDate);
+  // rankingUI も開いていたら更新
+  if ($('rankingOl')) refreshRankingUI();
+}
+
+function refreshRankingUI() {
+  const rkOl = $('rankingOl');
+  if (!rkOl) return;
+  const localList = loadRank().filter(r => (r.mode||'hard') === activeRankMode).sort((a,b)=>b.total-a.total).slice(0,20);
+  renderRankCards(localList, 'rankingOl', _lastSubmittedDate);
+  if (SUPA_ENABLED) {
+    fetchGlobalRank(activeRankMode)
+      .then(list => { if (list) renderRankCards(list, 'rankingOl', _lastSubmittedDate); })
+      .catch(() => {});
+  }
+}
+
+async function fetchGlobalRank(rankMode) {
   if (!SUPA_ENABLED) return null;
+  const modeFilter = rankMode ? `&mode=eq.${rankMode}` : '';
   const res = await fetch(
-    `${SUPA_URL}/rest/v1/batcraft_scores?select=name,total,mat,created_at&order=total.desc&limit=30`,
+    `${SUPA_URL}/rest/v1/batcraft_scores?select=name,total,mat,mode,created_at&order=total.desc&limit=30${modeFilter}`,
     { headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY } }
   );
   if (!res.ok) throw new Error(res.status);
@@ -3705,7 +3745,7 @@ async function submitGlobalRank(rec) {
     method: 'POST',
     headers: { apikey: SUPA_KEY, Authorization: 'Bearer ' + SUPA_KEY,
                'Content-Type': 'application/json', Prefer: 'return=minimal' },
-    body: JSON.stringify({ name: rec.name, total: rec.total, mat: rec.mat })
+    body: JSON.stringify({ name: rec.name, total: rec.total, mat: rec.mat, mode: rec.mode })
   });
 }
 
@@ -3721,14 +3761,12 @@ function gradeInfo(total) {
 let _lastSubmittedDate = null;
 
 function renderRank(highlightDate) {
-  // ローカルを即表示
-  const local = loadRank().sort((a, b) => b.total - a.total).slice(0, 20);
+  const local = loadRank().filter(r => (r.mode||'hard') === activeRankMode).sort((a,b)=>b.total-a.total).slice(0,20);
   renderRankCards(local, 'rankList', highlightDate);
-  // グローバル取得（あれば上書き）
   const badge = $('rankLoadingBadge');
   if (SUPA_ENABLED) {
     if (badge) badge.style.display = 'inline';
-    fetchGlobalRank()
+    fetchGlobalRank(activeRankMode)
       .then(list => { if (list) renderRankCards(list, 'rankList', highlightDate); })
       .catch(() => {})
       .finally(() => { if (badge) badge.style.display = 'none'; });
@@ -3738,6 +3776,8 @@ function renderRank(highlightDate) {
 function showEnd() {
   $('hitData').style.display = 'none';
   $('totalDist').textContent = score.total;
+  activeRankMode = battingMode === 'normal' ? 'normal' : 'hard';
+  setRankMode(activeRankMode);
   // グレード演出
   const grade = gradeInfo(score.total);
   const _emoji = $('endGradeEmoji'); if (_emoji) _emoji.textContent = grade.emoji;
@@ -3779,7 +3819,8 @@ $('regBtn').onclick = async () => {
   }
 
   const mat = $('materialSelect') ? $('materialSelect').value : 'wood';
-  const rec = {name, total: score.total, mat, date: Date.now()};
+  const recMode = battingMode === 'normal' ? 'normal' : 'hard';
+  const rec = {name, total: score.total, mat, mode: recMode, date: Date.now()};
   _lastSubmittedDate = rec.date;
   // ローカル保存
   const list = loadRank(); list.push(rec);
@@ -5074,19 +5115,8 @@ function showScreen(screenId) {
   } else if (screenId === 'rankingUI') {
     mode = 'ranking';
     $(screenId).style.display = 'block';
-    // グローバルランキング取得して表示
-    const rkOl = $('rankingOl');
-    if (rkOl) {
-      rkOl.innerHTML = skeletonHTML(8);
-      // ローカル即表示 → グローバル上書き
-      const localList = loadRank().sort((a,b)=>b.total-a.total).slice(0,20);
-      renderRankCards(localList, 'rankingOl', _lastSubmittedDate);
-      if (SUPA_ENABLED) {
-        fetchGlobalRank()
-          .then(list => { if (list) renderRankCards(list, 'rankingOl', _lastSubmittedDate); })
-          .catch(() => {});
-      }
-    }
+    setRankMode(activeRankMode);
+    refreshRankingUI();
   } else if (screenId === 'gamePanel') {
     mode = 'game';
     $('gamePanel').style.display = 'flex';
