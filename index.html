@@ -840,6 +840,13 @@
       <input type="range" id="settingsVolumeSlider" min="0" max="1" step="0.05" value="1.0" style="width:100%; cursor:pointer; margin:8px 0;">
     </div>
     <div style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-weight:bold; font-size:13px;">FPS上限:</span>
+      <select id="settingsFpsSelect" style="background:#1c1130; color:#fff; border:1px solid #4a3a6a; border-radius:6px; padding:4px 10px; font-size:13px; cursor:pointer;">
+        <option value="60" selected>60 FPS</option>
+        <option value="30">30 FPS（省エネ）</option>
+      </select>
+    </div>
+    <div style="margin-bottom:18px; display:flex; justify-content:space-between; align-items:center;">
       <span style="font-weight:bold; font-size:13px;">高画質エフェクト (Bloom):</span>
       <input type="checkbox" id="settingsBloomCheckbox" checked style="cursor:pointer;">
     </div>
@@ -1302,7 +1309,7 @@ window.onerror = function(msg, url, line, col, error) {
 };
 // ================= 基本 =================
 const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -2317,35 +2324,7 @@ function addOutfieldStructures() {
     scoreboardBroken = false;
   }
 
-  // Night searchlights
   searchlights = [];
-  const slCount = 4;
-  for (let i = 0; i < slCount; i++) {
-    const th = Math.PI * (0.65 + 0.7 * (i / (slCount - 1)));
-    const r = 160 + Math.random() * 80;
-    const x = r * Math.sin(th);
-    const z = r * Math.cos(th);
-    
-    const beamGeo = new THREE.ConeGeometry(8, 120, 16, 1, true);
-    beamGeo.translate(0, 60, 0);
-    const beamMat = new THREE.MeshBasicMaterial({
-      color: 0x88bbff,
-      transparent: true,
-      opacity: 0.15,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide,
-      depthWrite: false
-    });
-    const beam = new THREE.Mesh(beamGeo, beamMat);
-    beam.position.set(x, -5, z);
-    
-    beam.rotation.x = 0.2 + Math.random() * 0.3;
-    beam.rotation.z = Math.random() * Math.PI * 2;
-    const rotSpeed = 0.4 + Math.random() * 0.6;
-    
-    gameGroup.add(beam);
-    searchlights.push({ mesh: beam, rotSpeed });
-  }
 }
 
 const buildingTexCache = {};
@@ -2512,13 +2491,6 @@ function addBuildings() {
       pentMesh.position.y = hgt / 2 + pentH / 2;
       buildingGroup.add(pentMesh);
       
-      // Beacon Light on top of penthouse
-      const beaconGeo = new THREE.SphereGeometry(0.26, 8, 8);
-      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff3333, transparent: true });
-      const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-      beacon.position.set(0, hgt / 2 + pentH + 0.2, 0);
-      buildingGroup.add(beacon);
-      buildingBeacons.push({ material: beaconMat, phase: Math.random() * Math.PI * 2, speed: 4 + Math.random() * 2 });
       
       b = buildingGroup;
     } else if (type < 0.75) {
@@ -2580,13 +2552,6 @@ function addBuildings() {
       b3Mesh.position.y = hgt / 2;
       buildingGroup.add(b3Mesh);
       
-      // Beacon Light on top
-      const beaconGeo = new THREE.SphereGeometry(0.26, 8, 8);
-      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff3333, transparent: true });
-      const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-      beacon.position.set(0, hgt / 2 + 0.2, 0);
-      buildingGroup.add(beacon);
-      buildingBeacons.push({ material: beaconMat, phase: Math.random() * Math.PI * 2, speed: 4 + Math.random() * 2 });
       
       b = buildingGroup;
     } else {
@@ -2632,13 +2597,6 @@ function addBuildings() {
       antMesh.position.y = -hgt / 2 + shaftH + deckH + antH / 2;
       buildingGroup.add(antMesh);
       
-      // Beacon Light at antenna tip
-      const beaconGeo = new THREE.SphereGeometry(0.3, 8, 8);
-      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff1111, transparent: true });
-      const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-      beacon.position.set(0, -hgt / 2 + shaftH + deckH + antH + 0.15, 0);
-      buildingGroup.add(beacon);
-      buildingBeacons.push({ material: beaconMat, phase: Math.random() * Math.PI * 2, speed: 5 + Math.random() * 2.5 });
       
       b = buildingGroup;
     }
@@ -2769,13 +2727,6 @@ function addCyberLandmarks() {
   const antMesh = new THREE.Mesh(antGeo, antMat);
   antMesh.position.y = 180;
   towerGroup.add(antMesh);
-  
-  const beaconGeo = new THREE.SphereGeometry(1.8, 8, 8);
-  const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 1.0 });
-  const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-  beacon.position.set(0, 200, 0);
-  towerGroup.add(beacon);
-  buildingBeacons.push({ material: beaconMat, phase: Math.random() * Math.PI * 2, speed: 5 });
   
   const towerLight = new THREE.PointLight(0xff2200, isNight ? 4.0 : 0, 100);
   towerLight.position.set(0, 200, 0);
@@ -4048,18 +3999,7 @@ function resolveBallCollisions() {
   }
 }
 
-function updateGame(dt) {
-  // Update searchlights
-  for (const sl of searchlights) {
-    sl.mesh.rotation.z += sl.rotSpeed * dt;
-    sl.mesh.rotation.x = 0.35 + Math.sin(Date.now() * 0.001 * sl.rotSpeed) * 0.15;
-  }
-
-  // Update building beacons (slow pulsing)
-  for (const beacon of buildingBeacons) {
-    const intensity = 0.15 + 0.85 * (0.5 + 0.5 * Math.sin(Date.now() * 0.001 * beacon.speed + beacon.phase));
-    beacon.material.opacity = intensity;
-  }
+function updateGame(dt, frameCount) {
 
   // Update explosion particles
   if (explosion) {
@@ -5013,11 +4953,6 @@ function setupStadiumLighting(lightMode) {
     scene.fog = new THREE.Fog(isNight ? 0x141f38 : 0xbfe0ff, isNight ? 160 : 200, isNight ? 780 : 880);
   }
 
-  // Adjust specific night elements
-  for (const sl of searchlights) {
-    if (sl.mesh) sl.mesh.visible = isNight;
-  }
-  
   gameGroup.traverse(child => {
     if (child.name === "stars" || child.name === "moon") {
       child.visible = isNight;
@@ -5310,6 +5245,10 @@ $('settingsVolumeSlider').oninput = (e) => {
   masterVolume = parseFloat(e.target.value);
   $('settingsVolumeVal').textContent = Math.round(masterVolume * 100) + '%';
 };
+$('settingsFpsSelect').onchange = (e) => {
+  fpsTarget = parseInt(e.target.value);
+  fpsInterval = 1000 / fpsTarget;
+};
 $('settingsBloomCheckbox').onchange = (e) => {
   useBloom = e.target.checked;
 };
@@ -5432,20 +5371,39 @@ window.__bat = {
 
 // ================= メインループ =================
 let last = performance.now();
+let fpsTarget = 60;
+let fpsInterval = 1000 / fpsTarget;
+let rafId = null;
+let pageVisible = true;
+
+document.addEventListener('visibilitychange', () => {
+  pageVisible = !document.hidden;
+  if (pageVisible && rafId === null) {
+    last = performance.now();
+    rafId = requestAnimationFrame(loop);
+  }
+});
+
+let frameCount = 0;
 function loop(now) {
-  const dt = Math.min((now-last)/1000, .05); last = now;
+  if (!pageVisible) { rafId = null; return; }
+  rafId = requestAnimationFrame(loop);
+  const elapsed = now - last;
+  if (elapsed < fpsInterval - 1) return;
+  last = now - (elapsed % fpsInterval);
+  const dt = Math.min(elapsed / 1000, .05);
+  frameCount++;
   if (mode === 'craft') updateCraft(dt);
-  else updateGame(dt);
-  
+  else updateGame(dt, frameCount);
+
   if (debugMode) {
     updateDebugPanel();
   }
-  
+
   if (useBloom) composer.render(); else renderer.render(scene, camera);
-  requestAnimationFrame(loop);
 }
 showScreen('menuUI');
-requestAnimationFrame(loop);
+rafId = requestAnimationFrame(loop);
 </script>
 </body>
 </html>
